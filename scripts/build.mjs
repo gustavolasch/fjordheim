@@ -1,0 +1,84 @@
+// Build: src/ -> dist/fjordheim.html (um arquivo, abre com duplo clique).
+// Sem dependências. Node >= 18.
+//   node scripts/build.mjs
+// Ordem dos módulos JS = ordem desta lista (todos compartilham um único escopo).
+// Ao criar um arquivo novo em src/js, adicione-o aqui.
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SRC = path.join(ROOT, 'src');
+const OUT = path.join(ROOT, 'dist', 'fjordheim.html');
+
+const JS_ORDER = [
+  'js/core/00-base.js',
+  'GENERATED:sprites',
+  'js/data/biomes.js',
+  'js/data/buildings.js',
+  'js/data/resources.js',
+  'js/data/items.js',
+  'js/data/world.js',
+  'js/data/people.js',
+  'js/data/palette.js',
+  'js/data/hints.js',
+  'js/game/state.js',
+  'js/game/economy.js',
+  'js/game/units.js',
+  'js/game/player.js',
+  'js/game/fx.js',
+  'js/game/update.js',
+  'js/game/survival.js',
+  'js/draw/sprites.js',
+  'js/draw/primitives.js',
+  'js/draw/nature.js',
+  'js/draw/buildings.js',
+  'js/draw/figures.js',
+  'js/draw/decor.js',
+  'js/draw/render.js',
+  'js/ui/ghost.js',
+  'js/ui/input.js',
+  'js/ui/sheets.js',
+  'js/ui/hud.js',
+  'js/system/audio.js',
+  'js/system/save.js',
+  'js/system/devmode.js',
+  'js/system/setup.js',
+  'js/system/loop.js',
+];
+
+const read = (rel) => fs.readFileSync(path.join(SRC, rel), 'utf8');
+
+const template = read('index.html');
+const css = read('styles/main.css');
+// Sprites baked by tools/sprite-bake -> one generated chunk (data URIs, so the HTML stays single-file).
+function genSprites() {
+  const dir = path.join(SRC, 'assets', 'sprites');
+  const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+  const src = {}, meta = {};
+  for (const [k, m] of Object.entries(manifest)) {
+    src[k] = 'data:image/png;base64,' + fs.readFileSync(path.join(dir, k + '.png')).toString('base64');
+    meta[k] = { w: m.w, h: m.h, ax: m.ax, ay: m.ay };
+  }
+  return `const SPR_SRC=${JSON.stringify(src)};\nconst SPR_META=${JSON.stringify(meta)};\n`;
+}
+const ORDER = JS_ORDER;
+const js = ORDER.map(rel => rel === 'GENERATED:sprites' ? genSprites() : read(rel)).join('');
+
+// Erro de sintaxe aparece aqui, com o nome do arquivo, antes de gerar o HTML.
+try {
+  new vm.Script(js, { filename: 'fjordheim.js' });
+} catch (err) {
+  console.error('Erro de sintaxe no JS montado:', err.message);
+  process.exit(1);
+}
+
+// Função como replacer: evita que "$&" etc. no código sejam interpretados.
+const html = template
+  .replace('<!--@css-->\n', () => `<style>\n${css}</style>\n`)
+  .replace('<!--@js-->\n', () => `<script>\n${js}</script>\n`);
+
+fs.mkdirSync(path.dirname(OUT), { recursive: true });
+fs.writeFileSync(OUT, html);
+console.log(`ok: ${path.relative(ROOT, OUT)} (${(html.length / 1024).toFixed(1)} KB, ${ORDER.length} módulos JS)`);

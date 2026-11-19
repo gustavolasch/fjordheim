@@ -1,0 +1,149 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import { buildViking, applyPose, FRAMES } from '/character/viking-model.js';
+
+// Post-process: pixels whose hue is green (60..170 deg) take the target hue; lightness and alpha are kept.
+// Trunk/bark (brown, hue ~25 deg) is not touched.
+function hexToHsl(hex) { const n = parseInt(hex.slice(1), 16); const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; } return [h, s, l]; }
+function hslToRgb(h, s, l) { const f = (n, k = (n + h / 30) % 12) => l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return [f(0), f(8), f(4)]; }
+async function recolorGreens(dataUrl, hex, lift = 1.35) {
+  const img = new Image(); img.src = dataUrl; await img.decode();
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), a = d.data;
+  const [th, ts] = hexToHsl(hex);
+  for (let i = 0; i < a.length; i += 4) {
+    if (a[i + 3] < 8) continue;
+    const r = a[i] / 255, gg = a[i + 1] / 255, b = a[i + 2] / 255;
+    const [h, s, l] = (() => { const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b); let hh = 0, ss = 0; const ll = (mx + mn) / 2; if (mx !== mn) { const dd = mx - mn; ss = ll > .5 ? dd / (2 - mx - mn) : dd / (mx + mn); hh = mx === r ? (gg - b) / dd + (gg < b ? 6 : 0) : mx === gg ? (b - r) / dd + 2 : (r - gg) / dd + 4; hh *= 60; } return [hh, ss, ll]; })();
+    if (h < 60 || h > 170 || s < 0.15) continue;
+    const [R, G, B] = hslToRgb(th, Math.min(1, ts * 1.1 + 0.1), Math.min(0.92, l * lift));
+    a[i] = R * 255; a[i + 1] = G * 255; a[i + 2] = B * 255;
+  }
+  g.putImageData(d, 0, 0);
+  return c.toDataURL('image/png');
+}
+const loader = new GLTFLoader();
+const cache = {};
+function load(name) { return cache[name] ||= new Promise((res, rej) => loader.load(`/pack/${name}.gltf`, g => res(g.scene), undefined, rej)); }
+// iso: yaw 45deg, pitch 30deg (2:1 dimetric, same as the game's P())
+const YAW = Math.PI / 4, PITCH = Math.PI / 6;
+// recolor: {match: regex on material name, color: hex} multiplies base color (leaves per biome)
+window.bake = async function ({ name, targetH, pxPerUnitGuess = 60, tint = null, scaleY = 1 }) {
+  const src = await load(name);
+  const obj = src.clone(true);
+  if (tint) { const re = new RegExp(tint.match); obj.traverse(o => { if (o.isMesh && o.material && re.test(o.material.name)) { o.material = o.material.clone(); o.material.color.set(tint.color); } }); }
+  const box0 = new THREE.Box3().setFromObject(obj);
+  const size = box0.getSize(new THREE.Vector3());
+  // recenter: base center at origin
+  obj.position.x -= (box0.min.x + box0.max.x) / 2; obj.position.z -= (box0.min.z + box0.max.z) / 2; obj.position.y -= box0.min.y;
+  const scene = new THREE.Scene();
+  scene.add(obj);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x886644, 1.7));
+  const d = new THREE.DirectionalLight(0xffffff, 1.4); d.position.set(3, 6, 2); scene.add(d);
+  // camera at iso direction looking at center of model
+  const dir = new THREE.Vector3(Math.cos(PITCH) * Math.sin(YAW), Math.sin(PITCH), Math.cos(PITCH) * Math.cos(YAW));
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
+  const center = new THREE.Vector3(0, size.y / 2, 0);
+  cam.position.copy(center).addScaledVector(dir, 100);
+  cam.lookAt(center);
+  cam.updateMatrixWorld(true);
+  // project box corners to measure screen extents, then fit height to targetH (in 2x px)
+  const bb = new THREE.Box3().setFromObject(obj);
+  const pts = []; for (const x of [bb.min.x, bb.max.x]) for (const y of [bb.min.y, bb.max.y]) for (const z of [bb.min.z, bb.max.z]) pts.push(new THREE.Vector3(x, y, z));
+  const ptsCam = pts.map(p => p.clone().applyMatrix4(cam.matrixWorldInverse));
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (const p of ptsCam) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); }
+  // base point (origin on ground) in cam space
+  const base = new THREE.Vector3(0, 0, 0).applyMatrix4(cam.matrixWorldInverse);
+  const unitsPerPx = (maxY - minY) / (targetH * 2) ; // 2x supersample
+  const pxW = Math.ceil((maxX - minX) / unitsPerPx) + 8, pxH = Math.ceil((maxY - minY) / unitsPerPx) + 8;
+  const left = minX - 4 * unitsPerPx, top = maxY + 4 * unitsPerPx;
+  const hw = pxW * unitsPerPx / 2, hh = pxH * unitsPerPx / 2;
+  const cx = (left + pxW * unitsPerPx / 2), cy = (top - pxH * unitsPerPx / 2);
+  cam.left = cx - hw; cam.right = cx + hw; cam.top = cy + hh; cam.bottom = cy - hh; cam.updateProjectionMatrix();
+  const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(pxW, pxH); r.setClearColor(0x000000, 0);
+  r.render(scene, cam);
+  let data = r.domElement.toDataURL('image/png');
+  if (tint && tint.hue) data = await recolorGreens(data, tint.hue, tint.lift ?? 1.35);
+  // anchor: base point in pixels
+  const ax = (base.x - cam.left) / (cam.right - cam.left) * pxW;
+  const ay = (cam.top - base.y) / (cam.top - cam.bottom) * pxH;
+  r.dispose();
+  return { data, w: pxW, h: pxH, ax, ay, size: { x: size.x, y: size.y, z: size.z } };
+};
+// Personagem: todos os frames na MESMA câmera e escala (âncora nos pés fica estável na animação).
+window.bakeCharacter = async function ({ targetH = 21, names = Object.keys(FRAMES) }) {
+  const { root, j } = buildViking(THREE);
+  const scene = new THREE.Scene(); scene.add(root);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a090, 2.6));
+  const d = new THREE.DirectionalLight(0xffffff, 1.5); d.position.set(3, 6, 2); scene.add(d);
+  const dir = new THREE.Vector3(Math.cos(PITCH) * Math.sin(YAW), Math.sin(PITCH), Math.cos(PITCH) * Math.cos(YAW));
+  // união das caixas de todos os frames
+  const mn = new THREE.Vector3(1e9, 1e9, 1e9), mx = new THREE.Vector3(-1e9, -1e9, -1e9);
+  // 8 direções: cada frame girado para a direção k (a = k*45°, mesma convenção de heading do jogo)
+  const list = [];
+  for (const n of names) for (let k = 0; k < 8; k++) list.push({ name: `${n}_d${k}`, pose: FRAMES[n], yaw: k * Math.PI / 4 });
+  const setFrame = it => { applyPose(j, ...it.pose); root.rotation.y = Math.PI / 2 - it.yaw; root.updateMatrixWorld(true); };
+  for (const it of list) { setFrame(it); const b = new THREE.Box3().setFromObject(root); mn.min(b.min); mx.max(b.max); }
+  const center = mn.clone().add(mx).multiplyScalar(.5);
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 1000);
+  cam.position.copy(center).addScaledVector(dir, 100); cam.lookAt(center); cam.updateMatrixWorld(true);
+  const pts = []; for (const x of [mn.x, mx.x]) for (const y of [mn.y, mx.y]) for (const z of [mn.z, mx.z]) pts.push(new THREE.Vector3(x, y, z).applyMatrix4(cam.matrixWorldInverse));
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (const p of pts) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); }
+  const upp = (maxY - minY) / (targetH * 2);
+  const pxW = Math.ceil((maxX - minX) / upp) + 8, pxH = Math.ceil((maxY - minY) / upp) + 8;
+  const left = minX - 4 * upp, top = maxY + 4 * upp;
+  const cx = left + pxW * upp / 2, cy = top - pxH * upp / 2, hw = pxW * upp / 2, hh = pxH * upp / 2;
+  cam.left = cx - hw; cam.right = cx + hw; cam.top = cy + hh; cam.bottom = cy - hh; cam.updateProjectionMatrix();
+  const base = new THREE.Vector3(0, 0, 0).applyMatrix4(cam.matrixWorldInverse);
+  const ax = (base.x - cam.left) / (cam.right - cam.left) * pxW, ay = (cam.top - base.y) / (cam.top - cam.bottom) * pxH;
+  const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(pxW, pxH); r.setClearColor(0x000000, 0);
+  const out = [];
+  for (const it of list) {
+    setFrame(it);
+    r.render(scene, cam);
+    out.push({ name: it.name, data: r.domElement.toDataURL('image/png'), w: pxW, h: pxH, ax, ay });
+  }
+  r.dispose();
+  return out;
+};
+window.exportViking = async function () {
+  const { root, j } = buildViking(THREE); applyPose(j, 'idle', 0);
+  const buf = await new GLTFExporter().parseAsync(root, { binary: true });
+  return Array.from(new Uint8Array(buf));
+};
+// Conferência: vistas do modelo em repouso (mesmo ângulo das fotos de referência), para comparar.
+window.bakeViews = async function ({ yaws, targetH = 300 }) {
+  const { root, j } = buildViking(THREE);
+  applyPose(j, 'idle', 0); root.updateMatrixWorld(true);
+  const scene = new THREE.Scene(); scene.add(root);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a090, 2.6));
+  const d = new THREE.DirectionalLight(0xffffff, 1.5); d.position.set(3, 6, 2); scene.add(d);
+  const bb = new THREE.Box3().setFromObject(root), center = bb.getCenter(new THREE.Vector3());
+  const out = [];
+  for (const yaw of yaws) {
+    const dir = new THREE.Vector3(Math.cos(.08) * Math.sin(yaw), Math.sin(.08), Math.cos(.08) * Math.cos(yaw));
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 1000);
+    cam.position.copy(center).addScaledVector(dir, 100); cam.lookAt(center); cam.updateMatrixWorld(true);
+    const pts = []; for (const x of [bb.min.x, bb.max.x]) for (const y of [bb.min.y, bb.max.y]) for (const z of [bb.min.z, bb.max.z]) pts.push(new THREE.Vector3(x, y, z).applyMatrix4(cam.matrixWorldInverse));
+    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    for (const p of pts) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); }
+    const upp = (maxY - minY) / targetH, pxW = Math.ceil((maxX - minX) / upp) + 8, pxH = Math.ceil((maxY - minY) / upp) + 8;
+    const cx = minX - 4 * upp + pxW * upp / 2, cy = maxY + 4 * upp - pxH * upp / 2, hw = pxW * upp / 2, hh = pxH * upp / 2;
+    cam.left = cx - hw; cam.right = cx + hw; cam.top = cy + hh; cam.bottom = cy - hh; cam.updateProjectionMatrix();
+    const r = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+    r.setPixelRatio(1); r.setSize(pxW, pxH); r.setClearColor(0xf2f2f2, 1); r.render(scene, cam);
+    out.push({ yaw, data: r.domElement.toDataURL('image/png') }); r.dispose();
+  }
+  return out;
+};
+window.ready = true;
+</script></body></html>

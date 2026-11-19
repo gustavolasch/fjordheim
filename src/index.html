@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Fjordheim — Construa sua vila viking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<!--@css-->
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="tiltT" class="tilt"></div><div id="tiltB" class="tilt"></div>
+<div id="vig"></div>
+<div id="hud" class="hidden">
+  <div id="top"><div id="res" class="glass"></div><button id="bLoc" class="rbtn glass" title="Encontrar personagem"></button><button id="bSpeed" class="rbtn glass" title="Velocidade">1×</button><button id="bMenu" class="rbtn glass" title="Menu"></button></div>
+  <div id="hint" class="glass off"><span class="ic">💡</span><span id="hintT"></span><button id="hintX" aria-label="Dispensar">✕</button></div>
+  <div id="raid" class="hidden"></div>
+  <div id="toasts"></div>
+  <div id="sheet" class="glass"></div>
+  <div id="place" class="glass"></div>
+  <nav id="bar" class="glass">
+    <button data-tab="build"></button>
+    <button data-tab="craft"></button>
+    <button data-tab="bag"></button>
+    <button data-tab="edit"></button>
+  </nav>
+</div>
+<div id="menu">
+  <div class="mbox panel">
+    <h1>FJORDHEIM</h1>
+    <p class="sub">Comece do nada. Construa tudo.</p>
+    <div class="mrow" id="mTop"></div>
+    <h3>Novo jogo · escolha o cenário</h3>
+    <div class="bgrid" id="biomes"></div>
+    <h3>Opções</h3>
+    <div class="opts" id="opts"></div>
+    <p class="help">Toque no chão para andar e nos objetos para coletar · arraste para mover a câmera · pinça ou roda do mouse para zoom</p>
+  </div>
+</div>
+<!--@js-->
+</body>
+</html>

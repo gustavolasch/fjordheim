@@ -1,0 +1,14 @@
+{
+  "name": "fjordheim",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Fjordheim — city builder viking em canvas (HTML único, sem dependências)",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "bake:sprites": "node tools/sprite-bake/gen-jobs.mjs && node tools/sprite-bake/run.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

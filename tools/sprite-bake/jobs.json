@@ -1,0 +1,405 @@
+[
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "autumn_oak_0",
+  "tint": {
+   "hue": "#e0631f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "autumn_pine_0",
+  "tint": {
+   "hue": "#3f6b3a",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_2",
+  "targetH": 44,
+  "out": "autumn_oak_1",
+  "tint": {
+   "hue": "#f0a020",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_2",
+  "targetH": 44,
+  "out": "autumn_pine_1",
+  "tint": {
+   "hue": "#4b7a3e",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_3",
+  "targetH": 44,
+  "out": "autumn_oak_2",
+  "tint": {
+   "hue": "#c8401c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_3",
+  "targetH": 44,
+  "out": "autumn_pine_2",
+  "tint": {
+   "hue": "#3f6b3a",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_4",
+  "targetH": 44,
+  "out": "autumn_oak_3",
+  "tint": {
+   "hue": "#e8c33a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_4",
+  "targetH": 44,
+  "out": "autumn_pine_3",
+  "tint": {
+   "hue": "#4b7a3e",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_5",
+  "targetH": 44,
+  "out": "autumn_oak_4",
+  "tint": {
+   "hue": "#d9541a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_5",
+  "targetH": 44,
+  "out": "autumn_pine_4",
+  "tint": {
+   "hue": "#3f6b3a",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "autumn_oak_5",
+  "tint": {
+   "hue": "#b8321a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "autumn_pine_5",
+  "tint": {
+   "hue": "#4b7a3e",
+   "lift": 1
+  }
+ },
+ {
+  "name": "Bush_Common",
+  "targetH": 18,
+  "out": "autumn_bush",
+  "tint": {
+   "hue": "#c96a2a",
+   "lift": 1.2
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "forest_oak_0",
+  "tint": {
+   "hue": "#4f8a34",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "forest_pine_0",
+  "tint": {
+   "hue": "#2c6a36",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_2",
+  "targetH": 44,
+  "out": "forest_oak_1",
+  "tint": {
+   "hue": "#5d9a3c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_2",
+  "targetH": 44,
+  "out": "forest_pine_1",
+  "tint": {
+   "hue": "#357a3d",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_3",
+  "targetH": 44,
+  "out": "forest_oak_2",
+  "tint": {
+   "hue": "#467d2f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_3",
+  "targetH": 44,
+  "out": "forest_pine_2",
+  "tint": {
+   "hue": "#2a5d31",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_4",
+  "targetH": 44,
+  "out": "forest_oak_3",
+  "tint": {
+   "hue": "#4f8a34",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_4",
+  "targetH": 44,
+  "out": "forest_pine_3",
+  "tint": {
+   "hue": "#2c6a36",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_5",
+  "targetH": 44,
+  "out": "forest_oak_4",
+  "tint": {
+   "hue": "#5d9a3c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_5",
+  "targetH": 44,
+  "out": "forest_pine_4",
+  "tint": {
+   "hue": "#357a3d",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "forest_oak_5",
+  "tint": {
+   "hue": "#467d2f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "forest_pine_5",
+  "tint": {
+   "hue": "#2a5d31",
+   "lift": 1
+  }
+ },
+ {
+  "name": "Bush_Common",
+  "targetH": 18,
+  "out": "forest_bush",
+  "tint": {
+   "hue": "#3f7d2e",
+   "lift": 1.2
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "coast_oak_0",
+  "tint": {
+   "hue": "#4e8a36",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "coast_pine_0",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_2",
+  "targetH": 44,
+  "out": "coast_oak_1",
+  "tint": {
+   "hue": "#5f9a3f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_2",
+  "targetH": 44,
+  "out": "coast_pine_1",
+  "tint": {
+   "hue": "#3a773d",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_3",
+  "targetH": 44,
+  "out": "coast_oak_2",
+  "tint": {
+   "hue": "#3f7a30",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_3",
+  "targetH": 44,
+  "out": "coast_pine_2",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_4",
+  "targetH": 44,
+  "out": "coast_oak_3",
+  "tint": {
+   "hue": "#4e8a36",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_4",
+  "targetH": 44,
+  "out": "coast_pine_3",
+  "tint": {
+   "hue": "#3a773d",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_5",
+  "targetH": 44,
+  "out": "coast_oak_4",
+  "tint": {
+   "hue": "#5f9a3f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_5",
+  "targetH": 44,
+  "out": "coast_pine_4",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "coast_oak_5",
+  "tint": {
+   "hue": "#3f7a30",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "coast_pine_5",
+  "tint": {
+   "hue": "#3a773d",
+   "lift": 1
+  }
+ },
+ {
+  "name": "Bush_Common",
+  "targetH": 18,
+  "out": "coast_bush",
+  "tint": {
+   "hue": "#467f32",
+   "lift": 1.2
+  }
+ },
+ {
+  "name": "Rock_Medium_1",
+  "targetH": 14,
+  "out": "rock_0"
+ },
+ {
+  "name": "Rock_Medium_2",
+  "targetH": 14,
+  "out": "rock_1"
+ },
+ {
+  "name": "Rock_Medium_3",
+  "targetH": 14,
+  "out": "rock_2"
+ },
+ {
+  "name": "Pebble_Round_1",
+  "targetH": 5,
+  "out": "pebble_0"
+ },
+ {
+  "name": "Pebble_Round_2",
+  "targetH": 5,
+  "out": "pebble_1"
+ },
+ {
+  "name": "Pebble_Round_3",
+  "targetH": 5,
+  "out": "pebble_2"
+ },
+ {
+  "name": "Pebble_Round_4",
+  "targetH": 5,
+  "out": "pebble_3"
+ },
+ {
+  "name": "Pebble_Round_5",
+  "targetH": 5,
+  "out": "pebble_4"
+ },
+ {
+  "name": "Flower_3_Group",
+  "targetH": 16,
+  "out": "flower_0"
+ },
+ {
+  "type": "character",
+  "targetH": 21
+ },
+ {
+  "type": "export"
+ }
+]
