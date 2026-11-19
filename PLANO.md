@@ -375,3 +375,7 @@ O plano vira 8 atualizações, cada uma jogável e testada antes da próxima. Os
 Depois da 1.0: **gráficos em 3D**, depois **interiores**, depois **primeira pessoa com o rei**, usando o que as versões anteriores já deixaram pronto.
 
 **Como usar este plano no Claude Code:** peça uma atualização por vez, indicando a seção correspondente deste documento, e peça para ele rodar o teste por toque ao final de cada uma.
+
+## Pendências
+
+- **Teste por toque instável:** o teste às vezes falha em rodadas diferentes, mesmo sem mudança de código. Causa: o jogo avança pelo tempo real do quadro e consome `Math.random` a cada quadro. Solução provisória: `node tools/touch-test/retry.mjs` (repete até 3 vezes). Solução definitiva, para fazer depois: controlar o relógio do jogo no teste (opção 1).

@@ -5,7 +5,8 @@
   "description": "Teste automático por toque (Chromium em tela de celular). Não entra no jogo.",
   "type": "module",
   "scripts": {
-    "test": "node run.mjs"
+    "test": "node run.mjs",
+    "test:retry": "node retry.mjs"
   },
   "devDependencies": {
     "playwright-core": "1.65.1"
