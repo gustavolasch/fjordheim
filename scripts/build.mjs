@@ -32,6 +32,7 @@ const JS_ORDER = [
   'js/game/update.js',
   'js/game/survival.js',
   'js/game/combat.js',
+  'js/game/commands.js',
   'js/draw/sprites.js',
   'js/draw/primitives.js',
   'js/draw/nature.js',

@@ -72,24 +72,22 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'expand':expanded=!expanded;break;
   case'build':sfx('tick');enterBuild(v);return;
   case'decor':sfx('tick');enterDecor(v);return;
-  case'qmode':if(b)b.mode=v;break;
-  case'craft':{const it=ITEMS[v];if(!afford(it.cost)){toast('Faltam recursos','bad');break}
-    if(it.hand){pay(it.cost);order({type:'craft',item:v,paid:it.cost})}else{const sm=G.bld.find(x=>x.type==='smithy'&&x.done);if(!sm){toast('Construa uma Ferraria primeiro','bad');break}pay(it.cost);order({type:'forge',b:sm.id,item:v,paid:it.cost});toast('Indo até a Ferraria…')}
-    closeSheet();break}
-  case'godeposit':{const me=PL();let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x-me.x,s.y-me.y);if(d<bd){bd=d;best=s}}if(best){order({type:'deposit',b:best.id});closeSheet()}break}
-  case'equip':equipItem(v);break;
-  case'unequip':unequip(v);break;
-  case'repair':if(b){order({type:'repair',b:b.id});closeSheet()}break;
-  case'ring':if(b)tocaSino(b);break;
-  case'sleep':if(b){order({type:'sleep',b:b.id});closeSheet()}break;
-  case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)lootTomb(t);sel=null;break}
-  case'demolish':if(b){refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);closeSheet()}break;
-  case'bdel':if(b){refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);sel=null}break;
-  case'flip':if(mode.sel)mode.sel.f*=-1;break;
-  case'big':if(mode.sel)mode.sel.s=Math.min(3,mode.sel.s*1.15);break;
-  case'small':if(mode.sel)mode.sel.s=Math.max(.35,mode.sel.s/1.15);break;
-  case'dup':if(mode.sel){const D=DECOR[mode.sel.k];if(!afford(D.cost)){toast('Faltam recursos','bad');break}pay(D.cost);const d={...mode.sel,id:G.idc++,x:mode.sel.x+.6,y:mode.sel.y+.3};G.decor.push(d);mode.sel=d;sfx('place')}break;
-  case'del':if(mode.sel){refund(DECOR[mode.sel.k].cost,.5);G.decor.splice(G.decor.indexOf(mode.sel),1);mode.sel=null}break;
+  case'qmode':if(b)sendCmd({t:'qmode',b:b.id,v});break;
+  case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
+  case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
+  case'equip':sendCmd({t:'equip',item:v});break;
+  case'unequip':sendCmd({t:'unequip',slot:v});break;
+  case'repair':if(b&&sendCmd({t:'repair',b:b.id}).ok)closeSheet();break;
+  case'ring':if(b)sendCmd({t:'ring',b:b.id});break;
+  case'sleep':if(b&&sendCmd({t:'sleep',b:b.id}).ok)closeSheet();break;
+  case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)sendCmd({t:'loot',id:t.id});sel=null;break}
+  case'demolish':if(b){sendCmd({t:'demolish',b:b.id});closeSheet()}break;
+  case'bdel':if(b){sendCmd({t:'demolish',b:b.id});sel=null}break;
+  case'flip':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'flip'});break;
+  case'big':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'big'});break;
+  case'small':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'small'});break;
+  case'dup':if(mode.sel){const r=sendCmd({t:'decorOp',id:mode.sel.id,op:'dup'});if(!r.ok){toast(r.msg,'bad');break}mode.sel=r.d;sfx('place')}break;
+  case'del':if(mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'del'});mode.sel=null}break;
   case'done':mode={t:'none'};closeSheet();break}
   sheetSig='';renderSheet();markTabs()}
 const TABS={build:['build','Construir'],craft:['craft','Criar'],bag:['bag','Mochila'],edit:['edit','Editar']};

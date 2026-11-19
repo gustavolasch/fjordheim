@@ -12,7 +12,7 @@ cv.addEventListener('pointermove',e=>{if(!G||menuOpen)return;const p=ptrs.get(e.
   if(!p){if(e.pointerType==='mouse')hover(e.clientX,e.clientY);return}
   p.x=e.clientX;p.y=e.clientY;if(!gest)return;
   if(gest.k==='pinch'&&ptrs.size>=2){const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;cam.x+=mx-gest.mx;cam.y+=my-gest.my;gest.mx=mx;gest.my=my;zoomAt(mx,my,clamp(gest.z0*d/gest.d0,ZMIN,ZMAX)/cam.z);return}
-  if(gest.k==='drag'){const[wx,wy]=s2w(e.clientX,e.clientY);mode.sel.x=clamp(wx+gest.ox,0,N);mode.sel.y=clamp(wy+gest.oy,0,N);return}
+  if(gest.k==='drag'){const[wx,wy]=s2w(e.clientX,e.clientY);sendCmd({t:'decorOp',id:mode.sel.id,op:'move',x:wx+gest.ox,y:wy+gest.oy});return}
   const dx=e.clientX-gest.lx,dy=e.clientY-gest.ly;gest.lx=e.clientX;gest.ly=e.clientY;
   if(gest.k==='tap'){if(Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy)>9){gest.k='pan';cam.x+=e.clientX-gest.sx;cam.y+=e.clientY-gest.sy}}
   else if(gest.k==='pan'){cam.x+=dx;cam.y+=dy}
@@ -26,7 +26,7 @@ cv.addEventListener('wheel',e=>{e.preventDefault();if(menuOpen)return;const base
 addEventListener('keydown',e=>{if(menuOpen||!G)return;const k=e.key;const s=40;
   if(k==='Escape'){if(mode.t!=='none')cancelMode();else closeSheet()}
   else if(k==='ArrowLeft'||k==='a')cam.x+=s;else if(k==='ArrowRight'||k==='d')cam.x-=s;else if(k==='ArrowUp'||k==='w')cam.y+=s;else if(k==='ArrowDown'||k==='s')cam.y-=s;
-  else if(k==='r'&&mode.t==='edit'&&mode.sel){mode.sel.f*=-1}else if(k==='r'&&mode.t==='decor'){mode.f=-(mode.f||1)}
+  else if(k==='r'&&mode.t==='edit'&&mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'flip'})}else if(k==='r'&&mode.t==='decor'){mode.f=-(mode.f||1)}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&mode.sel){act('del')}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&sel&&sel.k==='b'){act('bdel')}
   else if(k===' '){toggleSpeed()}});
@@ -61,7 +61,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   if(oi!=null){const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');const lab={tree:'🪓 Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'⛏️ Quebrar',ore:'⛏️ Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab);return}
   if(!inb(tx,ty))return;
   if(G.tiles[idx(tx,ty)]<=1){order({type:'fish',x:tx,y:ty});puff(tx+.5,ty+.5,'ring');return}
-  if(me){const p=astar(...utile(me),(x,y)=>x===tx&&y===ty,tx,ty,passV,9000)||astar(...utile(me),nearRect(tx,ty,1,1),tx,ty,passV,9000);if(p){order({type:'move'});me.path=p;puff(tx+.5,ty+.5,'ring')}else toast('Não dá para chegar lá')}}
+  if(me){const r=sendCmd({t:'walk',x:tx,y:ty});if(r.ok)puff(tx+.5,ty+.5,'ring');else toast(r.msg,r.kind)}}
 function tapBuilding(b,tx,ty){const d=BD[b.type];
   if(d.flat&&d.pass&&b.type!=='farm')return false; // floors & paths: just walk on them
   if(!b.done){order({type:'build',b:b.id});puff(b.x+b.w/2,b.y+b.h/2,'ring');sel={k:'b',id:b.id};openSheet('info');return true}
@@ -86,10 +86,10 @@ function enterBuild(type){const d=BD[type];closeSheet();sel=null;mode=d.line?{t:
 function enterDecor(k){closeSheet();sel=null;mode={t:'decor',kind:k,has:false,f:1};if(isTouch){const[wx,wy]=s2w(W/2,H*.45);mode.wx=wx;mode.wy=wy;mode.has=true}markTabs();updPlace()}
 function cancelMode(){mode={t:'none'};$('#place').classList.remove('open');markTabs();if(sheetKind==='edit')closeSheet()}
 function confirmPlace(){
-  if(mode.t==='build'){if(!mode.has)return;const r=placeCheck(mode.type,mode.gx,mode.gy);if(r!==true){toast(r,'bad');sfx('bad');return}const b=placeB(mode.type,mode.gx,mode.gy);floater(b.x+b.w/2,b.y+b.h/2,'−'+Object.entries(BD[b.type].cost).map(([k,v])=>v+RES[k][0]).join(' '));order({type:'build',b:b.id,auto:true});if(!afford(BD[mode.type].cost))cancelMode()}
-  else if(mode.t==='line'){if(!mode.a)return;let n=0,last='',first=null;for(const[x,y]of lineTiles(mode.a,mode.b)){const r=placeCheck(mode.type,x,y);if(r===true){const b=placeB(mode.type,x,y);first=first||b;n++}else last=r}
-    if(!n){toast(last||'Nada pôde ser construído','bad');sfx('bad')}else order({type:'build',b:first.id,auto:true});mode.a=null;mode.b=null}
-  else if(mode.t==='decor'){if(!mode.has)return;const D=DECOR[mode.kind];if(!afford(D.cost)){toast('Faltam recursos','bad');sfx('bad');return}if(G.decor.length>=300){toast('Limite de 300 objetos','bad');return}pay(D.cost);G.decor.push({id:G.idc++,k:mode.kind,x:mode.wx,y:mode.wy,s:1,f:mode.f||1});puff(mode.wx,mode.wy,'dust');sfx('place');if(mode.kind==='campfire'||mode.kind==='torch')completeHint('night')}
+  if(mode.t==='build'){if(!mode.has)return;const r=sendCmd({t:'build',type:mode.type,x:mode.gx,y:mode.gy});if(!r.ok){toast(r.msg,'bad');sfx('bad');return}const b=r.b;floater(b.x+b.w/2,b.y+b.h/2,'−'+Object.entries(BD[b.type].cost).map(([k,v])=>v+RES[k][0]).join(' '));if(!afford(BD[mode.type].cost))cancelMode()}
+  else if(mode.t==='line'){if(!mode.a)return;const r=sendCmd({t:'line',type:mode.type,a:mode.a,b:mode.b});
+    if(!r.ok){toast(r.msg,'bad');sfx('bad')}mode.a=null;mode.b=null}
+  else if(mode.t==='decor'){if(!mode.has)return;const r=sendCmd({t:'decor',kind:mode.kind,x:mode.wx,y:mode.wy,f:mode.f});if(!r.ok){toast(r.msg,'bad');sfx('bad');return}puff(mode.wx,mode.wy,'dust');sfx('place');if(mode.kind==='campfire'||mode.kind==='torch')completeHint('night')}
   updPlace()}
 // innerHTML só é reescrito quando o conteúdo muda: hover() chama updPlace a cada troca de tile,
 // e cada reescrita re-parseia as miniaturas (data URLs grandes).
@@ -107,5 +107,5 @@ function ataqueAlvo(t,forte){const me=PL();if(!me||me.down)return;closeSheet();s
   order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'⚔️ Golpe forte':'⚔️ Atacar')}
 /* ---- bloqueio: segurar o botão de escudo (gasta fôlego) ---- */
 const bBlock=$('#bBlock');
-bBlock.addEventListener('pointerdown',e=>{e.preventDefault();const p=PL();if(p&&!menuOpen){p.blockOn=true;bBlock.classList.add('on')}});
-for(const ev of['pointerup','pointercancel','pointerleave']){bBlock.addEventListener(ev,()=>{const p=PL();if(p)p.blockOn=false;bBlock.classList.remove('on')})}
+bBlock.addEventListener('pointerdown',e=>{e.preventDefault();if(PL()&&!menuOpen){sendCmd({t:'block',on:true});bBlock.classList.add('on')}});
+for(const ev of['pointerup','pointercancel','pointerleave']){bBlock.addEventListener(ev,()=>{sendCmd({t:'block',on:false});bBlock.classList.remove('on')})}

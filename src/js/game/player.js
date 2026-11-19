@@ -1,7 +1,7 @@
 /* ================= The player ================= */
 function PL(){return G&&UMAP.get(G.pid)}
 function adjT(u,x,y){const[tx,ty]=utile(u);return Math.abs(tx-x)<=1&&Math.abs(ty-y)<=1}
-function order(o){const u=PL();if(!u||u.down)return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
+function setOrder(u,o){if(!u||u.down)return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
 // replanejamentos: obstáculo que muda no meio do caminho (árvore cai, construção) não deve cancelar a ordem
 function stepTo(u,o,rx,ry,rw,rh,inside){if(o.tries>4){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}o.tries=(o.tries||0)+1;if(!goRect(u,rx,ry,rw,rh,inside,passV,9000)){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}return true}
 function faceTo(u,x,y){if(Math.abs((x-u.x)-(y-u.y))>.05)u.face=(x-u.x)-(y-u.y)>0?1:-1}
