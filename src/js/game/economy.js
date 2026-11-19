@@ -5,7 +5,7 @@ function pay(c){if(DEV.inf)return;for(const k in c){let n=c[k];const a=Math.min(
 function refund(c,f){const cap=storeCap();for(const k in c){let v=Math.floor(c[k]*f);const s=Math.min(v,Math.max(0,cap-G.res[k]));G.res[k]+=s;G.inv[k]+=v-s}}
 function costHTML(c){const ks=Object.keys(c);if(!ks.length)return'grátis';return ks.map(k=>`<span class="${have(k)<c[k]?'no':''}">${RES[k][0]}${c[k]}</span>`).join(' ')}
 function storeCap(){let c=0;for(const b of G.bld)if(b.done&&BD[b.type].store)c+=BD[b.type].store;return c}
-function bagW(){let w=0;for(const k in G.inv)w+=G.inv[k]*WEIGHT[k];return Math.round(w*10)/10}
+function bagW(){let w=0;for(const k in G.inv)w+=G.inv[k]*WEIGHT[k];for(const k in G.items)if(G.items[k]>0)w+=G.items[k]*(ITEMS[k]?.peso||0);return Math.round(w*10)/10}
 function canCarry(k,n){if(DEV.inf)return true;return bagW()+WEIGHT[k]*(n||1)<=BAG+1e-6}
 function addInv(k,n,x,y){G.inv[k]+=n;if(x!=null)floater(x,y,`+${n} ${RES[k][0]}`)}
 function addRes(k,v,x,y){const cap=storeCap();G.res[k]=Math.min(cap,G.res[k]+v);if(x!=null)floater(x,y,`+${v} ${RES[k][0]}`)}
@@ -46,10 +46,6 @@ function destroyB(b,msg){for(const u of G.units)if(u.work===b.id)unassign(u);
   for(let k=0;k<12;k++)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,k%2?'debris':'smoke');
   if(sel&&sel.k==='b'&&sel.id===b.id){sel=null;closeSheet()}
   if(msg)toast(msg,'bad')}
-function damageB(b,d){
-  b.hp-=d;puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,'debris');
-  if(b.type==='longhouse'&&b.hp<=b.max*.1){sack();b.hp=Math.round(b.max*.3);return}
-  if(b.hp<=0)destroyB(b,`🔥 ${BD[b.type].n} foi destruído!`)}
 function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*.3);G.res[k]-=v;if(v)lost.push(`${RES[k][0]}${v}`)}
   for(const u of G.units.slice())if(u.kind==='raider'){puff(u.x,u.y,'smoke');removeUnit(u)}
   G.raidOn=false;toast(`💰 Os invasores saquearam a Casa Comunal e fugiram com ${lost.join(' ')||'nada'}`,'bad')}

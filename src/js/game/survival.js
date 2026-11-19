@@ -2,7 +2,7 @@
    Barras do jogador (0..100): food (fome), warm (calor), energy (energia). Vida = u.hp.
    Fome: come sozinho abaixo de 35 e avisa quando a comida acaba. Morte: perde só a mochila (vai pro túmulo). */
 const NEED_DEF={food:80,warm:100,energy:100};
-const NEED_NAMES={hp:'Vida',food:'Fome',warm:'Calor',energy:'Energia'};
+const NEED_NAMES={hp:'Vida',food:'Fome',warm:'Calor',energy:'Energia',stam:'Fôlego'};
 const WARN_GAP=60; // segundos de jogo entre avisos repetidos
 
 function calmF(){return settings.calm?.5:1}
@@ -57,7 +57,7 @@ function killPlayer(u){
 }
 function respawnPlayer(u){
   u.hp=u.max;u.food=Math.max(u.food||0,50);u.warm=Math.max(u.warm||0,60);u.energy=Math.max(u.energy||0,60);
-  u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};
+  u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};u.sangue=0;u.stun=0;u.blockOn=false;
   const s=G.bld.find(b=>b.done&&(b.type==='shelter'||b.type==='house'||b.type==='longhouse'));
   const p=s?freeNear(s.x+1,s.y+s.h,3):freeNear(G.start[0],G.start[1],3);
   if(p){u.x=p[0]+.5;u.y=p[1]+.5}
@@ -89,7 +89,7 @@ function sleepNight(u){
 
 // barras na tela (fora do topo, acima da barra de navegação)
 function needsHUD(){const p=PL();if(!p||p.food==null)return;
-  const bars=[['❤️','hp',p.hp/p.max],['🍓','food',p.food/100],['🔥','warm',p.warm/100],['⚡','energy',p.energy/100]];
+  const bars=[['❤️','hp',p.hp/p.max],['🍓','food',p.food/100],['🔥','warm',p.warm/100],['⚡','energy',p.energy/100],['💨','stam',(p.stam??100)/100]];
   const sig=bars.map(b=>Math.round(b[2]*20)).join(',');
   let el=document.getElementById('needs');
   if(!el){el=document.createElement('div');el.id='needs';el.className='glass';document.body.appendChild(el)}

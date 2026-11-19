@@ -28,17 +28,24 @@ function sheetHTML(){
     if(!d)return head('Editar objetos','Toque numa decoração ou construção para selecionar. Arraste decoração para mover. Remover apaga qualquer peça, inclusive cercas e muros.')+`<div class="row"><button class="sbtn" data-a="done">Sair do modo edição</button></div>`;
     return head(DECOR[d.k].n,'Arraste o objeto para movê-lo livremente.')+`<div class="row"><button class="sbtn" data-a="flip">↔ Virar</button><button class="sbtn" data-a="small">➖</button><button class="sbtn" data-a="big">➕</button><button class="sbtn" data-a="dup">⧉ Duplicar (${costHTML(DECOR[d.k].cost)})</button><button class="sbtn red" data-a="del">🗑 Remover</button><button class="gbtn" data-a="done">Pronto</button></div>`}
   case'craft':{const sm=G.bld.find(b=>b.type==='smithy'&&b.done);return head('Criar','Ferramentas de pedra se fazem à mão. Armas pedem uma Ferraria pronta.')+
-    `<div class="items">${Object.keys(ITEMS).map(k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${it.ic}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div><div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`}).join('')}</div>`}
+    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${it.ic}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div><div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
+      tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS),arm=ks.filter(k=>!tools.includes(k));
+      return`<h4>Ferramentas de trabalho</h4><div class="items">${tools.map(card).join('')}</div>`+(arm.length?`<h4>Armas e equipamentos</h4><div class="items">${arm.map(card).join('')}</div>`:'')})()}
   case'bag':{const w=bagW(),cap=storeCap();
     return head('Mochila',`Peso ${w}/${BAG}. Toras pesam 5 · pedra e ferro 2 · galho 1 · comida 0,5.`)+`<div class="row" style="margin-top:0"><div class="meter"><i style="width:${Math.min(100,w/BAG*100)}%;background:${w>=BAG?'#e2533f':'#f3c969'}"></i></div></div>`+
       `<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.inv[k]?'':'z'}"><span>${RES[k][0]}</span><b>${G.inv[k]}</b><small>${RES[k][1]}</small></div>`).join('')}</div>`+
       `<h4>Nos depósitos ${cap?`· até ${cap} de cada`:''}</h4>`+(cap?`<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.res[k]?'':'z'}"><span>${RES[k][0]}</span><b>${G.res[k]}</b><small>${RES[k][1]}</small></div>`).join('')}</div>${w>0?'<div class="row"><button class="gbtn" data-a="godeposit">📦 Ir guardar tudo</button></div>':''}`:'<p class="hint">Nenhum depósito ainda. Construa uma Pilha de recursos.</p>')+
-      `<h4>Ferramentas e armas</h4><div class="inv">${Object.keys(ITEMS).map(k=>`<div class="slot ${G.items[k]?'':'z'}"><span>${ITEMS[k].ic}</span><b>${G.items[k]}</b><small>${ITEMS[k].n.split(' ')[0]}</small></div>`).join('')}</div>`+
+      `<h4>Equipamento</h4>${equipHTML()}<h4>Ferramentas e armas</h4>${bagItemsHTML()}`+
       `<h4>Assentamento</h4><table class="tbl"><tr><td>Construções</td><td>${G.bld.filter(b=>b.done&&!BD[b.type].line).length}</td></tr><tr><td>Peças de muro, cerca e piso</td><td>${G.bld.filter(b=>b.done&&BD[b.type].line).length}</td></tr><tr><td>Moradores</td><td>${popCount()} <span class="small">(em breve)</span></td></tr><tr><td>Dia</td><td>${Math.floor(G.t/240)+1} ${darkness()>.1?'🌙':'☀️'}</td></tr></table>`}
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">🎒 Resgatar mochila</button></div>`}
   case'info':return infoHTML()}
   return null}
+/* Mochila: 8 espaços de equipamento e a lista de itens (toque para vestir) */
+function equipHTML(){return`<div class="inv">${SLOTS.map(s=>{const k=G.equip[s];
+  return`<div class="slot ${k?'':'z'}" ${k?`data-a="unequip" data-v="${s}"`:''}><span>${k?ITEMS[k].ic:CB.slot_icone[s]}</span><b>${k?'':'—'}</b><small>${CB.slot_nome[s]}</small></div>`}).join('')}</div>`}
+function bagItemsHTML(){return`<div class="inv">${Object.keys(ITEMS).map(k=>{const it=ITEMS[k],n=G.items[k]||0,eq=it.slot&&n>0;
+  return`<div class="slot ${n?'':'z'}" ${eq?`data-a="equip" data-v="${k}" title="Toque para vestir"`:''}><span>${it.ic}</span><b>${n}</b><small>${it.n.split(' ')[0]}</small></div>`}).join('')}</div>`}
 function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
@@ -52,6 +59,8 @@ function infoHTML(){if(!sel)return null;
     if(b.type==='quarry')h+=`<div class="row"><b>Extrair:</b><button class="sbtn ${b.mode==='stone'?'on':''}" data-a="qmode" data-v="stone">🪨 Pedra</button><button class="sbtn ${b.mode==='iron'?'on':''}" data-a="qmode" data-v="iron">🔩 Ferro</button></div>`;
     if(b.type==='smithy')h+=`<p class="hint">Abra Criar para forjar armas. Você caminha até a ferraria para trabalhar.</p>`;
     if(b.type==='tower')h+=`<p class="hint">🏹 Alcance de 6 casas. Funciona sozinha.</p>`}
+  if(b.done&&b.hp<b.max)h+=`<div class="row"><button class="sbtn" data-a="repair">🔧 Reparar (${costHTML(repCusto(b))})</button></div>`;
+  if(b.done&&b.type==='bell')h+=`<div class="row"><button class="sbtn" data-a="ring">🔔 Tocar o sino</button></div>`;
   if(b.done&&['shelter','house','longhouse'].includes(b.type))h+=`<div class="row"><button class="sbtn" data-a="sleep">🛏 Dormir até o amanhecer</button></div>`;
   h+=`<div class="row"><button class="sbtn red" data-a="demolish">🔨 Desmontar (devolve ${b.done?'metade':'80%'})</button></div>`;
   return h}
@@ -68,6 +77,10 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
     if(it.hand){pay(it.cost);order({type:'craft',item:v,paid:it.cost})}else{const sm=G.bld.find(x=>x.type==='smithy'&&x.done);if(!sm){toast('Construa uma Ferraria primeiro','bad');break}pay(it.cost);order({type:'forge',b:sm.id,item:v,paid:it.cost});toast('Indo até a Ferraria…')}
     closeSheet();break}
   case'godeposit':{const me=PL();let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x-me.x,s.y-me.y);if(d<bd){bd=d;best=s}}if(best){order({type:'deposit',b:best.id});closeSheet()}break}
+  case'equip':equipItem(v);break;
+  case'unequip':unequip(v);break;
+  case'repair':if(b){order({type:'repair',b:b.id});closeSheet()}break;
+  case'ring':if(b)tocaSino(b);break;
   case'sleep':if(b){order({type:'sleep',b:b.id});closeSheet()}break;
   case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)lootTomb(t);sel=null;break}
   case'demolish':if(b){refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);closeSheet()}break;

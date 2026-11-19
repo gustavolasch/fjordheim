@@ -2,10 +2,10 @@
 const playerLook=()=>({name:'Você',tunic:'#2f5fa8',hair:'#d9a84e',skin:'#f1c9a0',fem:false,hp:100,max:100,speed:2,ox:0,oy:0});
 function newGame(biome,seed,demo){BIO=BIOMES[biome];
   G={biome,seed:seed||((Math.random()*1e9)|0),tiles:new Uint8Array(N*N),wear:new Float32Array(N*N),h:new Float32Array(N*N),obj:new Array(N*N).fill(null),occ:new Int32Array(N*N),bld:[],units:[],decor:[],tombs:[],
-    res:{stick:0,wood:0,stone:0,food:0,iron:0},inv:{stick:0,wood:0,stone:0,food:0,iron:0},items:{axe:0,pick:0,hammer:0,rod:0,sickle:0,sword:0,shield:0,spear:0,bow:0},
+    res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,
     t:185,speed:1,idc:1,nextRaid:1e12,raidN:0,raidOn:false,regrow:[],fall:[],hints:{},flags:{},demo:!!demo};
   BMAP=new Map();UMAP=new Map();PT=[];AR=[];genMap();
-  const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;
+  const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;G.rs=(G.seed|0)^0x9e3779b9;spawnAnimais();
   initTiles();bgGrad=null;initWeather();makeThumbs();cam.z=isTouch?1.2:1.3;centerCam()}
 function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$('#hud').classList.add('hidden');
   const top=$('#mTop');top.innerHTML=(inGame?'<button class="gbtn" id="mResume">▶ Voltar ao jogo</button><button class="sbtn" id="mSave">💾 Salvar</button>':'')+(hasSave()?'<button class="'+(inGame?'sbtn':'gbtn')+'" id="mLoad">📂 '+(inGame?'Carregar salvo':'Continuar jogo salvo')+'</button>':'');

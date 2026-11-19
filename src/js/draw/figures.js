@@ -49,8 +49,21 @@ function drawUnit(u){const[bx,by]=P(u.x+u.ox,u.y+u.oy,0);
   if(u.kind==='player'){ctx.strokeStyle='rgba(243,201,105,.75)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(bx,by,9,4.4,0,0,6.283);ctx.stroke();
     if(cam.z<.7){const k=1/cam.z;ctx.fillStyle='#f3c969';pp([[bx,by-24-8*k],[bx-4*k,by-24-14*k],[bx+4*k,by-24-14*k]],'#f3c969')}
     if(u.down){ctx.globalAlpha=.5}}
-  if(!(u.kind==='player'&&drawPlayerSprite(bx,by,u)))drawFigure(bx,by,u,u.kind==='villager'||u.kind==='player'?1:1.08);ctx.globalAlpha=1;
+  if(u.kind==='animal')drawAnimal(bx,by,u);else if(!(u.kind==='player'&&drawPlayerSprite(bx,by,u)))drawFigure(bx,by,u,u.kind==='villager'||u.kind==='player'?1:1.08);ctx.globalAlpha=1;
   if(u.hp<u.max&&u.kind!=='player'||u.kind==='player'&&u.hp<u.max*.98){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx-7,by-26,14,2.5);ctx.fillStyle=u.kind==='raider'?'#e2533f':'#6fd35b';ctx.fillRect(bx-7,by-26,14*Math.max(0,u.hp/u.max),2.5)}
   if(u.act&&u.kind==='player'&&u.act.dur>.6&&u.act.type!=='wait'&&u.act.type!=='build'){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(bx-8,by-30,16,2.4);ctx.fillStyle='#f3c969';ctx.fillRect(bx-8,by-30,16*clamp(u.act.t/u.act.dur,0,1),2.4)}
   if(sel&&sel.k==='u'&&sel.id===u.id){ctx.strokeStyle='#f3c969';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(bx,by,8,4,0,0,6.283);ctx.stroke()}}
 
+
+/* animais: desenho simples por espécie (presa pequena, urso grande) */
+const ANIMAL_LOOK={cervo:{c:'#9a6a3e',s:1.05,chifre:1},lebre:{c:'#c8b79a',s:.6,orelha:1},javali:{c:'#4e3d30',s:.95,presa:1},lobo:{c:'#77736e',s:.95},urso:{c:'#4a3121',s:1.45}};
+function drawAnimal(bx,by,u){const L=ANIMAL_LOOK[u.sp]||{c:'#888',s:1},s=L.s,f=u.face||1,mv=u.moving?Math.sin(u.anim)*1.6:0;
+  ell(bx,by+1,6.5*s,2.5*s,'rgba(0,0,0,.25)');
+  ln([bx-3*s,by-3*s],[bx-3*s+mv,by],L.c,1.5*s);ln([bx+2*s,by-3*s],[bx+2*s-mv,by],L.c,1.5*s);
+  ell(bx,by-6*s,7*s,3.9*s,L.c);
+  const hx=bx+f*6.5*s,hy=by-9*s;ell(hx,hy,3.1*s,2.7*s,shade(L.c,.08));
+  ln([hx,hy],[hx+f*3*s,hy+1*s],shade(L.c,-.35),1.2*s);
+  if(L.chifre)for(const d of[-1,1])ln([hx-f*1*s,hy-2*s],[hx-f*1*s+d*2.2*s,hy-6*s],'#e3d3b0',1.1*s);
+  if(L.orelha)ell(hx-f*1*s,hy-3*s,1.2*s,2.4*s,shade(L.c,-.1));
+  if(L.presa)ln([hx+f*1.5*s,hy+1.5*s],[hx+f*2.5*s,hy+3*s],'#f4eee0',1*s);
+  ctx.fillStyle='#1b1410';ctx.fillRect(hx+f*1.2*s,hy-.6*s,1,1)}

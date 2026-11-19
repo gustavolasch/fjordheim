@@ -5,7 +5,7 @@ function zoomAt(px,py,f){const nz=clamp(cam.z*f,ZMIN,ZMAX),ix=(px-cam.x)/cam.z,i
 const ptrs=new Map();let gest=null;
 cv.addEventListener('pointerdown',e=>{if(!G||menuOpen)return;camGo=null;if(e.button===2){cancelMode();return}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});zT=null;
-  if(ptrs.size===1){gest={k:'tap',sx:e.clientX,sy:e.clientY,lx:e.clientX,ly:e.clientY};
+  if(ptrs.size===1){gest={k:'tap',sx:e.clientX,sy:e.clientY,lx:e.clientX,ly:e.clientY,t0:performance.now()};
     if(mode.t==='edit'){const d=pickDecor(e.clientX,e.clientY);if(d){mode.sel=d;const[wx,wy]=s2w(e.clientX,e.clientY);gest={k:'drag',ox:d.x-wx,oy:d.y-wy};openSheet('edit')}}}
   else if(ptrs.size===2){const[a,b]=[...ptrs.values()];gest={k:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y)||1,z0:cam.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}}});
 cv.addEventListener('pointermove',e=>{if(!G||menuOpen)return;const p=ptrs.get(e.pointerId);
@@ -18,7 +18,7 @@ cv.addEventListener('pointermove',e=>{if(!G||menuOpen)return;const p=ptrs.get(e.
   else if(gest.k==='pan'){cam.x+=dx;cam.y+=dy}
   if(e.pointerType==='mouse')hover(e.clientX,e.clientY)});
 function pUp(e){if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
-  if(gest&&gest.k==='tap'&&e.type==='pointerup')onTap(e.clientX,e.clientY,e.pointerType);
+  if(gest&&gest.k==='tap'&&e.type==='pointerup')onTap(e.clientX,e.clientY,e.pointerType,performance.now()-(gest.t0||0));
   if(ptrs.size===0)gest=null;else if(ptrs.size===1){const[p]=[...ptrs.values()];gest={k:'pan',lx:p.x,ly:p.y,sx:p.x,sy:p.y}}}
 cv.addEventListener('pointerup',pUp);cv.addEventListener('pointercancel',pUp);
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -37,7 +37,7 @@ function hover(px,py){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy
 // if the tapped spot is blocked by a tree/rock/building, slide the piece to the nearest free spot (within 2 tiles)
 function snapSpot(type,gx,gy){const okAt=(x,y)=>{const r=placeCheck(type,x,y);return r===true||r==='Faltam recursos'};if(okAt(gx,gy))return[gx,gy];
   let best=null,bd=9;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const d=dx*dx+dy*dy;if(d<bd&&okAt(gx+dx,gy+dy)){bd=d;best=[gx+dx,gy+dy]}}return best||[gx,gy]}
-function onTap(px,py,type){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy);
+function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy);
   if(mode.t==='build'){hover(px,py);if(type==='mouse')confirmPlace();return}
   if(mode.t==='line'){if(!mode.a){mode.a=[tx,ty];mode.b=[tx,ty]}else{mode.b=[tx,ty];if(type==='mouse')confirmPlace()}updPlace();return}
   if(mode.t==='decor'){mode.wx=wx;mode.wy=wy;mode.has=true;if(type==='mouse')confirmPlace();return}
@@ -50,7 +50,7 @@ function onTap(px,py,type){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.flo
   const me=PL();
   if(me){const[sx,sy]=w2s(me.x,me.y,9);if(Math.hypot(px-sx,py-sy)<Math.max(16,18*cam.z)){openSheet('bag');return}}
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
-  if(best){sel={k:'u',id:best.id};openSheet('info');return}
+  if(best){if(best.kind==='animal'||best.kind==='raider'){ataqueAlvo(best,held>450);return}sel={k:'u',id:best.id};openSheet('info');return}
   // buildings: exact tile first, then tiles in front for tall ones
   let b=bAt(tx,ty);if(!b)for(const o of[1,2]){const c=bAt(tx+o,ty+o);if(c&&!BD[c.type].flat&&!BD[c.type].line){b=c;break}}
   if(b&&tapBuilding(b,tx,ty))return;
@@ -101,3 +101,11 @@ function updPlace(){const el=$('#place');if(mode.t==='none'||mode.t==='edit'){el
   const html=`<img src="${img}" alt=""><div class="txt"><b>${name} · ${costHTML(cost)}</b>${st}</div>${extra}<button class="sbtn" data-p="pieces" title="Peças">▦</button>${isTouch||mode.t!=='build'?`<button class="gbtn" data-p="ok" ${ok?'':'disabled'}>✓</button>`:''}<button class="sbtn" data-p="cancel">✕</button>`;if(html!==placeSig){placeSig=html;el.innerHTML=html}}
 $('#place').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;const a=b.dataset.p;if(a==='ok')confirmPlace();else if(a==='cancel')cancelMode();else if(a==='reset'){mode.a=null;mode.b=null;updPlace()}else if(a==='flip'){mode.f=-(mode.f||1)}else if(a==='pieces'){const keep=mode;$('#place').classList.remove('open');openSheet('build');mode=keep}});
 
+
+/* ---- combate: tocar em animal ou invasor ataca; segurar um pouco dá golpe forte ---- */
+function ataqueAlvo(t,forte){const me=PL();if(!me||me.down)return;closeSheet();sel=null;
+  order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'⚔️ Golpe forte':'⚔️ Atacar')}
+/* ---- bloqueio: segurar o botão de escudo (gasta fôlego) ---- */
+const bBlock=$('#bBlock');
+bBlock.addEventListener('pointerdown',e=>{e.preventDefault();const p=PL();if(p&&!menuOpen){p.blockOn=true;bBlock.classList.add('on')}});
+for(const ev of['pointerup','pointercancel','pointerleave']){bBlock.addEventListener(ev,()=>{const p=PL();if(p)p.blockOn=false;bBlock.classList.remove('on')})}

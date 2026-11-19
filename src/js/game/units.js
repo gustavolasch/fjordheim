@@ -36,7 +36,7 @@ function moveUnit(u,dt){
   const gx=tx+.5,gy=ty+.5,dx=gx-u.x,dy=gy-u.y,d=Math.hypot(dx,dy);
   if(d>.01)u.heading=Math.atan2(dy,dx); // direção de movimento no mundo do jogo (usada pelo sprite do jogador)
   let sp=u.speed*dt;if(u.kind==='player')sp*=survivalSpeed(u);if(u.kind==='villager'&&G.res.food<=0)sp*=.7;if(u.kind==='player'&&bagW()>BAG*.75)sp*=.85;
-  if(d<=sp){u.x=gx;u.y=gy;u.path.shift();wearTile(tx,ty)}else{u.x+=dx/d*sp;u.y+=dy/d*sp}
+  if(d<=sp){u.x=gx;u.y=gy;u.path.shift();wearTile(tx,ty);if(u.kind==='raider')armadilhaCheck(u,tx,ty)}else{u.x+=dx/d*sp;u.y+=dy/d*sp}
   if(Math.abs(dx-dy)>.01)u.face=(dx-dy)>0?1:-1;u.moving=true;return true}
 function raidActive(){return G.units.some(u=>u.kind==='raider')}
 function nearestUnit(x,y,R,f){let b=null,bd=R;for(const u of G.units){if(!f(u))continue;const d=Math.hypot(u.x-x,u.y-y);if(d<bd){bd=d;b=u}}return b}
@@ -48,7 +48,7 @@ function updVillager(u,dt){
   if(moveUnit(u,dt))return;
   if(u.act){u.act.t+=dt;actTick(u,dt);if(u.act&&u.act.t>=u.act.dur){const a=u.act;u.act=null;finishAct(u,a)}return}
   u.cool-=dt;if(u.cool>0)return;u.cool=.25+Math.random()*.3;think(u)}
-function actTick(u,dt){const a=u.act;if(a.type==='build'){const b=BMAP.get(a.b);if(!b){u.act=null;return}const rate=1/toolF(u);
+function actTick(u,dt){const a=u.act;if(a.type==='repair'){const b=BMAP.get(a.b);if(b)b.hp=Math.min(b.max,b.hp+b.max*dt/a.dur);return}if(a.type==='build'){const b=BMAP.get(a.b);if(!b){u.act=null;return}const rate=1/toolF(u);
     if(!b.done){b.prog+=rate*dt;b.hp=Math.min(b.max,b.max*(.3+.7*b.prog/b.work));if(Math.random()<dt*2)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,'dust');if(Math.random()<dt*1.2)sfx('hammer');if(b.prog>=b.work){completeB(b);u.act=null}}
     else{b.hp=Math.min(b.max,b.hp+rate*dt*8);if(b.hp>=b.max)u.act=null}}}
 function finishAct(u,a){const w=BMAP.get(u.work);
@@ -109,20 +109,13 @@ function updRaider(u,dt){u.atkCd-=dt;u.thinkT-=dt;
       if(b&&!isNear(u,b)&&!u.attackB&&(!u.path||!u.path.length)){if(!goRect(u,b.x,b.y,b.w,b.h,false,passR))u.tb=null}}}
   const t=u.target&&UMAP.get(u.target);
   if(t&&!t.hidden&&!t.down&&Math.hypot(t.x-u.x,t.y-u.y)<=u.range){u.moving=false;u.face=(t.x-u.x)-(t.y-u.y)>0?1:-1;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;attack(u,t)}return}
-  if(u.attackB){const wb=BMAP.get(u.attackB);if(wb){u.moving=false;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;damageB(wb,u.dmg)}return}u.attackB=null}
-  const b=u.tb&&BMAP.get(u.tb);if(b&&isNear(u,b)){u.path=null;u.moving=false;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;damageB(b,u.dmg)}return}
+  if(u.attackB){const wb=BMAP.get(u.attackB);if(wb){u.moving=false;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;damageB(wb,u.dmg,u.tipoB)}return}u.attackB=null}
+  const b=u.tb&&BMAP.get(u.tb);if(b&&isNear(u,b)){u.path=null;u.moving=false;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;damageB(b,u.dmg,u.tipoB)}return}
   moveUnit(u,dt)}
-function attack(a,t){if(a.ranged){AR.push({x:a.x,y:a.y,z:14,tid:t.id,dmg:a.dmg,sp:9});return}dmgUnit(t,a.dmg)}
-function dmgUnit(t,d){if(DEV.god&&t.kind==='player')return;t.hp-=d;for(let k=0;k<3;k++)puff(t.x,t.y,'blood');
-  if(t.kind==='player'){if(t.hp<=0)killPlayer(t);return}
-  if(t.hp<=0)killUnit(t)}
-function killUnit(u){for(let k=0;k<8;k++)puff(u.x,u.y,'smoke');removeUnit(u);
-  if(u.kind==='raider'){if(!raidActive()&&G.raidOn){G.raidOn=false;const iron=3+G.raidN*2;addInv('iron',iron);toast(`🏆 Invasores derrotados! Deixaram 🔩${iron}`,'good')}}
-  else toast(`💀 ${u.name} caiu em combate`,'bad')}
+function attack(a,t){if(a.ranged){AR.push({x:a.x,y:a.y,z:14,tid:t.id,dmg:a.dmg,tipo:a.tipo,sp:9,efeito:a.efeito||[],src:a.id});return}dmgUnit(t,a.dmg,a.tipo,{efeito:a.efeito||[],src:a})}
 function spawnRaid(){G.raidN++;const n=Math.min(14,2+Math.floor(G.raidN*1.6));const L=longhouse();if(!L)return;let sp=null;
-  for(let k=0;k<50&&!sp;k++){const s=(Math.random()*4)|0,t=(Math.random()*N)|0;const x=s===0?0:s===1?N-1:t,y=s===2?0:s===3?N-1:t;if(!passR(x,y))continue;
+  for(let k=0;k<50&&!sp;k++){const s=(rnd()*4)|0,t=(rnd()*N)|0;const x=s===0?0:s===1?N-1:t,y=s===2?0:s===3?N-1:t;if(!passR(x,y))continue;
     if(astar(x,y,nearRect(L.x,L.y,L.w,L.h),L.x+1,L.y+1,passR,12000))sp=[x,y]}
   if(!sp){G.nextRaid=G.t+90;return}
-  for(let i=0;i<n;i++){const hp=60+G.raidN*8;spawnUnit('raider',sp[0]+.5+(Math.random()-.5)*.8,sp[1]+.5+(Math.random()-.5)*.8,{hp,max:hp,dmg:7+G.raidN,range:1.2,rate:1.1,speed:1.45,tunic:pick(['#7d2219','#5a1a14','#2e2a28','#6b2a1e']),hair:pick(['#2a1d14','#6b3d1f','#3b2a1d'])})}
+  for(let i=0;i<n;i++)spawnSaqueador(sp[0]+.5+(rnd()-.5)*.8,sp[1]+.5+(rnd()-.5)*.8,G.raidN);
   G.raidOn=true;toast(`⚔️ ${n} invasores atacam a vila!`,'bad')}
-

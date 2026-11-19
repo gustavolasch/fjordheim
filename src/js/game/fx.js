@@ -28,5 +28,5 @@ function floater(x,y,text){PT.push({type:'txt',x,y,z:26,vz:16,vx:0,vy:0,life:1.5
 function fishJump(x,y){PT.push({type:'fish',x,y,z:0,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,vz:0,life:.9,max:.9,g:0,c:Math.random()<.5});for(let k=0;k<4;k++)PT.push({type:'splash',x,y,z:1,vx:(Math.random()-.5),vy:(Math.random()-.5),vz:20+Math.random()*15,g:80,life:.5,max:.5,r:1.3})}
 function updParticles(dt){for(let i=PT.length-1;i>=0;i--){const p=PT[i];p.life-=dt;if(p.life<=0){PT.splice(i,1);continue}p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;if(p.g){p.vz-=p.g*dt;if(p.z<0){p.z=0;p.vz*=-.3;p.vx*=.5;p.vy*=.5}}if(p.type==='smoke')p.r+=dt*3.5}
   for(let i=AR.length-1;i>=0;i--){const a=AR[i],t=UMAP.get(a.tid);if(!t){AR.splice(i,1);continue}const dx=t.x-a.x,dy=t.y-a.y,d=Math.hypot(dx,dy);a.ang=Math.atan2((dx+dy)*HH,(dx-dy)*HW);
-    if(d<.3){dmgUnit(t,a.dmg);AR.splice(i,1);continue}const s=a.sp*dt;a.x+=dx/d*s;a.y+=dy/d*s;a.z=lerp(a.z,10,.1)}}
+    if(d<.3){dmgUnit(t,a.dmg,a.tipo,{efeito:a.efeito||[],src:UMAP.get(a.src)});AR.splice(i,1);continue}const s=a.sp*dt;a.x+=dx/d*s;a.y+=dy/d*s;a.z=lerp(a.z,10,.1)}}
 

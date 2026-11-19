@@ -1,0 +1,25 @@
+import { chromium } from 'playwright-core';
+import path from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+const HTML = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'dist', 'fjordheim.html');
+const b = await chromium.launch({ channel: 'chrome' });
+const c = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+const p = await c.newPage();
+const errs = [];
+p.on('pageerror', e => errs.push('pageerror: ' + e.message + ' ' + (e.stack || '').split('\n')[1]));
+await p.goto(pathToFileURL(HTML).href);
+await p.waitForSelector('.bcard', { timeout: 15000 });
+await p.locator('.bcard').first().click();
+await p.waitForTimeout(1500);
+const bb = await p.locator('#bar button[data-tab="craft"]').boundingBox();
+await p.touchscreen.tap(bb.x + bb.width / 2, bb.y + bb.height / 2);
+await p.waitForTimeout(800);
+console.log('sheetKind', await p.evaluate(() => sheetKind), 'sheet items', await p.evaluate(() => document.querySelectorAll('#sheet [data-a="craft"]').length));
+await p.evaluate(() => { G.inv.stick = 4; G.inv.stone = 4; });
+await p.waitForSelector('#sheet [data-a="craft"][data-v="axe"]:not([disabled])', { timeout: 5000 }).catch(e => console.log('still disabled'));
+const cb = await p.locator('#sheet [data-a="craft"][data-v="axe"]').boundingBox();
+console.log('axe btn', JSON.stringify(cb), await p.evaluate(() => { const e = document.querySelector('#sheet [data-a="craft"][data-v="axe"]'); return e ? e.outerHTML.slice(0, 200) : 'none' }));
+await p.touchscreen.tap(cb.x + cb.width / 2, cb.y + cb.height / 2);
+for (let k = 0; k < 6; k++) { await p.waitForTimeout(700); console.log(JSON.stringify(await p.evaluate(() => ({ axe: G.items.axe, order: PL().order, act: PL().act && PL().act.type, inv: [G.inv.stick, G.inv.stone], sheet: sheetKind, errs: 0 })))) }
+console.log('errs', errs.slice(0, 3).join(' | ') || 'none');
+await b.close();

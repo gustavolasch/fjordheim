@@ -161,5 +161,14 @@ function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
     case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p)}
   if(!b.done)return drawSite(b);
-  ({longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower})[b.type](b)}
+  ({longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
 
+
+/* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */
+function dTrap(b){const q=P(b.x+.5,b.y+.5);ell(q[0],q[1]+1,11,4.5,'rgba(0,0,0,.2)');
+  for(let k=0;k<6;k++){const a=k/6*6.283+.3,r=7;const bx=q[0]+Math.cos(a)*r*.7,by=q[1]+Math.sin(a)*r*.35;ln([bx,by+2],[bx+1.5,by-7],C.woodD,1.8)}
+  const armed=(b.disp||0)<=(G?G.t:0);if(armed)ell(q[0],q[1],3,1.5,'#c8243a')}
+function dBell(b){const x=b.x+.5,y=b.y+.5,q=P(x,y);ell(q[0],q[1]+1,8,3.5,'rgba(0,0,0,.25)');
+  ln([q[0],q[1]],[q[0],q[1]-30],C.woodD,2.4);ln([q[0]-6,q[1]-26],[q[0]+6,q[1]-26],C.woodD,2);
+  const w=(b.cd||0)>(G?G.t:0)?Math.sin(perfT*18)*.25:0;
+  pp([[q[0]-6,q[1]-24],[q[0]+6,q[1]-24],[q[0]+4+w,q[1]-14],[q[0]-4+w,q[1]-14]],'#c9a24a');ell(q[0],q[1]-13,3.6,1.5,'#8a6a2a')}

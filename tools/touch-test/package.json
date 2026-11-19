@@ -1,0 +1,13 @@
+{
+  "name": "fjordheim-touch-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Teste automático por toque (Chromium em tela de celular). Não entra no jogo.",
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.65.1"
+  }
+}

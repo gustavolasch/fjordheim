@@ -24,5 +24,6 @@ const BD={
  stockpile:{n:'Pilha de recursos',cat:'store',w:2,h:2,cost:{stick:4},hp:80,work:3,flat:true,store:30,desc:'Toque para guardar o que carrega. 30 de cada recurso.'},
  storage:{n:'Armazém',cat:'store',w:2,h:2,cost:{wood:12,stone:4},hp:260,work:14,wallH:12,store:150,desc:'Guarda 150 de cada recurso.'}
 };
+Object.assign(BD,CDATA.construcoes); // sino e armadilha (data/combate.json)
 const BUILD_ORDER=Object.keys(BD);
 const CATS=[['struct','Estruturas'],['walls','Muros'],['fences','Cercas'],['floors','Pisos'],['doors','Portas'],['store','Depósitos'],['decor','Decoração']];

@@ -6,7 +6,8 @@ function order(o){const u=PL();if(!u||u.down)return;const old=u.order;if(old&&ol
 function stepTo(u,o,rx,ry,rw,rh,inside){if(o.tries>4){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}o.tries=(o.tries||0)+1;if(!goRect(u,rx,ry,rw,rh,inside,passV,9000)){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}return true}
 function faceTo(u,x,y){if(Math.abs((x-u.x)-(y-u.y))>.05)u.face=(x-u.x)-(y-u.y)>0?1:-1}
 function updPlayer(u,dt){
-  needsTick(u,dt);
+  needsTick(u,dt);combateTick(u,dt);
+  if(u.order&&u.order.type==='attack'&&ataqueOrdem(u,u.order,dt))return;
   if(moveUnit(u,dt))return;
   if(u.act){u.act.t+=dt;actTick(u,dt);if(u.act&&u.act.t>=u.act.dur){const a=u.act;u.act=null;finishP(u,a)}return}
   const o=u.order;
@@ -33,11 +34,12 @@ function updPlayer(u,dt){
   case'sleep':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}sleepNight(u);u.order=null;return}
   case'craft':{if(!o.started){o.started=true;u.act={type:'craft',item:o.item,t:0,dur:1.4}}return}
   case'forge':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}if(!o.started){o.started=true;faceTo(u,b.x+1,b.y+1);u.act={type:'forge',item:o.item,t:0,dur:2.6}}return}
+  case'repair':reparaOrdem(u,o);return;
   }}
 function startObj(u,o,ob){
   switch(ob.t){
   case'tree':if(ob.g<.7){toast('Árvore jovem demais. Deixe crescer.');u.order=null;return}
-    if(!G.items.axe){toast('Precisa de um 🪓 Machado de pedra (Criar).','bad');showHint('craft',true);u.order=null;return}
+    if(!hasTool('axe')){toast('Precisa de um 🪓 Machado de pedra (Criar).','bad');showHint('craft',true);u.order=null;return}
     u.act={type:'chop',i:o.i,t:0,dur:.85};return;
   case'falling':u.act={type:'wait',t:0,dur:.25};return;
   case'log':if(!canCarry('wood')){bagFull('wood');u.order=null;return}u.act={type:'takelog',i:o.i,t:0,dur:1.1};return;
@@ -48,14 +50,15 @@ function startObj(u,o,ob){
   case'bush':if(!(ob.b>0)){if(!o.cont)toast('Sem frutinhas agora. Elas voltam com o tempo.');u.order=null;return}if(!canCarry('food')){bagFull('food');u.order=null;return}u.act={type:'berry',i:o.i,t:0,dur:.7};return;
   case'stump':if(!o.cont)toast('Um toco. A árvore volta a crescer com o tempo.');u.order=null;return;
   default:u.order=null}}
-function ptool(k){if(G.items[k]>0&&Math.random()<.012){G.items[k]--;toast(`💥 Seu ${ITEMS[k].n} quebrou`,'bad');sfx('bad')}}
+function ptool(k){if(hasTool(k)&&Math.random()<.012){gastaFerramenta(k);toast(`💥 Seu ${ITEMS[k].n} quebrou`,'bad');sfx('bad')}}
 function finishP(u,a){const o=u.order;if(o&&o.type==='obj')o.cont=true;const ob=a.i!=null?G.obj[a.i]:null;const ox=a.i!=null?a.i%N+.5:0,oy=a.i!=null?(a.i/N|0)+.5:0;
   switch(a.type){
   case'chop':if(ob&&ob.t==='tree'){chopHit(a.i,ob);sfx('chop');ptool('axe')}break;
   case'takelog':if(ob&&ob.t==='log'&&canCarry('wood')){ob.amt--;addInv('wood',1,ox+.6,oy);sfx('pick');if(ob.amt<=0)toStump(a.i,ob);completeHint('log')}break;
   case'pickup':if(ob){G.obj[a.i]=null;addInv(a.k,1,ox,oy);sfx('pick');for(let k=0;k<3;k++)puff(ox,oy,'pop');completeHint('walk')}break;
   case'mine':if(ob&&(ob.t==='stone'||ob.t==='ore')){ob.amt--;addInv(a.k,1,ox,oy);sfx('mine');for(let k=0;k<3;k++)puff(ox,oy,'rockchip');if(ob.amt<=0){G.obj[a.i]=null;for(let k=0;k<5;k++)puff(ox,oy,'dust')}ptool('pick')}break;
-  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
+  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
+  case'repair':toast('🔧 Reparado','good');u.order=null;break;
   case'fish':if(Math.random()<.65){addInv('food',1,a.fx,a.fy);fishJump(a.fx,a.fy);sfx('splash')}ptool('rod');if(!canCarry('food')){u.order=null;bagFull()}break;
   case'farm':{const b=BMAP.get(a.b);if(b){b.grow+=.15;for(let k=0;k<2;k++)puff(b.x+Math.random()*3,b.y+Math.random()*3,'dust');if(b.grow>=1){b.grow=0;const n=Math.min(4,Math.floor((BAG-bagW())/WEIGHT.food+1e-6));if(n>0){addInv('food',n,b.x+1.5,b.y+1.5);sfx('store')}else{bagFull();u.order=null}}}break}
   case'craft':case'forge':G.items[a.item]++;floater(u.x,u.y,`+1 ${ITEMS[a.item].ic}`);sfx('craft');if(o)o.done=true;u.order=null;if(a.item==='axe')completeHint('craft');if(a.item==='pick')completeHint('pick');break}}

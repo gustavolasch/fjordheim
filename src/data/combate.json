@@ -1,0 +1,164 @@
+{
+  "_nota": "Tabelas do combate (0.5). Equilibrar o jogo é editar números aqui. O build embute este arquivo como CDATA.",
+  "slots": ["cabeca", "peito", "pernas", "pes", "mao", "escudo", "costas", "cinto"],
+  "slot_nome": {
+    "cabeca": "Cabeça", "peito": "Peito", "pernas": "Pernas", "pes": "Pés",
+    "mao": "Mão", "escudo": "Escudo", "costas": "Costas", "cinto": "Cinto"
+  },
+  "slot_icone": {
+    "cabeca": "⛑️", "peito": "🦺", "pernas": "👖", "pes": "🥾",
+    "mao": "⚔️", "escudo": "🛡️", "costas": "🎒", "cinto": "🪢"
+  },
+
+  "itens": {
+    "axe": {
+      "n": "Machado de pedra", "ic": "🪓", "cost": {"stick": 2, "stone": 2}, "hand": 1,
+      "use": "Derruba árvores. Também serve de arma.", "slot": "mao", "peso": 1, "era": 1,
+      "arma": {"dano": "corte", "dmg": 8, "alcance": 1.3, "vel": 1.0, "fol": 12}
+    },
+    "lanca_madeira": {
+      "n": "Lança de madeira", "ic": "🔱", "cost": {"stick": 3, "wood": 1}, "hand": 1,
+      "use": "Ataca de perto e arremessa de médio alcance.", "slot": "mao", "peso": 2, "era": 1,
+      "arma": {"dano": "perfuracao", "dmg": 8, "alcance": 1.7, "dist": 3.5, "vel": 1.2, "fol": 12}
+    },
+    "funda": {
+      "n": "Funda", "ic": "🪃", "cost": {"stick": 3}, "hand": 1,
+      "use": "Longo alcance. Usa pedrinhas como munição.", "slot": "mao", "peso": 0.5, "era": 1,
+      "arma": {"dano": "impacto", "dmg": 6, "alcance": 1.0, "dist": 6, "vel": 0.9, "fol": 8, "municao": "stone"}
+    },
+    "bow": {
+      "n": "Arco curto", "ic": "🏹", "cost": {"stick": 3, "wood": 1},
+      "use": "Caça sem assustar a presa.", "slot": "mao", "peso": 1, "era": 2,
+      "arma": {"dano": "perfuracao", "dmg": 9, "alcance": 1.0, "dist": 6.5, "vel": 1.5, "fol": 10, "efeito": ["silencioso"]}
+    },
+    "club": {
+      "n": "Porrete com cravos", "ic": "🏏", "cost": {"stick": 2, "wood": 1},
+      "use": "Lento, mas atordoa.", "slot": "mao", "peso": 3, "era": 2,
+      "arma": {"dano": "impacto", "dmg": 12, "alcance": 1.3, "vel": 2.0, "fol": 16, "efeito": ["atordoa"]}
+    },
+    "beardaxe": {
+      "n": "Machado de barba", "ic": "🪓", "cost": {"wood": 2, "iron": 1},
+      "use": "Puxa o escudo do inimigo.", "slot": "mao", "peso": 3, "era": 3,
+      "arma": {"dano": "corte", "dmg": 13, "alcance": 1.3, "vel": 1.2, "fol": 14, "efeito": ["puxa_escudo"]}
+    },
+    "sword": {
+      "n": "Espada de ferro", "ic": "🗡️", "cost": {"wood": 1, "iron": 3},
+      "use": "Rápida. Pode bloquear sem escudo.", "slot": "mao", "peso": 2, "era": 3,
+      "arma": {"dano": "corte", "dmg": 12, "alcance": 1.3, "vel": 0.7, "fol": 12, "efeito": ["pode_bloquear"]}
+    },
+    "spear": {
+      "n": "Lança de ferro", "ic": "🔱", "cost": {"stick": 2, "wood": 1, "iron": 1},
+      "use": "Ataca por trás do escudo do inimigo.", "slot": "mao", "peso": 3, "era": 3,
+      "arma": {"dano": "perfuracao", "dmg": 15, "alcance": 1.7, "vel": 1.2, "fol": 14, "efeito": ["ignora_escudo"]}
+    },
+    "longbow": {
+      "n": "Arco longo", "ic": "🏹", "cost": {"stick": 4, "wood": 3, "iron": 1},
+      "use": "Lento, com dano alto à distância.", "slot": "mao", "peso": 2, "era": 4,
+      "arma": {"dano": "perfuracao", "dmg": 16, "alcance": 1.0, "dist": 9, "vel": 2.2, "fol": 12}
+    },
+    "daneaxe": {
+      "n": "Machado dinamarquês", "ic": "🪓", "cost": {"wood": 4, "iron": 4},
+      "use": "Duas mãos: não cabe escudo. Dano muito alto.", "slot": "mao", "duas_maos": true, "peso": 5, "era": 4,
+      "arma": {"dano": "corte", "dmg": 22, "alcance": 1.6, "vel": 2.2, "fol": 22}
+    },
+    "warhammer": {
+      "n": "Martelo de guerra", "ic": "🔨", "cost": {"wood": 2, "iron": 4},
+      "use": "Lento. Quebra armaduras.", "slot": "mao", "peso": 4, "era": 4,
+      "arma": {"dano": "impacto", "dmg": 18, "alcance": 1.3, "vel": 2.0, "fol": 18, "efeito": ["quebra"]}
+    },
+    "shield": {
+      "n": "Escudo", "ic": "🛡️", "cost": {"wood": 3, "iron": 1},
+      "use": "Segure o botão de bloqueio para absorver golpes.", "slot": "escudo", "peso": 3, "era": 2,
+      "bloqueio": 0.6
+    },
+
+    "gibao_couro": {
+      "n": "Gibão de couro", "ic": "🦺", "cost": {"hide": 3}, "hand": 1,
+      "use": "Armadura de couro: bom contra cortes.", "slot": "peito", "peso": 3, "era": 1,
+      "fator": {"corte": 0.8, "perfuracao": 0.9, "impacto": 0.85, "fogo": 1}
+    },
+    "cota_malha": {
+      "n": "Cota de malha", "ic": "⛓️", "cost": {"iron": 6},
+      "use": "Quase imune a cortes. Ferro não segura bem a perfuração.", "slot": "peito", "peso": 8, "era": 3,
+      "fator": {"corte": 0.4, "perfuracao": 0.85, "impacto": 0.9, "fogo": 1}
+    },
+    "capuz_couro": {
+      "n": "Capuz de couro", "ic": "🧢", "cost": {"hide": 2}, "hand": 1,
+      "use": "Protege a cabeça de golpes leves.", "slot": "cabeca", "peso": 1, "era": 1,
+      "fator": {"corte": 0.9, "perfuracao": 0.9, "impacto": 0.9, "fogo": 1}
+    },
+    "elmo_ferro": {
+      "n": "Elmo de ferro", "ic": "⛑️", "cost": {"iron": 4},
+      "use": "Protege bem contra pancadas.", "slot": "cabeca", "peso": 4, "era": 3,
+      "fator": {"corte": 0.6, "perfuracao": 0.7, "impacto": 0.7, "fogo": 1}
+    },
+    "calcas_couro": {
+      "n": "Calças de couro", "ic": "👖", "cost": {"hide": 2}, "hand": 1,
+      "use": "Proteção leve nas pernas.", "slot": "pernas", "peso": 2, "era": 1,
+      "fator": {"corte": 0.95, "perfuracao": 0.95, "impacto": 0.95, "fogo": 1}
+    },
+    "botas_couro": {
+      "n": "Botas de couro", "ic": "🥾", "cost": {"hide": 1}, "hand": 1,
+      "use": "Pés protegidos.", "slot": "pes", "peso": 1, "era": 1,
+      "fator": {"corte": 0.95, "perfuracao": 0.95, "impacto": 0.95, "fogo": 1}
+    }
+  },
+
+  "construcoes": {
+    "bell": {
+      "n": "Sino de alarme", "cat": "struct", "w": 1, "h": 1, "cost": {"wood": 2, "stone": 2},
+      "hp": 80, "work": 4, "wallH": 14,
+      "desc": "Toque para tocar o sino. Durante uma invasão, os moradores correm para se esconder."
+    },
+    "trap": {
+      "n": "Armadilha de estacas", "cat": "walls", "w": 1, "h": 1, "cost": {"stick": 4},
+      "hp": 40, "work": 2, "pass": true,
+      "desc": "Estacas escondidas no chão. O invasor que pisar leva um golpe. Recarrega sozinha."
+    }
+  },
+
+  "materiais": {
+    "madeira": {"corte": 1, "perfuracao": 0.8, "impacto": 1, "fogo": 1.5},
+    "pedra":   {"corte": 0.3, "perfuracao": 0.2, "impacto": 0.7, "fogo": 0}
+  },
+  "material_construcao": {
+    "stonewall": "pedra", "stonegate": "pedra", "quarry": "pedra", "smithy": "pedra"
+  },
+  "queima": {"segundos": 6, "dano_por_segundo": 2.5},
+
+  "reparo": {"fracao_custo": 0.5, "tempo_total": 4},
+  "armadilha": {"dano": 30, "tipo": "perfuracao", "recarga": 20, "desgaste": 15},
+  "sino": {"recarga": 20},
+  "torre": {"dano": 9, "tipo": "perfuracao", "alcance": 6.5, "recarga": 1.4},
+
+  "fome_sangramento": {"dps": 1.2, "segundos": 12, "chance": 0.25},
+  "atordoar_dano": 12,
+  "atordoar_segundos": 1.0,
+  "escudo_quebrado_segundos": 2.5,
+  "fol": {"max": 100, "regen_parado": 14, "gasto_andando": 1.5, "gasto_bloqueio": 8, "custo_bloqueio_por_dano": 1.2, "golpe_forte": 30, "golpe_forte_mult_dano": 2.2, "golpe_forte_mult_vel": 1.6, "mao_nua": {"dano": "impacto", "dmg": 3, "alcance": 1.0, "vel": 0.9, "fol": 6}},
+  "bloqueio_ignorado_por_lanca": 0.3,
+  "bloqueio_sem_escudo": 0.2,
+  "bloqueio_espada": 0.4,
+
+  "animais": {
+    "cervo":  {"n": "Cervo",  "ic": "🦌", "hp": 30, "dano": 0, "vel": 3.0, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"food": 4, "hide": 1, "bone": 2}},
+    "lebre":  {"n": "Lebre",  "ic": "🐇", "hp": 8,  "dano": 0, "vel": 3.4, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"food": 2, "hide": 1}},
+    "javali": {"n": "Javali", "ic": "🐗", "hp": 34, "dano": 9, "tipo": "corte", "alcance": 1.2, "vel_ataque": 1.4, "vel": 2.2, "comportamento": "ataca", "aggro": 3.5, "perseguicao": 8, "drop": {"food": 6, "hide": 2, "bone": 2}},
+    "lobo":   {"n": "Lobo",   "ic": "🐺", "hp": 26, "dano": 6, "tipo": "perfuracao", "alcance": 1.2, "vel_ataque": 1.0, "vel": 2.5, "comportamento": "ataca", "aggro": 6, "perseguicao": 14, "bando": 4, "drop": {"food": 2, "hide": 2, "bone": 1}},
+    "urso":   {"n": "Urso",   "ic": "🐻", "hp": 90, "dano": 16, "tipo": "corte", "alcance": 1.4, "vel_ataque": 1.8, "vel": 2.0, "comportamento": "ataca", "aggro": 4, "perseguicao": 10, "drop": {"food": 10, "hide": 5, "bone": 4}}
+  },
+  "animais_por_bioma": {
+    "autumn": {"cervo": 4, "lebre": 3, "javali": 2},
+    "forest": {"cervo": 3, "lebre": 2, "javali": 2, "lobo": 3, "urso": 1},
+    "coast":  {"cervo": 3, "lebre": 3, "lobo": 2},
+    "snow":   {"lebre": 2, "lobo": 3, "urso": 1}
+  },
+  "animais_padrao": {"cervo": 3, "lebre": 2},
+  "animais_reaparece_segundos": 150,
+
+  "saqueador": {
+    "n": "Saqueador", "hp_base": 60, "hp_por_onda": 8, "dano_base": 7, "dano_por_onda": 1,
+    "tipo": "corte", "alcance": 1.2, "vel_ataque": 1.1, "vel": 1.45,
+    "tocha_a_partir_da_onda": 3, "chance_tocha": 0.4, "dano_tocha": 6
+  }
+}

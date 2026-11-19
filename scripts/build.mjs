@@ -15,6 +15,7 @@ const OUT = path.join(ROOT, 'dist', 'fjordheim.html');
 const JS_ORDER = [
   'js/core/00-base.js',
   'GENERATED:sprites',
+  'GENERATED:combate',
   'js/data/biomes.js',
   'js/data/buildings.js',
   'js/data/resources.js',
@@ -30,6 +31,7 @@ const JS_ORDER = [
   'js/game/fx.js',
   'js/game/update.js',
   'js/game/survival.js',
+  'js/game/combat.js',
   'js/draw/sprites.js',
   'js/draw/primitives.js',
   'js/draw/nature.js',
@@ -63,8 +65,17 @@ function genSprites() {
   }
   return `const SPR_SRC=${JSON.stringify(src)};\nconst SPR_META=${JSON.stringify(meta)};\n`;
 }
+// Tabelas em JSON (src/data/*.json) viram constantes: combate -> CDATA.
+function genJson(name, varName) {
+  const obj = JSON.parse(read(path.join('data', name)));
+  return `const ${varName}=${JSON.stringify(obj)};\n`;
+}
 const ORDER = JS_ORDER;
-const js = ORDER.map(rel => rel === 'GENERATED:sprites' ? genSprites() : read(rel)).join('');
+const js = ORDER.map(rel => {
+  if (rel === 'GENERATED:sprites') return genSprites();
+  if (rel === 'GENERATED:combate') return genJson('combate.json', 'CDATA');
+  return read(rel);
+}).join('');
 
 // Erro de sintaxe aparece aqui, com o nome do arquivo, antes de gerar o HTML.
 try {
