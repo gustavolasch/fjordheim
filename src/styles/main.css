@@ -115,3 +115,7 @@ h3{font-family:'Cinzel',serif;color:#f3c969;font-size:15px;margin:18px 0 10px;le
 /* botão de bloqueio (0.5): segurar = bloquear com o escudo */
 #bBlock{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:8;width:54px;height:54px;font-size:24px;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
 #bBlock.on{box-shadow:0 0 0 3px #f3c969}
+/* multijogador: código da sala e entrada por código (menu) */
+.netinfo{width:100%;padding:8px 10px;border-radius:10px;background:rgba(243,201,105,.12);font-size:14px}
+.joinbox{display:flex;gap:8px;width:100%;margin-top:6px}
+.joinbox input{flex:1;min-width:0;padding:10px;font-size:18px;letter-spacing:4px;text-transform:uppercase;text-align:center;border-radius:10px;border:1px solid #6a5a3a;background:#1b1712;color:#f3e7c9}

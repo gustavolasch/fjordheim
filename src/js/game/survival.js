@@ -47,6 +47,7 @@ function needWarn(u){
 
 // morte: a mochila (recursos e ferramentas) vai para um túmulo no local; o equipamento não é perdido
 function killPlayer(u){
+  if(u.guest){toast('💀 Seu amigo caiu e voltou ao abrigo.','bad');respawnPlayer(u);return} // a mochila é do anfitrião: não vai para o túmulo
   if(!settings.calm){
     G.tombs.push({id:G.idc++,x:u.x,y:u.y,inv:{...G.inv},items:{...G.items}});
     for(const k in G.inv)G.inv[k]=0;

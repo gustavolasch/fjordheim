@@ -86,7 +86,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'flip':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'flip'});break;
   case'big':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'big'});break;
   case'small':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'small'});break;
-  case'dup':if(mode.sel){const r=sendCmd({t:'decorOp',id:mode.sel.id,op:'dup'});if(!r.ok){toast(r.msg,'bad');break}mode.sel=r.d;sfx('place')}break;
+  case'dup':if(mode.sel){const r=sendCmd({t:'decorOp',id:mode.sel.id,op:'dup'});if(!r.ok){toast(r.msg,'bad');break}if(r.d)mode.sel=r.d;sfx('place')}break;
   case'del':if(mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'del'});mode.sel=null}break;
   case'done':mode={t:'none'};closeSheet();break}
   sheetSig='';renderSheet();markTabs()}

@@ -10,7 +10,7 @@ function applyState(s){
   if(!PL()){const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id}
   if((s.v||3)<4)migraV4(); // save antigo: completa os recursos e itens novos e povoa a região com animais
   PT=[];AR=[];initTiles();bgGrad=null;initWeather();makeThumbs()}
-function save(silent){if(!G||G.demo)return;try{const s=snapState();s.cam=cam;localStorage.setItem(SAVE_KEY,JSON.stringify(s));if(!silent)toast('💾 Jogo salvo neste navegador','good')}catch(e){if(!silent)toast('Não foi possível salvar neste navegador','bad')}}
+function save(silent){if(!G||G.demo||NET.role==='guest')return;try{const s=snapState();s.cam=cam;localStorage.setItem(SAVE_KEY,JSON.stringify(s));if(!silent)toast('💾 Jogo salvo neste navegador','good')}catch(e){if(!silent)toast('Não foi possível salvar neste navegador','bad')}}
 function hasSave(){try{return!!localStorage.getItem(SAVE_KEY)}catch(e){return false}}
-function load(){let s;try{s=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){s=null}if(!s){toast('Nenhum jogo salvo encontrado','bad');return false}
+function load(){if(NET.role==='guest')return false;if(NET.role==='host')netLeave(true);let s;try{s=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){s=null}if(!s){toast('Nenhum jogo salvo encontrado','bad');return false}
   applyState(s);if(s.cam)cam=s.cam;else centerCam();return true}

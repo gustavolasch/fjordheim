@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node run.mjs",
-    "test:retry": "node retry.mjs"
+    "test:retry": "node retry.mjs",
+    "test:net": "node net-run.mjs"
   },
   "devDependencies": {
     "playwright-core": "1.65.1"

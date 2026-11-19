@@ -5,7 +5,10 @@
 // e o anfitrião executa no personagem de quem enviou.
 // Retorno: {ok:true,...} ou {ok:false,msg,kind}. msg vazio = sem aviso na tela.
 const CMDS={};
-function sendCmd(c,uid){const u=UMAP.get(uid==null?G.pid:uid);if(!u)return{ok:false,msg:''};const h=CMDS[c.t];return h?h(u,c):{ok:false,msg:''}}
+function sendCmd(c,uid){
+  // amigo (sem uid explícito): o comando vai ao anfitrião, que executa no personagem do amigo
+  if(uid==null&&NET.role==='guest'){if(NET.conn&&NET.conn.open)NET.conn.send({t:'cmd',c});return{ok:true,pending:true}}
+  const u=UMAP.get(uid==null?myPid():uid);if(!u)return{ok:false,msg:''};const h=CMDS[c.t];return h?h(u,c):{ok:false,msg:''}}
 const cmdFail=(msg,kind)=>({ok:false,msg,kind:kind===undefined?'bad':kind});
 // atalho usado pela tela para ordens de personagem (coletar, atacar, construir, etc.)
 function order(o){return sendCmd({t:'order',o})}

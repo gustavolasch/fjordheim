@@ -1,5 +1,6 @@
 /* ================= The player ================= */
-function PL(){return G&&UMAP.get(G.pid)}
+function myPid(){return NET.role==='guest'?NET.pid:G.pid}
+function PL(){return G&&UMAP.get(myPid())}
 function adjT(u,x,y){const[tx,ty]=utile(u);return Math.abs(tx-x)<=1&&Math.abs(ty-y)<=1}
 function setOrder(u,o){if(!u||u.down)return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
 // replanejamentos: obstáculo que muda no meio do caminho (árvore cai, construção) não deve cancelar a ordem

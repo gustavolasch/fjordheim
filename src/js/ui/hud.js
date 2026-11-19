@@ -9,7 +9,7 @@ function updHUD(){if(!G)return;needsHUD();const w=bagW();
 $('#res').addEventListener('click',e=>{if(e.target.closest('[data-bag]')){if(sheetKind==='bag')closeSheet();else{if(mode.t!=='none')cancelMode();openSheet('bag')}}});
 $('#raid').addEventListener('click',()=>{const r=G.units.find(u=>u.kind==='raider');if(r)focusOn(r.x,r.y)});
 $('#bLoc').addEventListener('click',()=>{const p=PL();if(p)focusOn(p.x,p.y)});
-function toggleSpeed(){if(paused){paused=false;G.speed=1}else if(G.speed>=3){paused=true}else G.speed++;updHUD()}
+function toggleSpeed(){if(NET.role==='guest')return;if(paused){paused=false;G.speed=1}else if(G.speed>=3){paused=true}else G.speed++;updHUD()}
 $('#bSpeed').addEventListener('click',toggleSpeed);
 $('#bMenu').addEventListener('click',()=>openMenu(true));
 function toast(msg,kind){if(G&&G.demo)return;const box=$('#toasts');for(const c of box.children)if(c.textContent===msg)return;const el=document.createElement('div');el.className='toast glass '+(kind||'');el.textContent=msg;box.appendChild(el);while(box.children.length>2)box.firstChild.remove();setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400)},kind==='bad'?3800:3000)}

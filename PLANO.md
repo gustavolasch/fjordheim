@@ -376,6 +376,21 @@ Depois da 1.0: **gráficos em 3D**, depois **interiores**, depois **primeira pes
 
 **Como usar este plano no Claude Code:** peça uma atualização por vez, indicando a seção correspondente deste documento, e peça para ele rodar o teste por toque ao final de cada uma.
 
+## Multijogador com amigo (fora do roteiro)
+
+Sem servidor e sem conta. Anfitrião cria a sala (“Jogar com amigo”) e recebe um código de 5 caracteres; o amigo digita o código (“Entrar com código”) e entra na ilha. PeerJS 1.5.5 vendorizado em `src/vendor/` e embutido no HTML.
+
+- Anfitrião simula e manda o estado 2 vezes por segundo (`src/js/system/net.js`). Terreno vai só no primeiro envio.
+- Amigo não simula: manda comandos, que entram pela mesma porta dos comandos locais (`sendCmd`). Tem personagem próprio e faz tudo que o anfitrião faz.
+- A mochila, as construções e a economia são da ilha (compartilhadas).
+- Save só no aparelho do anfitrião. O amigo não salva nem carrega.
+- Um amigo por vez. Se o anfitrião fechar a página, a sala acaba.
+- Morte do amigo: volta ao abrigo; a mochila não vai para o túmulo.
+- Conexão pode falhar em redes restritas (sem servidor TURN). Aceito.
+
+Limitações conhecidas: movimento do amigo aparece em saltos de 0,5 s (sem interpolação); sons e avisos de efeito só tocam no aparelho do anfitrião.
+
 ## Pendências
 
 - **Teste por toque instável:** o teste às vezes falha em rodadas diferentes, mesmo sem mudança de código. Causa: o jogo avança pelo tempo real do quadro e consome `Math.random` a cada quadro. Solução provisória: `node tools/touch-test/retry.mjs` (repete até 3 vezes). Solução definitiva, para fazer depois: controlar o relógio do jogo no teste (opção 1).
+- **Multijogador:** interpolação do movimento do amigo; efeitos (sons e fumaça) também para o amigo; teste de dois jogadores com relógio controlado.
