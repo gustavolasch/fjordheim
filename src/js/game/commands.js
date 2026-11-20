@@ -16,7 +16,6 @@ function order(o){return sendCmd({t:'order',o})}
 CMDS.order=(u,c)=>{setOrder(u,c.o);return{ok:true}};
 CMDS.walk=(u,c)=>{const p=astar(...utile(u),(x,y)=>x===c.x&&y===c.y,c.x,c.y,passV,9000)||astar(...utile(u),nearRect(c.x,c.y,1,1),c.x,c.y,passV,9000);
   if(!p)return cmdFail('Não dá para chegar lá','');setOrder(u,{type:'move'});u.path=p;return{ok:true}};
-CMDS.block=(u,c)=>{u.blockOn=!!c.on;return{ok:true}};
 
 // construção: a simulação confere o terreno, cobra e cria a obra
 CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);

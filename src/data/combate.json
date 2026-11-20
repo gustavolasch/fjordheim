@@ -43,8 +43,8 @@
     },
     "sword": {
       "n": "Espada de ferro", "ic": "🗡️", "cost": {"wood": 1, "iron": 3},
-      "use": "Rápida. Pode bloquear sem escudo.", "slot": "mao", "peso": 2, "era": 3,
-      "arma": {"dano": "corte", "dmg": 12, "alcance": 1.3, "vel": 0.7, "fol": 12, "efeito": ["pode_bloquear"]}
+      "use": "Rápida.", "slot": "mao", "peso": 2, "era": 3,
+      "arma": {"dano": "corte", "dmg": 12, "alcance": 1.3, "vel": 0.7, "fol": 12}
     },
     "spear": {
       "n": "Lança de ferro", "ic": "🔱", "cost": {"stick": 2, "wood": 1, "iron": 1},
@@ -72,7 +72,7 @@
     },
     "shield": {
       "n": "Escudo", "ic": "🛡️", "cost": {"wood": 3, "iron": 1},
-      "use": "Segure o botão de bloqueio para absorver golpes.", "slot": "escudo", "peso": 3, "era": 2,
+      "use": "Bloqueia golpes sozinho, com chance, enquanto estiver equipado.", "slot": "escudo", "peso": 3, "era": 2,
       "bloqueio": 0.6
     },
 
@@ -139,10 +139,9 @@
   "atordoar_dano": 12,
   "atordoar_segundos": 1.0,
   "escudo_quebrado_segundos": 2.5,
-  "fol": {"max": 100, "regen_parado": 14, "gasto_andando": 1.5, "gasto_bloqueio": 8, "custo_bloqueio_por_dano": 1.2, "golpe_forte": 30, "golpe_forte_mult_dano": 2.2, "golpe_forte_mult_vel": 1.6, "mao_nua": {"dano": "impacto", "dmg": 3, "alcance": 1.0, "vel": 0.9, "fol": 6}},
+  "fol": {"max": 100, "regen_parado": 14, "gasto_andando": 1.5, "custo_bloqueio_por_dano": 1.2, "golpe_forte": 30, "golpe_forte_mult_dano": 2.2, "golpe_forte_mult_vel": 1.6, "mao_nua": {"dano": "impacto", "dmg": 3, "alcance": 1.0, "vel": 0.9, "fol": 6}},
+  "bloqueio_chance": 0.35,
   "bloqueio_ignorado_por_lanca": 0.3,
-  "bloqueio_sem_escudo": 0.2,
-  "bloqueio_espada": 0.4,
 
   "animais": {
     "cervo":  {"n": "Cervo",  "ic": "🦌", "hp": 30, "dano": 0, "vel": 3.0, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"food": 4, "hide": 1, "bone": 2}},

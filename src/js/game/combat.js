@@ -28,10 +28,10 @@ function equipItem(k){const it=ITEMS[k];
 function unequip(s){const k=G.equip[s];if(!k)return;G.equip[s]=null;G.items[k]=(G.items[k]||0)+1;sfx('tick')}
 function armaDe(u){const k=u.kind==='player'?G.equip.mao:null,it=k&&ITEMS[k];return it&&it.arma?{...it.arma,k}:{...CB.fol.mao_nua}}
 
-/* ---- fôlego (0..100): atacar gasta no golpe, andar gasta pouco, bloquear gasta por segundo ---- */
+/* ---- fôlego (0..100): atacar gasta no golpe, andar gasta pouco, cada golpe bloqueado gasta (em dmgUnit) ---- */
 function folTick(u,dt){if(u.stam==null)u.stam=CB.fol.max;
   let r=CB.fol.regen_parado;
-  if(u.blockOn&&u.stam>0)r=-CB.fol.gasto_bloqueio;else if(u.moving)r=-CB.fol.gasto_andando;
+  if(u.moving)r=-CB.fol.gasto_andando;
   u.stam=clamp(u.stam+r*dt,0,CB.fol.max)}
 
 /* ---- armadura: multiplica o dano pelo tipo (fator 1 = sem proteção) ---- */
@@ -39,11 +39,11 @@ function fatorArmadura(t,tipo){
   if(t.kind!=='player')return t.fator?(t.fator[tipo]??1):1;
   let f=1;for(const s of['cabeca','peito','pernas','pes']){const k=G.equip[s];if(k&&ITEMS[k].fator)f*=ITEMS[k].fator[tipo]??1}
   return Math.max(.12,f)}
-/* ---- bloqueio: só o jogador segura o botão; precisa de fôlego e de escudo ou arma que bloqueia ---- */
-function bloqueando(t){return!!(t.kind==='player'&&t.blockOn&&(t.stam||0)>0&&!((t.quebraT||0)>G.t))}
+/* ---- bloqueio automático: com escudo equipado, cada golpe tem uma chance (combate.json: bloqueio_chance).
+   Precisa de fôlego e o escudo não pode estar quebrado. ---- */
+function bloqueando(t){return!!(t.kind==='player'&&G.equip.escudo&&(t.stam||0)>0&&!((t.quebraT||0)>G.t)&&rnd()<CB.bloqueio_chance)}
 function fracaoBloqueio(atq){
-  const e=G.equip,esc=e.escudo?ITEMS[e.escudo]:null,mao=e.mao?ITEMS[e.mao]:null;
-  let f=esc?esc.bloqueio:(mao&&mao.arma&&(mao.arma.efeito||[]).includes('pode_bloquear')?CB.bloqueio_espada:CB.bloqueio_sem_escudo);
+  let f=ITEMS[G.equip.escudo].bloqueio;
   if(atq&&(atq.efeito||[]).includes('ignora_escudo'))f*=CB.bloqueio_ignorado_por_lanca;
   return f}
 

@@ -58,7 +58,7 @@ function killPlayer(u){
 }
 function respawnPlayer(u){
   u.hp=u.max;u.food=Math.max(u.food||0,50);u.warm=Math.max(u.warm||0,60);u.energy=Math.max(u.energy||0,60);
-  u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};u.sangue=0;u.stun=0;u.blockOn=false;
+  u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};u.sangue=0;u.stun=0;
   const s=G.bld.find(b=>b.done&&(b.type==='shelter'||b.type==='house'||b.type==='longhouse'));
   const p=s?freeNear(s.x+1,s.y+s.h,3):freeNear(G.start[0],G.start[1],3);
   if(p){u.x=p[0]+.5;u.y=p[1]+.5}
