@@ -147,6 +147,9 @@ try {
   const sumRes = () => page.evaluate(() => Object.values(G.res).reduce((a, b) => a + b, 0));
   const res0 = await sumRes();
   await tapTile(dep.x + 1, dep.y + 1);
+  // tocar no depósito abre o menu: "Guardar tudo"
+  await page.waitForSelector('#depmenu.open [data-d="guardar"]', { timeout: 10_000 });
+  await tapSel('#depmenu [data-d="guardar"]');
   await waitFor((r0) => Object.values(G.res).reduce((a, b) => a + b, 0) > r0, res0, STEP_TIMEOUT);
   ok('guardar no depósito por toque', (await sumRes()) > res0, `guardado ${(await sumRes()) - res0}`);
   await snap('04-deposito');

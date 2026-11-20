@@ -1,4 +1,6 @@
 /* cat: struct|walls|fences|floors|doors|store · grp: connection group for wall-like pieces */
+// Desmontar um depósito: os itens guardados vão para o outro depósito; devolve esta fração do custo.
+const DESMONTAR_DEP=.6;
 const BD={
  shelter:{n:'Abrigo',cat:'struct',w:2,h:2,cost:{stick:8,wood:2},hp:150,work:6,wallH:8,desc:'Seu primeiro teto: uma cobertura de galhos com fogueira.'},
  house:{n:'Casa',cat:'struct',w:2,h:2,cost:{wood:10,stone:4},hp:250,house:4,work:16,wallH:14,desc:'Uma casa de verdade, com lareira.'},

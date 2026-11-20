@@ -48,6 +48,10 @@ CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(!affor
 // guardar: vai até o depósito mais perto
 CMDS.godeposit=(u)=>{let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x-u.x,s.y-u.y);if(d<bd){bd=d;best=s}}
   if(!best)return cmdFail('','');setOrder(u,{type:'deposit',b:best.id});return{ok:true}};
+// desmontar depósito: o estoque fica (é global); só desmonta se o resto do estoque couber nos outros depósitos
+CMDS.desmontarDep=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||!BD[b.type].store)return cmdFail('','');
+  const left=storeCap()-BD[b.type].store;for(const k in G.res)if(G.res[k]>left)return cmdFail('Os outros depósitos não cabem tudo. Construa outro antes.');
+  destroyB(b);refund(BD[b.type].cost,DESMONTAR_DEP);toast('Depósito desmontado. Tudo continua guardado.','good');return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 

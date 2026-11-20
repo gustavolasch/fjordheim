@@ -51,6 +51,9 @@ body.tilt-on .tilt{display:block}
 #sheet,#place{position:fixed;left:50%;width:min(calc(100vw - 16px),560px);bottom:calc(env(safe-area-inset-bottom,0px) + 72px);z-index:6;border-radius:20px;transform:translate(-50%,18px);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .18s}
 #sheet.open,#place.open{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 #sheet{max-height:min(54vh,480px);overflow-y:auto;padding:12px 12px 14px;touch-action:pan-y}
+#depmenu{position:fixed;z-index:7;display:none;flex-direction:column;gap:6px;padding:8px;border-radius:14px}
+#depmenu.open{display:flex}
+#pickmenu{position:fixed;z-index:7;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:14px;max-width:190px}
 #sheet.bs{padding:4px 8px 10px;overflow:hidden}
 #place{display:flex;align-items:center;gap:7px;padding:7px 8px}
 #place img{width:46px;height:40px;flex:none;border-radius:8px;background:rgba(0,0,0,.25)}
@@ -143,7 +146,7 @@ img.ico{width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain;disp
 <div id="tiltT" class="tilt"></div><div id="tiltB" class="tilt"></div>
 <div id="vig"></div>
 <div id="hud" class="hidden">
-  <div id="top"><div id="res" class="glass"></div><button id="bLoc" class="rbtn glass" title="Encontrar personagem"></button><button id="bSpeed" class="rbtn glass" title="Velocidade">1×</button><button id="bMenu" class="rbtn glass" title="Menu"></button></div>
+  <div id="top"><div id="res" class="glass"></div><button id="bLoc" class="rbtn glass" title="Encontrar personagem"></button><button id="bMenu" class="rbtn glass" title="Menu"></button></div>
   <div id="hint" class="glass off"><span class="ic">💡</span><span id="hintT"></span><button id="hintX" aria-label="Dispensar">✕</button></div>
   <div id="raid" class="hidden"></div>
   <div id="toasts"></div>
@@ -255,6 +258,8 @@ const BIOMES={
  snow:{name:'Costa Gelada',desc:'Fiorde nevado, falésias alaranjadas e mar gelado.',grass:['#eef3f7','#e5ecf2','#f6f9fb','#dfe7ee','#e9eff4'],sand:'#e6e2d8',soil:'#7d5236',dirt:'#b9b2a6',deep:'#1d6681',shallow:'#36a0a6',cliffTop:'#f2f5f8',cliff:'#c0703a',tree:[['pine',1]],leaves:['#6f8f6a'],pines:['#3d5f5a','#4a6d66'],bg:['#8aa7c0','#1f354b'],weather:'snow',crop:'#cdbb8a',bush:'#6c8a78',snowy:true,card:'linear-gradient(135deg,#eef3f7,#c0703a 55%,#1d6681)'}
 };
 /* cat: struct|walls|fences|floors|doors|store · grp: connection group for wall-like pieces */
+// Desmontar um depósito: os itens guardados vão para o outro depósito; devolve esta fração do custo.
+const DESMONTAR_DEP=.6;
 const BD={
  shelter:{n:'Abrigo',cat:'struct',w:2,h:2,cost:{stick:8,wood:2},hp:150,work:6,wallH:8,desc:'Seu primeiro teto: uma cobertura de galhos com fogueira.'},
  house:{n:'Casa',cat:'struct',w:2,h:2,cost:{wood:10,stone:4},hp:250,house:4,work:16,wallH:14,desc:'Uma casa de verdade, com lareira.'},
@@ -1077,6 +1082,10 @@ CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(!affor
 // guardar: vai até o depósito mais perto
 CMDS.godeposit=(u)=>{let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x-u.x,s.y-u.y);if(d<bd){bd=d;best=s}}
   if(!best)return cmdFail('','');setOrder(u,{type:'deposit',b:best.id});return{ok:true}};
+// desmontar depósito: o estoque fica (é global); só desmonta se o resto do estoque couber nos outros depósitos
+CMDS.desmontarDep=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||!BD[b.type].store)return cmdFail('','');
+  const left=storeCap()-BD[b.type].store;for(const k in G.res)if(G.res[k]>left)return cmdFail('Os outros depósitos não cabem tudo. Construa outro antes.');
+  destroyB(b);refund(BD[b.type].cost,DESMONTAR_DEP);toast('Depósito desmontado. Tudo continua guardado.','good');return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 
@@ -1573,7 +1582,7 @@ function s2w(px,py){const ix=(px-cam.x)/cam.z,iy=(py-cam.y)/cam.z,a=ix/HW,c=iy/H
 function w2s(x,y,z){const q=P(x,y,z||0);return[q[0]*cam.z+cam.x,q[1]*cam.z+cam.y]}
 function zoomAt(px,py,f){const nz=clamp(cam.z*f,ZMIN,ZMAX),ix=(px-cam.x)/cam.z,iy=(py-cam.y)/cam.z;cam.z=nz;cam.x=px-ix*nz;cam.y=py-iy*nz}
 const ptrs=new Map();let gest=null;
-cv.addEventListener('pointerdown',e=>{if(!G||menuOpen)return;camGo=null;if(e.button===2){cancelMode();return}try{cv.setPointerCapture(e.pointerId)}catch(_){}
+cv.addEventListener('pointerdown',e=>{if(!G||menuOpen)return;camGo=null;closeDepMenu();closePickMenu();if(e.button===2){cancelMode();return}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});zT=null;
   if(ptrs.size===1){gest={k:'tap',sx:e.clientX,sy:e.clientY,lx:e.clientX,ly:e.clientY,t0:performance.now()};
     if(mode.t==='edit'){const d=pickDecor(e.clientX,e.clientY);if(d){mode.sel=d;const[wx,wy]=s2w(e.clientX,e.clientY);gest={k:'drag',ox:d.x-wx,oy:d.y-wy};openSheet('edit')}}}
@@ -1599,7 +1608,7 @@ addEventListener('keydown',e=>{if(menuOpen||!G)return;const k=e.key;const s=40;
   else if(k==='r'&&mode.t==='edit'&&mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'flip'})}else if(k==='r'&&mode.t==='decor'){mode.f=-(mode.f||1)}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&mode.sel){act('del')}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&sel&&sel.k==='b'){act('bdel')}
-  else if(k===' '){toggleSpeed()}});
+});
 function hover(px,py){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy);
   if(mode.t==='build'){const d=BD[mode.type];let gx=tx-((d.w-1)>>1),gy=ty-((d.h-1)>>1);[gx,gy]=snapSpot(mode.type,gx,gy);if(gx!==mode.gx||gy!==mode.gy||!mode.has){mode.gx=gx;mode.gy=gy;mode.has=true;updPlace()}}
   else if(mode.t==='line'){if(mode.a&&(mode.b[0]!==tx||mode.b[1]!==ty)){mode.b=[tx,ty];updPlace()}}
@@ -1621,14 +1630,11 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   if(me){const[sx,sy]=w2s(me.x,me.y,9);if(Math.hypot(px-sx,py-sy)<Math.max(16,18*cam.z)){openSheet('bag');return}}
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
   if(best){if(best.kind==='animal'||best.kind==='raider'){ataqueAlvo(best,held>450);return}sel={k:'u',id:best.id};openSheet('info');return}
-  // buildings: exact tile first, then tiles in front for tall ones
-  let b=bAt(tx,ty);if(!b)for(const o of[1,2]){const c=bAt(tx+o,ty+o);if(c&&!BD[c.type].flat&&!BD[c.type].line){b=c;break}}
-  if(b&&tapBuilding(b,tx,ty))return;
-  const d=pickDecor(px,py);if(d){mode={t:'edit',sel:d};markTabs();openSheet('edit');return}
-  // natural objects: exact tile, then canopy of a tree standing in front
-  const oi=pickObj(px,py);
+  // vários objetos no toque (construção, decoração, recurso, árvore na frente): lista para escolher
+  const cands=tapCands(px,py,tx,ty);
+  if(cands.length>1){closeSheet();sel=null;openPickMenu(cands,px,py,tx,ty);return}
+  if(cands.length===1&&(cands[0].k!=='b'||cands[0].inter)){runCand(cands[0],tx,ty);return}
   closeSheet();sel=null;
-  if(oi!=null){const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');const lab={tree:'[[itens.axe]] Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'[[ferramentas.pick]] Quebrar',ore:'[[ferramentas.pick]] Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab);return}
   if(!inb(tx,ty))return;
   if(G.tiles[idx(tx,ty)]<=1){order({type:'fish',x:tx,y:ty});puff(tx+.5,ty+.5,'ring');return}
   if(me){const r=sendCmd({t:'walk',x:tx,y:ty});if(r.ok)puff(tx+.5,ty+.5,'ring');else toast(r.msg,r.kind)}}
@@ -1636,7 +1642,7 @@ function tapBuilding(b,tx,ty){const d=BD[b.type];
   if(d.flat&&d.pass&&b.type!=='farm')return false; // floors & paths: just walk on them
   if(!b.done){order({type:'build',b:b.id});puff(b.x+b.w/2,b.y+b.h/2,'ring');sel={k:'b',id:b.id};openSheet('info');return true}
   if(b.type==='bridge')return false;
-  if(d.store){order({type:'deposit',b:b.id});sel={k:'b',id:b.id};openSheet('info');return true}
+  if(d.store){openDepMenu(b);return true}
   if(b.type==='farm'){order({type:'farm',b:b.id});floater(b.x+1.5,b.y+1.5,'Cuidar da lavoura');return true}
   if(b.type==='dock'){let w=null;for(let dy=0;dy<b.h&&!w;dy++)for(let dx=0;dx<b.w;dx++)if(G.tiles[idx(b.x+dx,b.y+dy)]<=1){w=[b.x+dx,b.y+dy];break}if(w){order({type:'fish',x:w[0],y:w[1]})}return true}
   if(d.grp&&!d.gate)return false;
@@ -1675,6 +1681,55 @@ $('#place').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if
 /* ---- combate: tocar em animal ou invasor ataca; segurar um pouco dá golpe forte ---- */
 function ataqueAlvo(t,forte){const me=PL();if(!me||me.down)return;closeSheet();sel=null;
   order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'[[interface.combate]] Golpe forte':'[[interface.combate]] Atacar')}
+/* ================= Menus de toque: depósito e escolha entre objetos sobrepostos ================= */
+// Tocar num depósito abre um menu pequeno ao lado dele. Só "Ver estoque" abre a janela.
+let depId=null;
+function closeDepMenu(){depId=null;const el=document.getElementById('depmenu');if(el)el.classList.remove('open')}
+function openDepMenu(b){let el=document.getElementById('depmenu');
+  if(!el){el=document.createElement('div');el.id='depmenu';el.className='glass';
+    el.innerHTML='<button class="sbtn" data-d="guardar">Guardar tudo</button><button class="sbtn" data-d="ver">Ver estoque</button><button class="sbtn red" data-d="desmontar">Desmontar</button>';
+    el.addEventListener('click',e=>{const a=e.target.closest('[data-d]');if(!a)return;const bb=depId!=null&&BMAP.get(depId);closeDepMenu();if(!bb)return;
+      if(a.dataset.d==='guardar')order({type:'deposit',b:bb.id});
+      else if(a.dataset.d==='ver')openSheet('bag');
+      else sendCmd({t:'desmontarDep',b:bb.id})});
+    document.body.appendChild(el)}
+  depId=b.id;const[sx,sy]=w2s(b.x+b.w/2,b.y+b.h/2,0);
+  el.style.left=Math.max(8,Math.min(innerWidth-200,sx-90))+'px';el.style.top=Math.max(8,sy-120)+'px';el.classList.add('open')}
+
+// ---- escolha entre objetos sobrepostos ----
+// prioridade: recursos e objetos pequenos primeiro; construções e decoração por último
+const PICK_PRI={pebble:0,branch:0,bush:1,log:1,stone:2,ore:2,stump:3,falling:3,tree:4};
+// acerto por tela, sem escolher só um (pickObj escolhe um; aqui pegamos todos)
+function objHits(px,py){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy),z=cam.z,out=[];
+  for(let y=ty-1;y<=ty+3;y++)for(let x=tx-1;x<=tx+3;x++){if(!inb(x,y))continue;const i=idx(x,y),o=G.obj[i];if(!o)continue;
+    const[sx,sy]=w2s(x+.5+(o.ox||0),y+.5+(o.oy||0)),s=(o.s||1)*z,tall=o.t==='tree'||o.t==='falling';
+    const top=sy-(tall?40*(o.t==='tree'?.35+.65*o.g:1):o.t==='stone'||o.t==='ore'?18:12)*s-4,bot=sy+7*z,cx=o.t==='log'?sx+16*z:sx,hw=(tall?13:o.t==='log'?22:12)*s+5;
+    if(px<cx-hw||px>cx+hw||py<top||py>bot)continue;out.push(i)}
+  return out}
+function decorHits(px,py){const out=[];for(const d of G.decor){const D=DECOR[d.k];const[sx,sy]=w2s(d.x,d.y);const s=d.s*cam.z*(D.big?2.4:1);const dx=px-sx,dy=py-sy;
+  if(Math.abs(dx)<16*s+8&&dy<10*s+6&&dy>-34*s-8)out.push(d)}return out}
+// construção que o toque realmente usa (ou que só se seleciona): mesma regra de tapBuilding
+function bTapInter(b){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')return false;if(b.type==='bridge')return false;
+  return!b.done||!!d.store||b.type==='farm'||b.type==='dock'||!(d.grp&&!d.gate)}
+function tapCands(px,py,tx,ty){const out=[];
+  let b=bAt(tx,ty);if(!b)for(const o of[1,2]){const c=bAt(tx+o,ty+o);if(c&&!BD[c.type].flat&&!BD[c.type].line){b=c;break}}
+  if(b&&!(BD[b.type].flat&&BD[b.type].pass)&&b.type!=='bridge')out.push({k:'b',ref:b,inter:bTapInter(b),pri:6,name:BD[b.type].n+(b.done?'':' (obra)')});
+  for(const d of decorHits(px,py))out.push({k:'d',ref:d,inter:true,pri:5,name:DECOR[d.k].n});
+  for(const i of objHits(px,py)){const o=G.obj[i];out.push({k:'o',ref:i,inter:true,pri:PICK_PRI[o.t]??3,name:OBJNAME[o.t]||o.t})}
+  return out.sort((a,c)=>a.pri-c.pri)}
+// age sobre o alvo escolhido (mesmo comportamento de antes para cada tipo)
+function runCand(c,tx,ty){
+  if(c.k==='b'){if(tapBuilding(c.ref,tx,ty))return;sel={k:'b',id:c.ref.id};openSheet('info');return}
+  if(c.k==='d'){mode={t:'edit',sel:c.ref};markTabs();openSheet('edit');return}
+  const oi=c.ref;closeSheet();sel=null;const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');
+  const lab={tree:'[[itens.axe]] Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'[[ferramentas.pick]] Quebrar',ore:'[[ferramentas.pick]] Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab)}
+function closePickMenu(){const el=document.getElementById('pickmenu');if(el)el.remove()}
+function openPickMenu(cands,px,py,tx,ty){closePickMenu();const list=cands.slice(0,6);
+  const el=document.createElement('div');el.id='pickmenu';el.className='glass';
+  el.innerHTML=list.map((c,i)=>`<button class="sbtn" data-i="${i}">${c.name}</button>`).join('');
+  el.addEventListener('click',e=>{const a=e.target.closest('[data-i]');if(!a)return;const c=list[+a.dataset.i];closePickMenu();if(c)runCand(c,tx,ty)});
+  document.body.appendChild(el);
+  el.style.left=Math.max(8,Math.min(innerWidth-190,px-80))+'px';el.style.top=Math.max(8,py-60-list.length*40)+'px'}
 /* ================= UI: sheets ================= */
 let THUMB={},DTHUMB={};
 // Miniaturas dependem só do bioma (e de dados estáticos): gera uma vez por bioma.
@@ -1776,17 +1831,14 @@ $('#bLoc').innerHTML=svg('loc');$('#bMenu').innerHTML=svg('menu');
 
 /* ================= HUD / toasts ================= */
 let hudSig='';
-const BASE_RES=['stick','wood','stone','food','iron']; // sempre mostrados na barra; os outros só quando há algum
+const BAR_RES=['stick','wood','stone','food']; // barra de cima: só estes + mochila; o resto fica em "Ver estoque"
 function updHUD(){if(!G)return;needsHUD();const w=bagW();
-  const h=Object.keys(RES).filter(k=>have(k)>0||BASE_RES.includes(k)).map(k=>`<div class="chip" title="${RES[k][0]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
+  const h=BAR_RES.map(k=>`<div class="chip" title="${RES[k][0]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
   if(h!==hudSig){hudSig=h;$('#res').innerHTML=h}
-  const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');
-  $('#bSpeed').textContent=paused?'⏸':G.speed+'×'}
+  const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');}
 $('#res').addEventListener('click',e=>{if(e.target.closest('[data-bag]')){if(sheetKind==='bag')closeSheet();else{if(mode.t!=='none')cancelMode();openSheet('bag')}}});
 $('#raid').addEventListener('click',()=>{const r=G.units.find(u=>u.kind==='raider');if(r)focusOn(r.x,r.y)});
 $('#bLoc').addEventListener('click',()=>{const p=PL();if(p)focusOn(p.x,p.y)});
-function toggleSpeed(){if(NET.role==='guest')return;if(paused){paused=false;G.speed=1}else if(G.speed>=3){paused=true}else G.speed++;updHUD()}
-$('#bSpeed').addEventListener('click',toggleSpeed);
 $('#bMenu').addEventListener('click',()=>openMenu(true));
 function toast(msg,kind){if(G&&G.demo)return;const box=$('#toasts');for(const c of box.children)if(c.dataset.msg===msg)return;const el=document.createElement('div');el.className='toast glass '+(kind||'');el.dataset.msg=msg;el.replaceChildren(richNodes(msg));box.appendChild(el);while(box.children.length>2)box.firstChild.remove();setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400)},kind==='bad'?3800:3000)}
 function centerOn(x,y){const q=P(x,y);cam.x=W/2-q[0]*cam.z;cam.y=H*.48-q[1]*cam.z}

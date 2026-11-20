@@ -3,7 +3,7 @@ function s2w(px,py){const ix=(px-cam.x)/cam.z,iy=(py-cam.y)/cam.z,a=ix/HW,c=iy/H
 function w2s(x,y,z){const q=P(x,y,z||0);return[q[0]*cam.z+cam.x,q[1]*cam.z+cam.y]}
 function zoomAt(px,py,f){const nz=clamp(cam.z*f,ZMIN,ZMAX),ix=(px-cam.x)/cam.z,iy=(py-cam.y)/cam.z;cam.z=nz;cam.x=px-ix*nz;cam.y=py-iy*nz}
 const ptrs=new Map();let gest=null;
-cv.addEventListener('pointerdown',e=>{if(!G||menuOpen)return;camGo=null;if(e.button===2){cancelMode();return}try{cv.setPointerCapture(e.pointerId)}catch(_){}
+cv.addEventListener('pointerdown',e=>{if(!G||menuOpen)return;camGo=null;closeDepMenu();closePickMenu();if(e.button===2){cancelMode();return}try{cv.setPointerCapture(e.pointerId)}catch(_){}
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});zT=null;
   if(ptrs.size===1){gest={k:'tap',sx:e.clientX,sy:e.clientY,lx:e.clientX,ly:e.clientY,t0:performance.now()};
     if(mode.t==='edit'){const d=pickDecor(e.clientX,e.clientY);if(d){mode.sel=d;const[wx,wy]=s2w(e.clientX,e.clientY);gest={k:'drag',ox:d.x-wx,oy:d.y-wy};openSheet('edit')}}}
@@ -29,7 +29,7 @@ addEventListener('keydown',e=>{if(menuOpen||!G)return;const k=e.key;const s=40;
   else if(k==='r'&&mode.t==='edit'&&mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'flip'})}else if(k==='r'&&mode.t==='decor'){mode.f=-(mode.f||1)}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&mode.sel){act('del')}
   else if((k==='Delete'||k==='Backspace')&&mode.t==='edit'&&sel&&sel.k==='b'){act('bdel')}
-  else if(k===' '){toggleSpeed()}});
+});
 function hover(px,py){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Math.floor(wy);
   if(mode.t==='build'){const d=BD[mode.type];let gx=tx-((d.w-1)>>1),gy=ty-((d.h-1)>>1);[gx,gy]=snapSpot(mode.type,gx,gy);if(gx!==mode.gx||gy!==mode.gy||!mode.has){mode.gx=gx;mode.gy=gy;mode.has=true;updPlace()}}
   else if(mode.t==='line'){if(mode.a&&(mode.b[0]!==tx||mode.b[1]!==ty)){mode.b=[tx,ty];updPlace()}}
@@ -51,14 +51,11 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   if(me){const[sx,sy]=w2s(me.x,me.y,9);if(Math.hypot(px-sx,py-sy)<Math.max(16,18*cam.z)){openSheet('bag');return}}
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
   if(best){if(best.kind==='animal'||best.kind==='raider'){ataqueAlvo(best,held>450);return}sel={k:'u',id:best.id};openSheet('info');return}
-  // buildings: exact tile first, then tiles in front for tall ones
-  let b=bAt(tx,ty);if(!b)for(const o of[1,2]){const c=bAt(tx+o,ty+o);if(c&&!BD[c.type].flat&&!BD[c.type].line){b=c;break}}
-  if(b&&tapBuilding(b,tx,ty))return;
-  const d=pickDecor(px,py);if(d){mode={t:'edit',sel:d};markTabs();openSheet('edit');return}
-  // natural objects: exact tile, then canopy of a tree standing in front
-  const oi=pickObj(px,py);
+  // vários objetos no toque (construção, decoração, recurso, árvore na frente): lista para escolher
+  const cands=tapCands(px,py,tx,ty);
+  if(cands.length>1){closeSheet();sel=null;openPickMenu(cands,px,py,tx,ty);return}
+  if(cands.length===1&&(cands[0].k!=='b'||cands[0].inter)){runCand(cands[0],tx,ty);return}
   closeSheet();sel=null;
-  if(oi!=null){const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');const lab={tree:'[[itens.axe]] Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'[[ferramentas.pick]] Quebrar',ore:'[[ferramentas.pick]] Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab);return}
   if(!inb(tx,ty))return;
   if(G.tiles[idx(tx,ty)]<=1){order({type:'fish',x:tx,y:ty});puff(tx+.5,ty+.5,'ring');return}
   if(me){const r=sendCmd({t:'walk',x:tx,y:ty});if(r.ok)puff(tx+.5,ty+.5,'ring');else toast(r.msg,r.kind)}}
@@ -66,7 +63,7 @@ function tapBuilding(b,tx,ty){const d=BD[b.type];
   if(d.flat&&d.pass&&b.type!=='farm')return false; // floors & paths: just walk on them
   if(!b.done){order({type:'build',b:b.id});puff(b.x+b.w/2,b.y+b.h/2,'ring');sel={k:'b',id:b.id};openSheet('info');return true}
   if(b.type==='bridge')return false;
-  if(d.store){order({type:'deposit',b:b.id});sel={k:'b',id:b.id};openSheet('info');return true}
+  if(d.store){openDepMenu(b);return true}
   if(b.type==='farm'){order({type:'farm',b:b.id});floater(b.x+1.5,b.y+1.5,'Cuidar da lavoura');return true}
   if(b.type==='dock'){let w=null;for(let dy=0;dy<b.h&&!w;dy++)for(let dx=0;dx<b.w;dx++)if(G.tiles[idx(b.x+dx,b.y+dy)]<=1){w=[b.x+dx,b.y+dy];break}if(w){order({type:'fish',x:w[0],y:w[1]})}return true}
   if(d.grp&&!d.gate)return false;

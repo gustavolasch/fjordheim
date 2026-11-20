@@ -44,6 +44,7 @@ const JS_ORDER = [
   'js/draw/render.js',
   'js/ui/ghost.js',
   'js/ui/input.js',
+  'js/ui/depmenu.js',
   'js/ui/sheets.js',
   'js/ui/hud.js',
   'js/system/audio.js',
