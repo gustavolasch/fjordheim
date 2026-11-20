@@ -23,6 +23,7 @@ O plano completo de jogabilidade está em `PLANO.md`. Leia só a seção da atua
 Ao fim de cada etapa, o teste deve jogar só tocando na tela, num Chromium com tela de celular:
 começar do zero, coletar, criar ferramenta, derrubar árvore, construir, guardar no depósito, salvar e carregar.
 Também deve checar que não houve erro de JavaScript e que o desempenho continua bom.
+O teste por toque completo só roda quando a mudança mexe na jogabilidade ou na lógica do jogo. Para ícones, textos, imagens e configuração de publicação, basta abrir o jogo e checar que não há erros no console.
 
 ## Regras de jogo que não mudam
 - O jogador começa sem nada: sem itens, sem moradores, sem construções.

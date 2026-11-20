@@ -95,4 +95,6 @@ const html = template
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, html);
+// Manifesto e ícones (src/pwa/) vão junto do HTML, para o app instalado e para dist/ abrir sem erro.
+fs.cpSync(path.join(SRC, 'pwa'), path.dirname(OUT), { recursive: true });
 console.log(`ok: ${path.relative(ROOT, OUT)} (${(html.length / 1024).toFixed(1)} KB, ${ORDER.length} módulos JS)`);
