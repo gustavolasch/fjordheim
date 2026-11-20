@@ -67,7 +67,7 @@
       "arma": {"dano": "impacto", "dmg": 18, "alcance": 1.3, "vel": 2.0, "fol": 18, "efeito": ["quebra"]}
     },
     "curativo": {
-      "n": "Curativo de fibra", "ic": "🩹", "cost": {"fibra": 1}, "hand": 1,
+      "n": "Curativo de fibra", "ic": "🩹", "cost": {"fibra": 2}, "hand": 1,
       "use": "Estanca o sangramento. Gasta um ao usar.", "peso": 0.2, "era": 1
     },
     "shield": {
