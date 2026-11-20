@@ -136,7 +136,8 @@
   "daneaxe": {
    "n": "Machado dinamarquês",
    "emoji": "🪓",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/machado_dinamarques",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "sword": {
@@ -149,19 +150,22 @@
   "spear": {
    "n": "Lança de ferro",
    "emoji": "🔱",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/lanca_ferro",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "longbow": {
    "n": "Arco longo",
    "emoji": "🏹",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/arco_longo",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "warhammer": {
    "n": "Martelo de guerra",
    "emoji": "🔨",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/martelo_guerra",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "curativo": {
@@ -320,17 +324,20 @@
   },
   "quarry": {
    "n": "Pedreira",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/pedreira",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "farm": {
    "n": "Fazenda",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/fazenda",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "dock": {
    "n": "Cais de Pesca",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/cais_pesca",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "smithy": {
@@ -342,7 +349,8 @@
   },
   "barracks": {
    "n": "Quartel",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/quartel",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "tower": {
@@ -354,7 +362,8 @@
   },
   "wall": {
    "n": "Paliçada",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/palicada",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "stonewall": {
@@ -380,17 +389,20 @@
   },
   "floor": {
    "n": "Piso de madeira",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/piso_madeira",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "path": {
    "n": "Caminho de pedra",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/caminho_pedra",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "bridge": {
    "n": "Ponte",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/ponte",
+   "status": "ok",
    "fonte": "src/js/data/buildings.js"
   },
   "gate": {
@@ -437,12 +449,14 @@
   },
   "bell": {
    "n": "Sino de alarme",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/sino_alarme",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "trap": {
    "n": "Armadilha de estacas",
-   "status": "pendente",
+   "icone": "9_construcoes_extra/armadilha_estacas",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   }
  },
@@ -450,7 +464,8 @@
   "vida": {
    "n": "Vida",
    "emoji": "❤️",
-   "status": "pendente"
+   "icone": "11_interface/vida",
+   "status": "ok"
   },
   "calor": {
    "n": "Calor",
@@ -462,12 +477,14 @@
   "energia": {
    "n": "Energia",
    "emoji": "⚡",
-   "status": "pendente"
+   "icone": "11_interface/energia",
+   "status": "ok"
   },
   "folego": {
    "n": "Fôlego",
    "emoji": "💨",
-   "status": "pendente"
+   "icone": "11_interface/folego",
+   "status": "ok"
   },
   "mochila": {
    "n": "Mochila",
@@ -478,7 +495,8 @@
   "pessoas": {
    "n": "Pessoas",
    "emoji": "👥",
-   "status": "pendente"
+   "icone": "11_interface/pessoas",
+   "status": "ok"
   },
   "construindo": {
    "n": "Construindo",
@@ -489,12 +507,14 @@
   "obra": {
    "n": "Obra",
    "emoji": "🏗️",
-   "status": "pendente"
+   "icone": "11_interface/obra",
+   "status": "ok"
   },
   "reparar": {
    "n": "Reparar",
    "emoji": "🔧",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/reparar",
+   "status": "ok"
   },
   "desmontar": {
    "n": "Desmontar",
@@ -511,97 +531,116 @@
   "sino": {
    "n": "Tocar o sino",
    "emoji": "🔔",
-   "status": "pendente"
+   "icone": "11_interface/sino",
+   "status": "ok"
   },
   "armadilha": {
    "n": "Armadilha",
    "emoji": "🪤",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/armadilha",
+   "status": "ok"
   },
   "remover": {
    "n": "Remover",
    "emoji": "🗑",
-   "status": "pendente"
+   "icone": "11_interface/remover",
+   "status": "ok"
   },
   "mais": {
    "n": "Aumentar",
    "emoji": "➕",
-   "status": "pendente"
+   "icone": "11_interface/aumentar",
+   "status": "ok"
   },
   "menos": {
    "n": "Diminuir",
    "emoji": "➖",
-   "status": "pendente"
+   "icone": "11_interface/diminuir",
+   "status": "ok"
   },
   "bloqueado": {
    "n": "Bloqueado",
    "emoji": "🔒",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/bloqueado",
+   "status": "ok"
   },
   "dia": {
    "n": "Dia",
    "emoji": "☀️",
-   "status": "pendente"
+   "icone": "11_interface/dia",
+   "status": "ok"
   },
   "noite": {
    "n": "Noite",
    "emoji": "🌙",
-   "status": "pendente"
+   "icone": "11_interface/noite",
+   "status": "ok"
   },
   "dica": {
    "n": "Dica",
    "emoji": "💡",
-   "status": "pendente"
+   "icone": "11_interface/dica",
+   "status": "ok"
   },
   "explorar": {
    "n": "Explorar",
    "emoji": "🔭",
-   "status": "pendente"
+   "icone": "11_interface/explorar",
+   "status": "ok"
   },
   "conquista": {
    "n": "Conquista",
    "emoji": "🏆",
-   "status": "pendente"
+   "icone": "11_interface/conquista",
+   "status": "ok"
   },
   "sangramento": {
    "n": "Sangramento",
    "emoji": "🩸",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/sangramento",
+   "status": "ok"
   },
   "quebrou": {
    "n": "Ferramenta quebrou",
    "emoji": "💥",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/ferramenta_quebrou",
+   "status": "ok"
   },
   "moedas": {
    "n": "Moedas",
    "emoji": "💰",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/moedas",
+   "status": "ok"
   },
   "salvar": {
    "n": "Salvar",
    "emoji": "💾",
-   "status": "pendente"
+   "icone": "11_interface/salvar",
+   "status": "ok"
   },
   "carregar": {
    "n": "Carregar",
    "emoji": "📂",
-   "status": "pendente"
+   "icone": "11_interface/carregar",
+   "status": "ok"
   },
   "conectar": {
    "n": "Conectar",
    "emoji": "🔗",
-   "status": "pendente"
+   "icone": "11_interface/conectar",
+   "status": "ok"
   },
   "concluido": {
    "n": "Concluído",
    "emoji": "✅",
-   "status": "pendente"
+   "icone": "11_interface/concluido",
+   "status": "ok"
   },
   "morte": {
    "n": "Morte",
    "emoji": "💀",
-   "status": "pendente"
+   "icone": "10_armas_animais_estados/morte",
+   "status": "ok"
   },
   "combate": {
    "n": "Combate",
@@ -634,31 +673,36 @@
   "cervo": {
    "n": "Cervo",
    "emoji": "🦌",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/cervo",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "lebre": {
    "n": "Lebre",
    "emoji": "🐇",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/lebre",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "javali": {
    "n": "Javali",
    "emoji": "🐗",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/javali",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "lobo": {
    "n": "Lobo",
    "emoji": "🐺",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/lobo",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   },
   "urso": {
    "n": "Urso",
    "emoji": "🐻",
-   "status": "pendente",
+   "icone": "10_armas_animais_estados/urso",
+   "status": "ok",
    "fonte": "src/data/combate.json"
   }
  },
