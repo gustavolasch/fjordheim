@@ -28,7 +28,7 @@ function sheetHTML(){
     if(!d)return head('Editar objetos','Toque numa decoração ou construção para selecionar. Arraste decoração para mover. Remover apaga qualquer peça, inclusive cercas e muros.')+`<div class="row"><button class="sbtn" data-a="done">Sair do modo edição</button></div>`;
     return head(DECOR[d.k].n,'Arraste o objeto para movê-lo livremente.')+`<div class="row"><button class="sbtn" data-a="flip">↔ Virar</button><button class="sbtn" data-a="small">➖</button><button class="sbtn" data-a="big">➕</button><button class="sbtn" data-a="dup">⧉ Duplicar (${costHTML(DECOR[d.k].cost)})</button><button class="sbtn red" data-a="del">🗑 Remover</button><button class="gbtn" data-a="done">Pronto</button></div>`}
   case'craft':{const sm=G.bld.find(b=>b.type==='smithy'&&b.done);return head('Criar','Ferramentas de pedra se fazem à mão. Armas pedem uma Ferraria pronta.')+
-    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${it.ic}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div><div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
+    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div><div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
       tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS),arm=ks.filter(k=>!tools.includes(k));
       return`<h4>Ferramentas de trabalho</h4><div class="items">${tools.map(card).join('')}</div>`+(arm.length?`<h4>Armas e equipamentos</h4><div class="items">${arm.map(card).join('')}</div>`:'')})()}
   case'bag':{const w=bagW(),cap=storeCap();
@@ -43,9 +43,9 @@ function sheetHTML(){
   return null}
 /* Mochila: 8 espaços de equipamento e a lista de itens (toque para vestir) */
 function equipHTML(){return`<div class="inv">${SLOTS.map(s=>{const k=G.equip[s];
-  return`<div class="slot ${k?'':'z'}" ${k?`data-a="unequip" data-v="${s}"`:''}><span>${k?ITEMS[k].ic:CB.slot_icone[s]}</span><b>${k?'':'—'}</b><small>${CB.slot_nome[s]}</small></div>`}).join('')}</div>`}
+  return`<div class="slot ${k?'':'z'}" ${k?`data-a="unequip" data-v="${s}"`:''}><span>${k?itemIcon(k):icon('slots',s)}</span><b>${k?'':'—'}</b><small>${CB.slot_nome[s]}</small></div>`}).join('')}</div>`}
 function bagItemsHTML(){return`<div class="inv">${Object.keys(ITEMS).map(k=>{const it=ITEMS[k],n=G.items[k]||0,eq=it.slot&&n>0;
-  return`<div class="slot ${n?'':'z'}" ${eq?`data-a="equip" data-v="${k}" title="Toque para vestir"`:''}><span>${it.ic}</span><b>${n}</b><small>${it.n.split(' ')[0]}</small></div>`}).join('')}</div>`}
+  return`<div class="slot ${n?'':'z'}" ${eq?`data-a="equip" data-v="${k}" title="Toque para vestir"`:''}><span>${itemIcon(k)}</span><b>${n}</b><small>${it.n.split(' ')[0]}</small></div>`}).join('')}</div>`}
 function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;

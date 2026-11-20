@@ -58,7 +58,7 @@ function assignWorker(b,silent){const d=BD[b.type];if(!d.jobs||!b.done)return;if
 function unassign(u){if(u.tool){G.items[u.tool]++;u.tool=null}u.job=null;u.work=null;u.path=null;u.act=null;u.carry=0;u.tgt=null}
 function takeTool(u){const t=JOBTOOL[u.job||'builder'];if(!u.tool&&G.items[t]>0){G.items[t]--;u.tool=t}}
 function toolF(u){if(u.kind==='player')return G.items.hammer>0?.62:1.25;return u.tool&&u.tool===JOBTOOL[u.job||'builder']?.62:1.25}
-function wearTool(u){if(u.tool&&Math.random()<.008){toast(`💥 ${ITEMS[u.tool].ic} ${ITEMS[u.tool].n} de ${u.name} quebrou`);u.tool=null;takeTool(u)}}
+function wearTool(u){if(u.tool&&Math.random()<.008){toast(`💥 ${itemMark(u.tool)} ${ITEMS[u.tool].n} de ${u.name} quebrou`);u.tool=null;takeTool(u)}}
 
 /* ================= Natural objects ================= */
 function chopHit(i,ob){ob.hp=(ob.hp==null?5:ob.hp)-1;ob.shake=.35;const x=i%N+.5,y=(i/N|0)+.5;

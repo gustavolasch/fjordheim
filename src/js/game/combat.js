@@ -24,7 +24,7 @@ function equipItem(k){const it=ITEMS[k];
   if(s==='mao'&&it.duas_maos&&G.equip.escudo){toast('Arma de duas mãos: tire o escudo antes','bad');return}
   if(s==='escudo'&&G.equip.mao&&ITEMS[G.equip.mao].duas_maos){toast('Tire a arma de duas mãos antes','bad');return}
   if(G.equip[s])G.items[G.equip[s]]++; // troca: o que estava no espaço volta para a mochila
-  G.equip[s]=k;G.items[k]--;sfx('craft');toast(`${it.ic} ${it.n} equipado`,'good')}
+  G.equip[s]=k;G.items[k]--;sfx('craft');toast(`${itemMark(k)} ${it.n} equipado`,'good')}
 function unequip(s){const k=G.equip[s];if(!k)return;G.equip[s]=null;G.items[k]=(G.items[k]||0)+1;sfx('tick')}
 function armaDe(u){const k=u.kind==='player'?G.equip.mao:null,it=k&&ITEMS[k];return it&&it.arma?{...it.arma,k}:{...CB.fol.mao_nua}}
 

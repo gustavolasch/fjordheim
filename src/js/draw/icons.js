@@ -7,6 +7,10 @@ const ICON_CACHE={};
 function iconEntry(g,k){const grp=ICONES[g];return grp&&grp[k]||null}
 function iconPath(g,k){const e=iconEntry(g,k);return e&&e.icone?ICON_DIR+e.icone+'.webp':null}
 function iconText(g,k){const e=iconEntry(g,k);return e&&e.emoji||''}
+// Itens: ferramentas (items.js) ou armas/equipamento (combate.json). Chave é única entre os dois.
+function itemGroup(k){return ICONES.ferramentas[k]?'ferramentas':'itens'}
+function itemIcon(k){return icon(itemGroup(k),k)}
+function itemMark(k){return '[['+itemGroup(k)+'.'+k+']]'}
 // HTML para painéis e barras. Só chaves fixas do jogo, nunca texto digitado pelo jogador.
 function icon(g,k){const p=iconPath(g,k);if(!p)return iconText(g,k);return `<img class="ico" src="${p}" alt="" loading="lazy" decoding="async">`}
 // Canvas: imagem já carregada ou null (na primeira vez começa o download).

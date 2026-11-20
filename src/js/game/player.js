@@ -62,5 +62,5 @@ function finishP(u,a){const o=u.order;if(o&&o.type==='obj')o.cont=true;const ob=
   case'repair':toast('🔧 Reparado','good');u.order=null;break;
   case'fish':if(Math.random()<.65){addInv('food',1,a.fx,a.fy);fishJump(a.fx,a.fy);sfx('splash')}ptool('rod');if(!canCarry('food')){u.order=null;bagFull()}break;
   case'farm':{const b=BMAP.get(a.b);if(b){b.grow+=.15;for(let k=0;k<2;k++)puff(b.x+Math.random()*3,b.y+Math.random()*3,'dust');if(b.grow>=1){b.grow=0;const n=Math.min(4,Math.floor((BAG-bagW())/WEIGHT.food+1e-6));if(n>0){addInv('food',n,b.x+1.5,b.y+1.5);sfx('store')}else{bagFull();u.order=null}}}break}
-  case'craft':case'forge':G.items[a.item]++;floater(u.x,u.y,`+1 ${ITEMS[a.item].ic}`);sfx('craft');if(o)o.done=true;u.order=null;if(a.item==='axe')completeHint('craft');if(a.item==='pick')completeHint('pick');break}}
+  case'craft':case'forge':G.items[a.item]++;floater(u.x,u.y,`+1 ${itemMark(a.item)}`);sfx('craft');if(o)o.done=true;u.order=null;if(a.item==='axe')completeHint('craft');if(a.item==='pick')completeHint('pick');break}}
 

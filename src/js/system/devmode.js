@@ -22,7 +22,7 @@ function devPanel(){
     el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);max-height:55vh;overflow-y:auto;z-index:9;padding:10px;border-radius:14px;font-size:12px';document.body.appendChild(el)}
   const tg=(k,n)=>`<button class="sbtn ${DEV[k]?'on':''}" data-dev="t:${k}">${n}: ${DEV[k]?'ON':'off'}</button>`;
   const res=Object.keys(RES).map(k=>`<button class="sbtn" data-dev="r:${k}">${RES[k][0]} +100 ${RES[k][1]}</button>`).join(' ');
-  const items=Object.keys(ITEMS).map(k=>`<button class="sbtn" data-dev="i:${k}">${ITEMS[k].ic} ${ITEMS[k].n}</button>`).join(' ');
+  const items=Object.keys(ITEMS).map(k=>`<button class="sbtn" data-dev="i:${k}">${itemIcon(k)} ${ITEMS[k].n}</button>`).join(' ');
   el.innerHTML=`<b style="font-family:Cinzel,serif;color:#f3c969">Modo desenvolvedor</b>
     <div class="row">${tg('inf','Recursos infinitos')} ${tg('instant','Construção instantânea')} ${tg('god','Invencível')}</div>
     <h4>Recursos</h4><div class="row">${res}</div>
