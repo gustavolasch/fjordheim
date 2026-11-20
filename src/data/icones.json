@@ -1,0 +1,740 @@
+{
+ "_nota": "Liga cada emoji do jogo ao seu ícone. Ícones: src/icones/<categoria>/<nome>.webp (PNG originais em src/icones/png/). status: ok | provisorio (parecido, trocar depois) | pendente (sem ícone: o emoji continua no código). Trocar um ícone = editar este arquivo.",
+ "recursos": {
+  "stick": {
+   "n": "Galhos",
+   "emoji": "🌿",
+   "icone": "1_recursos/galho",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "wood": {
+   "n": "Toras",
+   "emoji": "🪵",
+   "icone": "1_recursos/tora",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "stone": {
+   "n": "Pedra",
+   "emoji": "🪨",
+   "icone": "1_recursos/pedra",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "food": {
+   "n": "Comida",
+   "emoji": "🍓",
+   "icone": "1_recursos/frutinhas",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "iron": {
+   "n": "Ferro",
+   "emoji": "🔩",
+   "icone": "1_recursos/minerio_ferro",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "hide": {
+   "n": "Couro",
+   "emoji": "🧶",
+   "icone": "1_recursos/couro_cru",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "bone": {
+   "n": "Osso",
+   "emoji": "🦴",
+   "icone": "1_recursos/osso",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  },
+  "fibra": {
+   "n": "Fibra",
+   "emoji": "🧵",
+   "icone": "1_recursos/fibra",
+   "status": "ok",
+   "fonte": "src/js/data/resources.js"
+  }
+ },
+ "ferramentas": {
+  "pick": {
+   "n": "Picareta de pedra",
+   "emoji": "⛏️",
+   "icone": "3_ferramentas_armas/picareta_pedra",
+   "status": "ok",
+   "fonte": "src/js/data/items.js"
+  },
+  "hammer": {
+   "n": "Martelo",
+   "emoji": "🔨",
+   "icone": "3_ferramentas_armas/martelo_madeira",
+   "status": "ok",
+   "fonte": "src/js/data/items.js"
+  },
+  "rod": {
+   "n": "Vara de pesca",
+   "emoji": "🎣",
+   "icone": "3_ferramentas_armas/vara_pesca",
+   "status": "ok",
+   "fonte": "src/js/data/items.js"
+  },
+  "sickle": {
+   "n": "Foice",
+   "emoji": "🌾",
+   "icone": "3_ferramentas_armas/enxada",
+   "status": "provisorio",
+   "fonte": "src/js/data/items.js",
+   "obs": "Sem foice no pacote; enxada provisória"
+  }
+ },
+ "itens": {
+  "axe": {
+   "n": "Machado de pedra",
+   "emoji": "🪓",
+   "icone": "3_ferramentas_armas/machado_pedra",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "lanca_madeira": {
+   "n": "Lança de madeira",
+   "emoji": "🔱",
+   "icone": "3_ferramentas_armas/lanca_madeira",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "funda": {
+   "n": "Funda",
+   "emoji": "🪃",
+   "icone": "3_ferramentas_armas/funda",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "bow": {
+   "n": "Arco curto",
+   "emoji": "🏹",
+   "icone": "3_ferramentas_armas/arco_curto",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "club": {
+   "n": "Porrete com cravos",
+   "emoji": "🏏",
+   "icone": "3_ferramentas_armas/porrete_cravos",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "beardaxe": {
+   "n": "Machado de barba",
+   "emoji": "🪓",
+   "icone": "3_ferramentas_armas/machado_ferro",
+   "status": "provisorio",
+   "fonte": "src/data/combate.json",
+   "obs": "Provisório: machado de ferro"
+  },
+  "daneaxe": {
+   "n": "Machado dinamarquês",
+   "emoji": "🪓",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "sword": {
+   "n": "Espada de ferro",
+   "emoji": "🗡️",
+   "icone": "3_ferramentas_armas/espada_ferro",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "spear": {
+   "n": "Lança de ferro",
+   "emoji": "🔱",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "longbow": {
+   "n": "Arco longo",
+   "emoji": "🏹",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "warhammer": {
+   "n": "Martelo de guerra",
+   "emoji": "🔨",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "curativo": {
+   "n": "Curativo de fibra",
+   "emoji": "🩹",
+   "icone": "3_ferramentas_armas/curativo",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "shield": {
+   "n": "Escudo",
+   "emoji": "🛡️",
+   "icone": "4_equipamento/escudo_madeira",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Custo madeira+ferro; escudo_ferro é alternativa"
+  },
+  "gibao_couro": {
+   "n": "Gibão de couro",
+   "emoji": "🦺",
+   "icone": "4_equipamento/peitoral_couro",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "cota_malha": {
+   "n": "Cota de malha",
+   "emoji": "⛓️",
+   "icone": "4_equipamento/cota_malha",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "capuz_couro": {
+   "n": "Capuz de couro",
+   "emoji": "🧢",
+   "icone": "4_equipamento/elmo_couro",
+   "status": "provisorio",
+   "fonte": "src/data/combate.json",
+   "obs": "Provisório: elmo de couro"
+  },
+  "elmo_ferro": {
+   "n": "Elmo de ferro",
+   "emoji": "⛑️",
+   "icone": "4_equipamento/elmo_ferro",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "calcas_couro": {
+   "n": "Calças de couro",
+   "emoji": "👖",
+   "icone": "4_equipamento/calcas",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  },
+  "botas_couro": {
+   "n": "Botas de couro",
+   "emoji": "🥾",
+   "icone": "4_equipamento/botas_pele",
+   "status": "ok",
+   "fonte": "src/data/combate.json"
+  }
+ },
+ "slots": {
+  "cabeca": {
+   "n": "Cabeça",
+   "emoji": "⛑️",
+   "icone": "4_equipamento/elmo_ferro",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "peito": {
+   "n": "Peito",
+   "emoji": "🦺",
+   "icone": "4_equipamento/peitoral_couro",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "pernas": {
+   "n": "Pernas",
+   "emoji": "👖",
+   "icone": "4_equipamento/calcas",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "pes": {
+   "n": "Pés",
+   "emoji": "🥾",
+   "icone": "4_equipamento/botas_pele",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "mao": {
+   "n": "Mão",
+   "emoji": "⚔️",
+   "icone": "3_ferramentas_armas/espada_ferro",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "escudo": {
+   "n": "Escudo",
+   "emoji": "🛡️",
+   "icone": "4_equipamento/escudo_madeira",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "costas": {
+   "n": "Costas",
+   "emoji": "🎒",
+   "icone": "4_equipamento/mochila_couro",
+   "status": "ok",
+   "fonte": "src/data/combate.json",
+   "obs": "Ícone de slot vazio"
+  },
+  "cinto": {
+   "n": "Cinto",
+   "emoji": "🪢",
+   "icone": "4_equipamento/bolsa_fibra",
+   "status": "provisorio",
+   "fonte": "src/data/combate.json",
+   "obs": "Provisório: bolsa de fibra"
+  }
+ },
+ "construcoes": {
+  "shelter": {
+   "n": "Abrigo",
+   "icone": "6_construcoes/abrigo",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "house": {
+   "n": "Casa",
+   "icone": "6_construcoes/casa",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "longhouse": {
+   "n": "Casa Comunal",
+   "icone": "8_construcoes_avancadas/casa_comunal",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "lumber": {
+   "n": "Lenhador",
+   "icone": "8_construcoes_avancadas/serraria",
+   "status": "provisorio",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Provisório: serraria"
+  },
+  "quarry": {
+   "n": "Pedreira",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "farm": {
+   "n": "Fazenda",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "dock": {
+   "n": "Cais de Pesca",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "smithy": {
+   "n": "Ferraria",
+   "icone": "6_construcoes/forja",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "barracks": {
+   "n": "Quartel",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "tower": {
+   "n": "Torre de Vigia",
+   "icone": "8_construcoes_avancadas/torre_vigia",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "wall": {
+   "n": "Paliçada",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "stonewall": {
+   "n": "Muro de pedra",
+   "icone": "6_construcoes/muro",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "fence": {
+   "n": "Cerca de galhos",
+   "icone": "6_construcoes/cerca",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "railfence": {
+   "n": "Cerca de tábuas",
+   "icone": "6_construcoes/cerca",
+   "status": "provisorio",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Provisório: mesma cerca"
+  },
+  "floor": {
+   "n": "Piso de madeira",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "path": {
+   "n": "Caminho de pedra",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "bridge": {
+   "n": "Ponte",
+   "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
+  },
+  "gate": {
+   "n": "Portão",
+   "icone": "6_construcoes/portao",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "fgate": {
+   "n": "Porteira",
+   "icone": "6_construcoes/portao",
+   "status": "provisorio",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Provisório: mesmo portão"
+  },
+  "stonegate": {
+   "n": "Portão de pedra",
+   "icone": "6_construcoes/portao",
+   "status": "provisorio",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Provisório: mesmo portão"
+  },
+  "railgate": {
+   "n": "Porteira de tábuas",
+   "icone": "6_construcoes/portao",
+   "status": "provisorio",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Provisório: mesmo portão"
+  },
+  "stockpile": {
+   "n": "Pilha de recursos",
+   "icone": "6_construcoes/pilha_recursos",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "storage": {
+   "n": "Armazém",
+   "icone": "8_construcoes_avancadas/armazem",
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "obs": "Sem emoji no código hoje; ícone ainda não exibido"
+  },
+  "bell": {
+   "n": "Sino de alarme",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "trap": {
+   "n": "Armadilha de estacas",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  }
+ },
+ "interface": {
+  "vida": {
+   "n": "Vida",
+   "emoji": "❤️",
+   "status": "pendente"
+  },
+  "calor": {
+   "n": "Calor",
+   "emoji": "🔥",
+   "icone": "6_construcoes/fogueira",
+   "status": "ok",
+   "fonte": "src/js/game/survival.js"
+  },
+  "energia": {
+   "n": "Energia",
+   "emoji": "⚡",
+   "status": "pendente"
+  },
+  "folego": {
+   "n": "Fôlego",
+   "emoji": "💨",
+   "status": "pendente"
+  },
+  "mochila": {
+   "n": "Mochila",
+   "emoji": "🎒",
+   "icone": "4_equipamento/mochila_couro",
+   "status": "ok"
+  },
+  "pessoas": {
+   "n": "Pessoas",
+   "emoji": "👥",
+   "status": "pendente"
+  },
+  "construindo": {
+   "n": "Construindo",
+   "emoji": "🔨",
+   "icone": "3_ferramentas_armas/martelo_madeira",
+   "status": "ok"
+  },
+  "obra": {
+   "n": "Obra",
+   "emoji": "🏗️",
+   "status": "pendente"
+  },
+  "reparar": {
+   "n": "Reparar",
+   "emoji": "🔧",
+   "status": "pendente"
+  },
+  "desmontar": {
+   "n": "Desmontar",
+   "emoji": "🔨",
+   "icone": "3_ferramentas_armas/martelo_madeira",
+   "status": "ok"
+  },
+  "dormir": {
+   "n": "Dormir",
+   "emoji": "🛏",
+   "icone": "7_campo_e_moveis/cama",
+   "status": "ok"
+  },
+  "sino": {
+   "n": "Tocar o sino",
+   "emoji": "🔔",
+   "status": "pendente"
+  },
+  "armadilha": {
+   "n": "Armadilha",
+   "emoji": "🪤",
+   "status": "pendente"
+  },
+  "remover": {
+   "n": "Remover",
+   "emoji": "🗑",
+   "status": "pendente"
+  },
+  "mais": {
+   "n": "Aumentar",
+   "emoji": "➕",
+   "status": "pendente"
+  },
+  "menos": {
+   "n": "Diminuir",
+   "emoji": "➖",
+   "status": "pendente"
+  },
+  "bloqueado": {
+   "n": "Bloqueado",
+   "emoji": "🔒",
+   "status": "pendente"
+  },
+  "dia": {
+   "n": "Dia",
+   "emoji": "☀️",
+   "status": "pendente"
+  },
+  "noite": {
+   "n": "Noite",
+   "emoji": "🌙",
+   "status": "pendente"
+  },
+  "dica": {
+   "n": "Dica",
+   "emoji": "💡",
+   "status": "pendente"
+  },
+  "explorar": {
+   "n": "Explorar",
+   "emoji": "🔭",
+   "status": "pendente"
+  },
+  "conquista": {
+   "n": "Conquista",
+   "emoji": "🏆",
+   "status": "pendente"
+  },
+  "sangramento": {
+   "n": "Sangramento",
+   "emoji": "🩸",
+   "status": "pendente"
+  },
+  "quebrou": {
+   "n": "Ferramenta quebrou",
+   "emoji": "💥",
+   "status": "pendente"
+  },
+  "moedas": {
+   "n": "Moedas",
+   "emoji": "💰",
+   "status": "pendente"
+  },
+  "salvar": {
+   "n": "Salvar",
+   "emoji": "💾",
+   "status": "pendente"
+  },
+  "carregar": {
+   "n": "Carregar",
+   "emoji": "📂",
+   "status": "pendente"
+  },
+  "conectar": {
+   "n": "Conectar",
+   "emoji": "🔗",
+   "status": "pendente"
+  },
+  "concluido": {
+   "n": "Concluído",
+   "emoji": "✅",
+   "status": "pendente"
+  },
+  "morte": {
+   "n": "Morte",
+   "emoji": "💀",
+   "status": "pendente"
+  },
+  "combate": {
+   "n": "Combate",
+   "emoji": "⚔️",
+   "icone": "3_ferramentas_armas/espada_ferro",
+   "status": "provisorio",
+   "obs": "Provisório: espada de ferro"
+  },
+  "alvo_arco": {
+   "n": "Torre (alcance)",
+   "emoji": "🏹",
+   "icone": "3_ferramentas_armas/arco_curto",
+   "status": "provisorio",
+   "obs": "Provisório: arco curto"
+  }
+ },
+ "animais": {
+  "cervo": {
+   "n": "Cervo",
+   "emoji": "🦌",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "lebre": {
+   "n": "Lebre",
+   "emoji": "🐇",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "javali": {
+   "n": "Javali",
+   "emoji": "🐗",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "lobo": {
+   "n": "Lobo",
+   "emoji": "🐺",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  },
+  "urso": {
+   "n": "Urso",
+   "emoji": "🐻",
+   "status": "pendente",
+   "fonte": "src/data/combate.json"
+  }
+ },
+ "guardados": {
+  "_nota": "Ícones sem uso hoje (coisas que ainda não existem no jogo). Ao criar a coisa, ligue a chave aqui.",
+  "icones": [
+   "1_recursos/carne_crua",
+   "1_recursos/carvao",
+   "1_recursos/pele",
+   "1_recursos/penas",
+   "2_comida/agua_cantil",
+   "2_comida/carne_assada",
+   "2_comida/carne_salgada",
+   "2_comida/cerveja_hidromel",
+   "2_comida/ensopado",
+   "2_comida/leite",
+   "2_comida/mel",
+   "2_comida/mingau",
+   "2_comida/ovo",
+   "2_comida/pao",
+   "2_comida/peixe_assado",
+   "2_comida/peixe_cru",
+   "2_comida/peixe_defumado",
+   "2_comida/queijo",
+   "2_comida/sal",
+   "2_comida/torta_carne",
+   "3_ferramentas_armas/faca_osso",
+   "3_ferramentas_armas/flechas",
+   "3_ferramentas_armas/picareta_ferro",
+   "3_ferramentas_armas/tocha",
+   "4_equipamento/aljava",
+   "4_equipamento/amuleto",
+   "4_equipamento/coroa",
+   "4_equipamento/escudo_ferro",
+   "4_equipamento/manto",
+   "4_equipamento/roupa_peles",
+   "4_equipamento/trapos",
+   "5_materiais/cera",
+   "5_materiais/ceramica",
+   "5_materiais/corda",
+   "5_materiais/couro_curtido",
+   "5_materiais/la",
+   "5_materiais/lingote_aco",
+   "5_materiais/lingote_ferro",
+   "5_materiais/linha",
+   "5_materiais/linho",
+   "5_materiais/moedas_prata",
+   "5_materiais/ouro",
+   "5_materiais/tabuas",
+   "5_materiais/tecido",
+   "5_materiais/telha",
+   "5_materiais/tijolo",
+   "5_materiais/vela",
+   "6_construcoes/bancada",
+   "6_construcoes/bau",
+   "6_construcoes/cozinha",
+   "6_construcoes/curtume",
+   "6_construcoes/defumadouro",
+   "6_construcoes/forno_barro",
+   "6_construcoes/fundicao",
+   "6_construcoes/tear",
+   "7_campo_e_moveis/argila",
+   "7_campo_e_moveis/cavalete",
+   "7_campo_e_moveis/cebola",
+   "7_campo_e_moveis/cevada",
+   "7_campo_e_moveis/cogumelo",
+   "7_campo_e_moveis/ervas",
+   "7_campo_e_moveis/lareira",
+   "7_campo_e_moveis/linho_planta",
+   "7_campo_e_moveis/mesa_bancos",
+   "7_campo_e_moveis/nabo",
+   "7_campo_e_moveis/pedrinha",
+   "7_campo_e_moveis/repolho",
+   "7_campo_e_moveis/resina",
+   "7_campo_e_moveis/sementes",
+   "7_campo_e_moveis/trigo",
+   "8_construcoes_avancadas/carvoaria",
+   "8_construcoes_avancadas/celeiro",
+   "8_construcoes_avancadas/curandeiro",
+   "8_construcoes_avancadas/curral",
+   "8_construcoes_avancadas/drakkar",
+   "8_construcoes_avancadas/estabulo",
+   "8_construcoes_avancadas/estaleiro",
+   "8_construcoes_avancadas/galinheiro",
+   "8_construcoes_avancadas/ourives",
+   "8_construcoes_avancadas/pedra_runica",
+   "8_construcoes_avancadas/salgadeira",
+   "8_construcoes_avancadas/templo"
+  ]
+ }
+}
