@@ -28,8 +28,9 @@ function cartTick(dt){
   for(const c of G.carts.slice()){
     if(c.rider!=null){const r=UMAP.get(c.rider);
       if(!r||r.ride!==c.id){c.rider=null;continue}
-      if(!r.moving||r.heading==null)continue;
-      const tx=r.x-Math.cos(r.heading)*.75,ty=r.y-Math.sin(r.heading)*.75,dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);
+      // sempre converge para o ponto atrás do condutor (também parado)
+      const h=r.heading??Math.atan2(r.y-c.y,r.x-c.x);
+      const tx=r.x-Math.cos(h)*.75,ty=r.y-Math.sin(h)*.75,dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);
       const sp=r.speed*dt*survivalSpeed(r);if(d>.001){const s=Math.min(d,sp);c.x+=dx/d*s;c.y+=dy/d*s}
       continue}
     // parado e sem ninguém por perto: invasor rouba, animal quebra
@@ -40,9 +41,11 @@ function cartTick(dt){
 }
 // desenho (lido pelo render; mesmo formato de drawTomb)
 function drawCart(c){const q=P(c.x,c.y);
+  // a alça aponta para o lado do condutor (ou para onde o carrinho estiver virado)
+  const r=c.rider!=null?UMAP.get(c.rider):null,s=r&&P(r.x,r.y)[0]<q[0]?-1:1;
   ell(q[0],q[1]+2,12,5,'rgba(0,0,0,.25)');
   ell(q[0]-7,q[1]+2,3.6,3.6,'#3b2a1a');ell(q[0]+7,q[1]+2,3.6,3.6,'#3b2a1a');
-  ln([q[0]+11,q[1]-4],[q[0]+21,q[1]-12],'#6b4a26',2.2);
+  ln([q[0]+11*s,q[1]-4],[q[0]+21*s,q[1]-12],'#6b4a26',2.2);
   pp([[q[0]-11,q[1]-6],[q[0]+11,q[1]-6],[q[0]+11,q[1]+1],[q[0]-11,q[1]+1]],'#9a6a3a');
   ln([q[0]-11,q[1]-2.5],[q[0]+11,q[1]-2.5],'rgba(0,0,0,.25)',1);
   if(Object.values(c.inv||{}).some(v=>v>0)||Object.values(c.items||{}).some(v=>v>0))ell(q[0],q[1]-9,6,3,'#c9a25a');

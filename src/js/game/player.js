@@ -36,7 +36,7 @@ function updPlayer(u,dt){
     if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;u.act={type:'farm',t:0,dur:3*(G.items.sickle>0?.62:1.25),b:b.id};return}
   case'ride':{const ct=G.carts.find(x=>x.id===o.c);if(!ct||ct.rider!=null){u.order=null;return}
     if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
-    ct.rider=u.id;u.ride=ct.id;u.act=null;u.path=null;u.order=null;toast('🛒 Você está conduzindo o carrinho. Toque em Sair da carroça para descer.');return}
+    ct.rider=u.id;u.ride=ct.id;u.heading=Math.atan2(u.y-ct.y,u.x-ct.x);u.act=null;u.path=null;u.order=null;toast('🛒 Você está conduzindo o carrinho. Toque em Sair da carroça para descer.');return}
   case'stow':case'unload':{const ct=G.carts.find(x=>x.id===o.c);if(!ct){u.order=null;return}
     if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
     const r=cartExec(ct,o.type);if(r.msg)toast(r.msg,r.kind);u.order=null;return}
