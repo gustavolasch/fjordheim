@@ -7,20 +7,22 @@ function blocksObj(o){return o&&(o.t==='stone'||o.t==='ore'||o.t==='log'||o.t===
 function passV(x,y){if(!inb(x,y))return 0;const i=idx(x,y),id=G.occ[i];
   if(id){const b=BMAP.get(id);if(!b)return 0;const d=BD[b.type];if(d.pass&&(b.done||b.type!=='bridge'))return 1;if(d.gate&&b.done)return 1;return 0}
   if(!landT(G.tiles[i]))return 0;return blocksObj(G.obj[i])?0:1}
+// quina de diagonal: só construções e pedras bloqueiam; troncos de árvore não (passa entre dois troncos)
+function passC(x,y){if(!inb(x,y))return 0;const i=idx(x,y);if(G.occ[i])return passV(x,y);if(!landT(G.tiles[i]))return 0;const o=G.obj[i];return o&&(o.t==='stone'||o.t==='ore'||o.t==='log'||o.t==='falling')?0:1}
 function passR(x,y){if(!inb(x,y))return 0;const i=idx(x,y),id=G.occ[i];
   if(id){const b=BMAP.get(id);if(!b)return 0;const d=BD[b.type];if(d.wall||d.gate)return 7;if(d.pass&&(b.done||b.type!=='bridge'))return 1;return 0}
   if(!landT(G.tiles[i]))return 0;return blocksObj(G.obj[i])?0:1}
 /* A* */
 const gS=new Float32Array(N*N),came=new Int32Array(N*N),seen=new Uint32Array(N*N),closed=new Uint32Array(N*N);let stamp=0;
 const DIRS=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]];
-function astar(sx,sy,goal,hx,hy,pass,maxIt){maxIt=maxIt||5000;stamp++;if(!inb(sx,sy))return null;
+function astar(sx,sy,goal,hx,hy,pass,maxIt){maxIt=maxIt||5000;const cp=pass===passV?passC:pass;stamp++;if(!inb(sx,sy))return null;
   const hk=[],hv=[];const push=(k,v)=>{hk.push(k);hv.push(v);let i=hk.length-1;while(i>0){const p=(i-1)>>1;if(hv[p]<=hv[i])break;[hk[p],hk[i]]=[hk[i],hk[p]];[hv[p],hv[i]]=[hv[i],hv[p]];i=p}};
   const pop=()=>{const k=hk[0],lk=hk.pop(),lv=hv.pop();if(hk.length){hk[0]=lk;hv[0]=lv;let i=0;for(;;){const l=2*i+1,r=l+1;let m=i;if(l<hk.length&&hv[l]<hv[m])m=l;if(r<hk.length&&hv[r]<hv[m])m=r;if(m===i)break;[hk[m],hk[i]]=[hk[i],hk[m]];[hv[m],hv[i]]=[hv[i],hv[m]];i=m}}return k};
   const h=(x,y)=>{const dx=Math.abs(x-hx),dy=Math.abs(y-hy);return Math.max(dx,dy)+.414*Math.min(dx,dy)};
   const s=idx(sx,sy);gS[s]=0;came[s]=-1;seen[s]=stamp;push(s,h(sx,sy));let it=0;
   while(hk.length&&it++<maxIt){const c=pop();if(closed[c]===stamp)continue;closed[c]=stamp;const cx=c%N,cy=(c/N)|0;
     if(goal(cx,cy)){const path=[];let k=c;while(k!==s&&k>=0){path.push([k%N,(k/N)|0]);k=came[k]}path.reverse();return path}
-    for(const[dx,dy,dc]of DIRS){const nx=cx+dx,ny=cy+dy;const pc=pass(nx,ny);if(!pc)continue;if(dx&&dy&&(!pass(cx+dx,cy)||!pass(cx,cy+dy)))continue;
+    for(const[dx,dy,dc]of DIRS){const nx=cx+dx,ny=cy+dy;const pc=pass(nx,ny);if(!pc)continue;if(dx&&dy&&(!cp(cx+dx,cy)||!cp(cx,cy+dy)))continue;
       const ni=idx(nx,ny);if(closed[ni]===stamp)continue;const ng=gS[c]+dc*pc;if(seen[ni]!==stamp||ng<gS[ni]){seen[ni]=stamp;gS[ni]=ng;came[ni]=c;push(ni,ng+h(nx,ny))}}}
   return null}
 const nearRect=(rx,ry,rw,rh)=>(x,y)=>x>=rx-1&&x<=rx+rw&&y>=ry-1&&y<=ry+rh;
