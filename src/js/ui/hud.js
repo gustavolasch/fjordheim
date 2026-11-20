@@ -2,7 +2,7 @@
 let hudSig='';
 const BASE_RES=['stick','wood','stone','food','iron']; // sempre mostrados na barra; os outros só quando há algum
 function updHUD(){if(!G)return;needsHUD();const w=bagW();
-  const h=Object.keys(RES).filter(k=>have(k)>0||BASE_RES.includes(k)).map(k=>`<div class="chip" title="${RES[k][1]}">${RES[k][0]} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">🎒 ${w}/${BAG}</button>`;
+  const h=Object.keys(RES).filter(k=>have(k)>0||BASE_RES.includes(k)).map(k=>`<div class="chip" title="${RES[k][1]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
   if(h!==hudSig){hudSig=h;$('#res').innerHTML=h}
   const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.textContent=`⚔️ Invasão: ${r} · tocar para ver`}else el.classList.add('hidden');
   $('#bSpeed').textContent=paused?'⏸':G.speed+'×'}

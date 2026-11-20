@@ -117,3 +117,6 @@ h3{font-family:'Cinzel',serif;color:#f3c969;font-size:15px;margin:18px 0 10px;le
 .netinfo{width:100%;padding:8px 10px;border-radius:10px;background:rgba(243,201,105,.12);font-size:14px}
 .joinbox{display:flex;gap:8px;width:100%;margin-top:6px}
 .joinbox input{flex:1;min-width:0;padding:10px;font-size:18px;letter-spacing:4px;text-transform:uppercase;text-align:center;border-radius:10px;border:1px solid #6a5a3a;background:#1b1712;color:#f3e7c9}
+
+/* Ícones PNG/WebP (tabela data/icones.json) */
+img.ico{width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain;display:inline-block}

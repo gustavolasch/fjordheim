@@ -3,12 +3,12 @@ function have(k){return(G.inv[k]||0)+(G.res[k]||0)}
 function afford(c){if(DEV.inf)return true;for(const k in c)if(have(k)<c[k])return false;return true}
 function pay(c){if(DEV.inf)return;for(const k in c){let n=c[k];const a=Math.min(n,G.inv[k]);G.inv[k]-=a;n-=a;G.res[k]=Math.max(0,G.res[k]-n)}}
 function refund(c,f){const cap=storeCap();for(const k in c){let v=Math.floor(c[k]*f);const s=Math.min(v,Math.max(0,cap-G.res[k]));G.res[k]+=s;G.inv[k]+=v-s}}
-function costHTML(c){const ks=Object.keys(c);if(!ks.length)return'grátis';return ks.map(k=>`<span class="${have(k)<c[k]?'no':''}">${RES[k][0]}${c[k]}</span>`).join(' ')}
+function costHTML(c){const ks=Object.keys(c);if(!ks.length)return'grátis';return ks.map(k=>`<span class="${have(k)<c[k]?'no':''}">${icon('recursos',k)}${c[k]}</span>`).join(' ')}
 function storeCap(){let c=0;for(const b of G.bld)if(b.done&&BD[b.type].store)c+=BD[b.type].store;return c}
 function bagW(){let w=0;for(const k in G.inv)w+=G.inv[k]*WEIGHT[k];for(const k in G.items)if(G.items[k]>0)w+=G.items[k]*(ITEMS[k]?.peso||0);return Math.round(w*10)/10}
 function canCarry(k,n){if(DEV.inf)return true;return bagW()+WEIGHT[k]*(n||1)<=BAG+1e-6}
-function addInv(k,n,x,y){G.inv[k]+=n;if(x!=null)floater(x,y,`+${n} ${RES[k][0]}`)}
-function addRes(k,v,x,y){const cap=storeCap();G.res[k]=Math.min(cap,G.res[k]+v);if(x!=null)floater(x,y,`+${v} ${RES[k][0]}`)}
+function addInv(k,n,x,y){G.inv[k]+=n;if(x!=null)floater(x,y,`+${n} [[recursos.${k}]]`)}
+function addRes(k,v,x,y){const cap=storeCap();G.res[k]=Math.min(cap,G.res[k]+v);if(x!=null)floater(x,y,`+${v} [[recursos.${k}]]`)}
 function deposit(b){const cap=storeCap();let moved=0;for(const k in G.inv){const n=Math.min(G.inv[k],Math.max(0,cap-G.res[k]));if(n>0){G.inv[k]-=n;G.res[k]+=n;moved+=n}}
   if(moved){sfx('store');floater(b.x+b.w/2,b.y+b.h/2,'📦 guardado');completeHint('full');G.flags.deposited=true;if(bagW()>0)toast('Depósito cheio para alguns itens. Construa outro.')}
   else if(bagW()>0)toast('Os depósitos estão cheios. Construa outro.','bad');else toast('Mochila vazia')}

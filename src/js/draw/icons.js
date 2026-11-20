@@ -11,8 +11,15 @@ function iconText(g,k){const e=iconEntry(g,k);return e&&e.emoji||''}
 function icon(g,k){const p=iconPath(g,k);if(!p)return iconText(g,k);return `<img class="ico" src="${p}" alt="" loading="lazy" decoding="async">`}
 // Canvas: imagem já carregada ou null (na primeira vez começa o download).
 function iconCanvas(g,k){const p=iconPath(g,k);if(!p)return null;let im=ICON_CACHE[p];if(!im){im=ICON_CACHE[p]=new Image();im.src=p}return im.complete&&im.naturalWidth?im:null}
-// Mensagem com marcadores [[grupo.chave]] → nós do DOM (sem innerHTML).
-function richNodes(msg){const frag=document.createDocumentFragment(),parts=String(msg).split(/\[\[([a-z]+)\.([a-z_]+)\]\]/);
-  for(let i=0;i<parts.length;i+=3){frag.append(parts[i]||'');const g=parts[i+1];if(!g)continue;const k=parts[i+2],p=iconPath(g,k);
-    if(p){const im=document.createElement('img');im.className='ico';im.src=p;im.alt='';im.decoding='async';frag.append(im)}else frag.append(iconText(g,k))}
+// Mensagem com marcadores [[grupo.chave]] → partes: texto ou imagem (canvas) — um parser só.
+const ICON_MARK=/\[\[([a-z]+)\.([a-z_]+)\]\]/;
+function iconSplit(msg){const parts=String(msg).split(new RegExp(ICON_MARK.source,'g')),out=[];
+  for(let i=0;i<parts.length;i+=3){if(parts[i])out.push({t:parts[i]});const g=parts[i+1];if(g)out.push({g,k:parts[i+2]})}
+  return out}
+// Nós do DOM (toasts, textos de tela). Sem innerHTML.
+function richNodes(msg){const frag=document.createDocumentFragment();
+  for(const s of iconSplit(msg)){if(s.t!=null){frag.append(s.t);continue}const p=iconPath(s.g,s.k);
+    if(p){const im=document.createElement('img');im.className='ico';im.src=p;im.alt='';im.decoding='async';frag.append(im)}else frag.append(iconText(s.g,s.k))}
   return frag}
+// Canvas: partes com a imagem já carregada (ou emoji enquanto carrega).
+function iconCanvasSegs(msg){return iconSplit(msg).map(s=>s.t!=null?s:(iconCanvas(s.g,s.k)?{im:iconCanvas(s.g,s.k)}:{t:iconText(s.g,s.k)}))}

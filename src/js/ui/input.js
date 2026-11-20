@@ -86,7 +86,7 @@ function enterBuild(type){const d=BD[type];closeSheet();sel=null;mode=d.line?{t:
 function enterDecor(k){closeSheet();sel=null;mode={t:'decor',kind:k,has:false,f:1};if(isTouch){const[wx,wy]=s2w(W/2,H*.45);mode.wx=wx;mode.wy=wy;mode.has=true}markTabs();updPlace()}
 function cancelMode(){mode={t:'none'};$('#place').classList.remove('open');markTabs();if(sheetKind==='edit')closeSheet()}
 function confirmPlace(){
-  if(mode.t==='build'){if(!mode.has)return;const r=sendCmd({t:'build',type:mode.type,x:mode.gx,y:mode.gy});if(!r.ok){toast(r.msg,'bad');sfx('bad');return}const b=r.b;if(b)floater(b.x+b.w/2,b.y+b.h/2,'−'+Object.entries(BD[b.type].cost).map(([k,v])=>v+RES[k][0]).join(' '));if(!afford(BD[mode.type].cost))cancelMode()}
+  if(mode.t==='build'){if(!mode.has)return;const r=sendCmd({t:'build',type:mode.type,x:mode.gx,y:mode.gy});if(!r.ok){toast(r.msg,'bad');sfx('bad');return}const b=r.b;if(b)floater(b.x+b.w/2,b.y+b.h/2,'−'+Object.entries(BD[b.type].cost).map(([k,v])=>v+'[[recursos.'+k+']]').join(' '));if(!afford(BD[mode.type].cost))cancelMode()}
   else if(mode.t==='line'){if(!mode.a)return;const r=sendCmd({t:'line',type:mode.type,a:mode.a,b:mode.b});
     if(!r.ok){toast(r.msg,'bad');sfx('bad')}mode.a=null;mode.b=null}
   else if(mode.t==='decor'){if(!mode.has)return;const r=sendCmd({t:'decor',kind:mode.kind,x:mode.wx,y:mode.wy,f:mode.f});if(!r.ok){toast(r.msg,'bad');sfx('bad');return}puff(mode.wx,mode.wy,'dust');sfx('place');if(mode.kind==='campfire'||mode.kind==='torch')completeHint('night')}

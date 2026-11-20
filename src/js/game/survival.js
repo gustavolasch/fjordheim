@@ -90,7 +90,7 @@ function sleepNight(u){
 
 // barras na tela (fora do topo, acima da barra de navegação)
 function needsHUD(){const p=PL();if(!p||p.food==null)return;
-  const bars=[['❤️','hp',p.hp/p.max],['🍓','food',p.food/100],['🔥','warm',p.warm/100],['⚡','energy',p.energy/100],['💨','stam',(p.stam??100)/100]];
+  const bars=[[icon('interface','vida'),'hp',p.hp/p.max],[icon('recursos','food'),'food',p.food/100],[icon('interface','calor'),'warm',p.warm/100],[icon('interface','energia'),'energy',p.energy/100],[icon('interface','folego'),'stam',(p.stam??100)/100]];
   const sig=bars.map(b=>Math.round(b[2]*20)).join(',');
   let el=document.getElementById('needs');
   if(!el){el=document.createElement('div');el.id='needs';el.className='glass';document.body.appendChild(el)}
