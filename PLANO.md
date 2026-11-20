@@ -392,5 +392,6 @@ Amigo desliza entre as posições recebidas (interpolação). Limitação conhec
 
 ## Pendências
 
+- **Carroça com animal** (era 3): carga grande, precisa de caminho para andar; animal puxa. Fica para depois do carrinho de mão.
 - **Teste por toque instável:** o teste às vezes falha em rodadas diferentes, mesmo sem mudança de código. Causa: o jogo avança pelo tempo real do quadro e consome `Math.random` a cada quadro. Solução provisória: `node tools/touch-test/retry.mjs` (repete até 3 vezes). Solução definitiva, para fazer depois: controlar o relógio do jogo no teste (opção 1).
 - **Multijogador:** efeitos (sons e fumaça) também para o amigo; previsão do toque no amigo (hoje espera o anfitrião); teste de dois jogadores com relógio controlado.

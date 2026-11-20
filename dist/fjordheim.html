@@ -150,6 +150,7 @@ img.ico{width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain;disp
   <div id="hint" class="glass off"><span class="ic">💡</span><span id="hintT"></span><button id="hintX" aria-label="Dispensar">✕</button></div>
   <div id="raid" class="hidden"></div>
   <div id="toasts"></div>
+  <button id="bDismount" class="sbtn hidden" style="position:fixed;left:50%;transform:translateX(-50%);top:64px;z-index:6;box-shadow:0 2px 10px rgba(0,0,0,.35)">Sair da carroça</button>
   <div id="sheet" class="glass"></div>
   <div id="place" class="glass"></div>
   <nav id="bar" class="glass">
@@ -257,6 +258,7 @@ const BIOMES={
  coast:{name:'Falésia Costeira',desc:'Planalto verde sobre penhascos e mar aberto.',grass:['#7d9c45','#89a84d','#71913f','#95b056','#80a048'],sand:'#d2c391',soil:'#5f5042',dirt:'#a88a5e',deep:'#1c5c97',shallow:'#2f8fb9',cliffTop:'#8f9a6c',cliff:'#8b8680',tree:[['pine',.65],['oak',.35]],leaves:['#4e8a36','#5f9a3f','#3f7a30'],pines:['#2f6836','#3a773d'],bg:['#6b9fcf','#183a60'],weather:'clouds',crop:'#d4c050',bush:'#467f32',card:'linear-gradient(135deg,#1c5c97,#8b8680 50%,#89a84d)'},
  snow:{name:'Costa Gelada',desc:'Fiorde nevado, falésias alaranjadas e mar gelado.',grass:['#eef3f7','#e5ecf2','#f6f9fb','#dfe7ee','#e9eff4'],sand:'#e6e2d8',soil:'#7d5236',dirt:'#b9b2a6',deep:'#1d6681',shallow:'#36a0a6',cliffTop:'#f2f5f8',cliff:'#c0703a',tree:[['pine',1]],leaves:['#6f8f6a'],pines:['#3d5f5a','#4a6d66'],bg:['#8aa7c0','#1f354b'],weather:'snow',crop:'#cdbb8a',bush:'#6c8a78',snowy:true,card:'linear-gradient(135deg,#eef3f7,#c0703a 55%,#1d6681)'}
 };
+const CARRINHO={"_nota":"Carrinho de mão. Capacidade = mochila (BAG, em js/core/00-base.js). Velocidade = a do personagem que conduz. peso só informativo: o carrinho não entra na mochila.","custo":{"wood":3,"stick":4,"fibra":2},"vida":60,"peso":6};
 /* cat: struct|walls|fences|floors|doors|store · grp: connection group for wall-like pieces */
 // Desmontar um depósito: os itens guardados vão para o outro depósito; devolve esta fração do custo.
 const DESMONTAR_DEP=.6;
@@ -282,6 +284,7 @@ const BD={
  fgate:{n:'Porteira',cat:'doors',grp:'fence',w:1,h:1,cost:{stick:3},hp:80,work:2,gate:true,desc:'Encaixa nas cercas.'},
  stonegate:{n:'Portão de pedra',cat:'doors',grp:'wall',w:1,h:1,cost:{stone:4},hp:380,work:5,gate:true,stone:true,desc:'Encaixa no muro de pedra. Você passa, invasores não.'},
  railgate:{n:'Porteira de tábuas',cat:'doors',grp:'fence',w:1,h:1,cost:{wood:2},hp:120,work:3,gate:true,desc:'Encaixa na cerca de tábuas.'},
+ cart:{n:'Carrinho de mão',cat:'store',w:1,h:1,cost:CARRINHO.custo,hp:CARRINHO.vida,mobile:true,desc:'Leva a mochila. Toque em Mover para conduzir. Estacionado, guarda a mochila com um toque.'},
  stockpile:{n:'Pilha de recursos',cat:'store',w:2,h:2,cost:{stick:4},hp:80,work:3,flat:true,store:30,desc:'Toque para guardar o que carrega. 30 de cada recurso.'},
  storage:{n:'Armazém',cat:'store',w:2,h:2,cost:{wood:12,stone:4},hp:260,work:14,wallH:12,store:150,desc:'Guarda 150 de cada recurso.'}
 };
@@ -606,7 +609,9 @@ function spawnRaid(){G.raidN++;const n=Math.min(14,2+Math.floor(G.raidN*1.6));co
 function myPid(){return NET.role==='guest'?NET.pid:G.pid}
 function PL(){return G&&UMAP.get(myPid())}
 function adjT(u,x,y){const[tx,ty]=utile(u);return Math.abs(tx-x)<=1&&Math.abs(ty-y)<=1}
-function setOrder(u,o){if(!u||u.down)return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
+// enquanto conduz o carrinho, só andar e as ações do carrinho
+const RIDE_OK=['move','ride','stow','unload'];
+function setOrder(u,o){if(!u||u.down)return;if(u.ride!=null&&!RIDE_OK.includes(o.type))return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
 // replanejamentos: obstáculo que muda no meio do caminho (árvore cai, construção) não deve cancelar a ordem
 function stepTo(u,o,rx,ry,rw,rh,inside){if(o.tries>4){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}o.tries=(o.tries||0)+1;if(!goRect(u,rx,ry,rw,rh,inside,passV,9000)){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}return true}
 function faceTo(u,x,y){if(Math.abs((x-u.x)-(y-u.y))>.05)u.face=(x-u.x)-(y-u.y)>0?1:-1}
@@ -636,6 +641,12 @@ function updPlayer(u,dt){
     if(!canCarry('food')){bagFull();u.order=null;return}o.tries=0;faceTo(u,x+.5,y+.5);u.act={type:'fish',t:0,dur:4,fx:x+.5,fy:y+.5};return}
   case'farm':{const b=BMAP.get(o.b);if(!b||!b.done){u.order=null;return}const[tx,ty]=utile(u);
     if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;u.act={type:'farm',t:0,dur:3*(G.items.sickle>0?.62:1.25),b:b.id};return}
+  case'ride':{const ct=G.carts.find(x=>x.id===o.c);if(!ct||ct.rider!=null){u.order=null;return}
+    if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
+    ct.rider=u.id;u.ride=ct.id;u.act=null;u.path=null;u.order=null;toast('🛒 Você está conduzindo o carrinho. Toque em Sair da carroça para descer.');return}
+  case'stow':case'unload':{const ct=G.carts.find(x=>x.id===o.c);if(!ct){u.order=null;return}
+    if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
+    const r=cartExec(ct,o.type);if(r.msg)toast(r.msg,r.kind);u.order=null;return}
   case'sleep':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}sleepNight(u);u.order=null;return}
   case'craft':{if(!o.started){o.started=true;u.act={type:'craft',item:o.item,t:0,dur:1.4}}return}
   case'forge':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}if(!o.started){o.started=true;faceTo(u,b.x+1,b.y+1);u.act={type:'forge',item:o.item,t:0,dur:2.6}}return}
@@ -714,7 +725,7 @@ function update(dt){G.t+=dt;
     if(b.type==='tower'){b.cd-=dt;if(b.cd<=0){const t=nearestUnit(b.x+.5,b.y+.5,CB.torre.alcance,v=>v.kind==='raider');if(t){b.cd=CB.torre.recarga;AR.push({x:b.x+.5,y:b.y+.5,z:46,tid:t.id,dmg:CB.torre.dano,tipo:CB.torre.tipo,sp:10})}else b.cd=.3}}
     b.smokeT-=dt;if(b.smokeT<=0){b.smokeT=.6+Math.random()*.6;const c=chimney(b);if(c){puff(c[0],c[1],'chimney');const p=PT[PT.length-1];if(p)p.z=c[2]}}
     if(b.hp<b.max*.45&&Math.random()<dt*6)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,Math.random()<.5?'fire':'smoke')}
-  updFalling(dt);animaisTick(dt);
+  updFalling(dt);animaisTick(dt);cartTick(dt);
   for(let k=G.regrow.length-1;k>=0;k--){const i=G.regrow[k],o=G.obj[i];if(!o||G.occ[i]){G.regrow.splice(k,1);continue}
     if(o.t==='stump'){o.timer-=dt;if(o.timer<=0)G.obj[i]={t:'tree',k:o.k,c:o.c,ox:o.ox,oy:o.oy,s:o.s,hp:5,g:.2}}
     else if(o.t==='tree'){o.g=Math.min(1,o.g+dt/150);if(o.g>=1)G.regrow.splice(k,1)}
@@ -789,6 +800,7 @@ function killPlayer(u){
   respawnPlayer(u);
 }
 function respawnPlayer(u){
+  const ct=cartOf(u);if(ct)ct.rider=null;u.ride=null;
   u.hp=u.max;u.food=Math.max(u.food||0,50);u.warm=Math.max(u.warm||0,60);u.energy=Math.max(u.energy||0,60);
   u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};u.sangue=0;u.stun=0;
   const s=G.bld.find(b=>b.done&&(b.type==='shelter'||b.type==='house'||b.type==='longhouse'));
@@ -1045,14 +1057,15 @@ function sendCmd(c,uid){
   const u=UMAP.get(uid==null?myPid():uid);if(!u)return{ok:false,msg:''};const h=CMDS[c.t];return h?h(u,c):{ok:false,msg:''}}
 const cmdFail=(msg,kind)=>({ok:false,msg,kind:kind===undefined?'bad':kind});
 // atalho usado pela tela para ordens de personagem (coletar, atacar, construir, etc.)
-function order(o){return sendCmd({t:'order',o})}
+function order(o){if(PL()&&PL().ride!=null&&!RIDE_OK.includes(o.type)){toast('Saia da carroça para isso','bad');return{ok:false}}return sendCmd({t:'order',o})}
 
 CMDS.order=(u,c)=>{setOrder(u,c.o);return{ok:true}};
 CMDS.walk=(u,c)=>{const p=astar(...utile(u),(x,y)=>x===c.x&&y===c.y,c.x,c.y,passV,9000)||astar(...utile(u),nearRect(c.x,c.y,1,1),c.x,c.y,passV,9000);
   if(!p)return cmdFail('Não dá para chegar lá','');setOrder(u,{type:'move'});u.path=p;return{ok:true}};
 
 // construção: a simulação confere o terreno, cobra e cria a obra
-CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
+CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');if(u.ride!=null)return cmdFail('Saia da carroça para construir');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
+  if(BD[c.type].mobile){if(G.carts.some(x=>Math.floor(x.x)===c.x&&Math.floor(x.y)===c.y))return cmdFail('Já tem um carrinho aqui');pay(BD[c.type].cost);sfx('place');cartPlace(c.x,c.y);return{ok:true}}
   const b=placeB(c.type,c.x,c.y);setOrder(u,{type:'build',b:b.id,auto:true});return{ok:true,b}};
 CMDS.line=(u,c)=>{if(!BD[c.type]||!c.a||!c.b)return cmdFail('','');let n=0,last='',first=null;
   for(const[x,y]of lineTiles(c.a,c.b)){const r=placeCheck(c.type,x,y);if(r===true){const b=placeB(c.type,x,y);first=first||b;n++}else last=r}
@@ -1086,6 +1099,14 @@ CMDS.godeposit=(u)=>{let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.t
 CMDS.desmontarDep=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||!BD[b.type].store)return cmdFail('','');
   const left=storeCap()-BD[b.type].store;for(const k in G.res)if(G.res[k]>left)return cmdFail('Os outros depósitos não cabem tudo. Construa outro antes.');
   destroyB(b);refund(BD[b.type].cost,DESMONTAR_DEP);toast('Depósito desmontado. Tudo continua guardado.','good');return{ok:true}};
+// carrinho: mover (sobe como condutor), guardar mochila, descarregar no depósito
+CMDS.cartOp=(u,c)=>{const ct=G.carts.find(x=>x.id===c.id);if(!ct)return cmdFail('','');
+  if(c.op==='ride'){if(u.ride!=null)return cmdFail('Você já está no carrinho');if(ct.rider!=null)return cmdFail('Outro personagem já está conduzindo');setOrder(u,{type:'ride',c:ct.id});return{ok:true}}
+  if(c.op==='stow'||c.op==='unload'){if(cartNear(u,ct)){const r=cartExec(ct,c.op);if(r.msg)toast(r.msg,r.kind);return r.ok?{ok:true}:cmdFail('')}
+    setOrder(u,{type:c.op,c:ct.id});return{ok:true}}
+  return cmdFail('','')};
+// desce do carrinho: o carrinho fica onde está
+CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=null;u.ride=null;const p=freeNear(Math.floor(ct.x),Math.floor(ct.y),2);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.order=null;return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 
@@ -1096,6 +1117,56 @@ CMDS.sleep=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');setOrder(u,
 CMDS.ring=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');tocaSino(b);return{ok:true}};
 CMDS.demolish=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);return{ok:true}};
 CMDS.loot=(u,c)=>{const t=G.tombs.find(x=>x.id===c.id);if(!t)return cmdFail('','');lootTomb(t);return{ok:true}};
+/* ================= Carrinho de mão ================= */
+// Carrinho: fica em G.carts (não é construção: não ocupa tile e não bloqueia passagem).
+// Parado = depósito portátil (guarda a mochila, descarrega no depósito).
+// Conduzido ("Mover"): o personagem vira o condutor, o carrinho segue atrás dele na mesma velocidade.
+// Quem simula é o anfitrião; o amigo recebe o estado.
+function cartAt(wx,wy){for(const c of G.carts||[])if(Math.hypot(wx-c.x,wy-c.y)<.7)return c;return null}
+function cartOf(u){return u&&u.ride!=null?G.carts.find(c=>c.id===u.ride)||null:null}
+function cartW(c){let w=0;for(const k in c.inv)w+=c.inv[k]*WEIGHT[k];for(const k in c.items)w+=c.items[k]*(ITEMS[k]?.peso||0);return Math.round(w*10)/10}
+function cartNear(u,c){return Math.hypot(u.x-c.x,u.y-c.y)<=1.6}
+function cartPlace(x,y){const c={id:G.idc++,x:x+.5,y:y+.5,hp:CARRINHO.vida,max:CARRINHO.vida,inv:{},items:{},rider:null};G.carts.push(c);return c}
+// tudo o que cabe (até a capacidade da mochila) vai para o carrinho; o resto fica na mochila
+function cartStow(c){let sobra=false;
+  for(const k in G.inv){const n=G.inv[k];if(n<=0)continue;const room=Math.max(0,Math.floor((BAG-cartW(c))/WEIGHT[k]+1e-6));const m=Math.min(n,room);if(m>0){G.inv[k]-=m;c.inv[k]=(c.inv[k]||0)+m}if(G.inv[k]>0)sobra=true}
+  for(const k in G.items){const n=G.items[k];if(!n)continue;const w=ITEMS[k]?.peso||0;const room=w>0?Math.max(0,Math.floor((BAG-cartW(c))/w+1e-6)):n;const m=Math.min(n,room);if(m>0){G.items[k]-=m;c.items[k]=(c.items[k]||0)+m}if(G.items[k]>0)sobra=true}
+  if(sobra)return{ok:true,msg:'Carrinho cheio. O resto ficou na mochila.',kind:'bad'};
+  return{ok:true,msg:'🛒 Mochila guardada no carrinho',kind:'good'}}
+// descarrega no depósito mais próximo do carrinho (precisa estar encostado no depósito)
+function cartUnload(c){const b=G.bld.find(x=>x.done&&BD[x.type].store&&isNear(c,x));
+  if(!b)return{ok:false,msg:'Leve o carrinho até um depósito',kind:'bad'};
+  const cap=storeCap();let left=0;
+  for(const k in c.inv){const m=Math.min(c.inv[k],Math.max(0,cap-G.res[k]));G.res[k]+=m;c.inv[k]-=m;left+=c.inv[k]}
+  for(const k in c.items){G.items[k]=(G.items[k]||0)+c.items[k];c.items[k]=0}
+  if(left>0)return{ok:true,msg:'Depósito cheio para alguns itens. Construa outro.',kind:'bad'};
+  return{ok:true,msg:'📦 Carrinho descarregado no depósito',kind:'good'}}
+function cartExec(c,op){return op==='stow'?cartStow(c):cartUnload(c)}
+// movimento: o carrinho anda atrás do condutor, com a mesma velocidade; parado, fica onde está
+function cartTick(dt){
+  for(const c of G.carts.slice()){
+    if(c.rider!=null){const r=UMAP.get(c.rider);
+      if(!r||r.ride!==c.id){c.rider=null;continue}
+      if(!r.moving||r.heading==null)continue;
+      const tx=r.x-Math.cos(r.heading)*.75,ty=r.y-Math.sin(r.heading)*.75,dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy);
+      const sp=r.speed*dt*survivalSpeed(r);if(d>.001){const s=Math.min(d,sp);c.x+=dx/d*s;c.y+=dy/d*s}
+      continue}
+    // parado e sem ninguém por perto: invasor rouba, animal quebra
+    if(G.units.some(u=>u.kind==='player'&&Math.hypot(u.x-c.x,u.y-c.y)<5))continue;
+    if(G.units.some(u=>u.kind==='raider'&&Math.hypot(u.x-c.x,u.y-c.y)<1.2)&&cartW(c)>0){c.inv={};c.items={};toast('🛒 Invasores roubaram o carrinho sem ninguém por perto','bad')}
+    if(G.units.some(u=>u.kind==='animal'&&Math.hypot(u.x-c.x,u.y-c.y)<1.2)){c.hp-=dt*6;if(c.hp<=0){G.carts=G.carts.filter(x=>x!==c);puff(c.x,c.y,'debris');toast('🛒 O carrinho quebrou sem ninguém por perto','bad')}}
+  }
+}
+// desenho (lido pelo render; mesmo formato de drawTomb)
+function drawCart(c){const q=P(c.x,c.y);
+  ell(q[0],q[1]+2,12,5,'rgba(0,0,0,.25)');
+  ell(q[0]-7,q[1]+2,3.6,3.6,'#3b2a1a');ell(q[0]+7,q[1]+2,3.6,3.6,'#3b2a1a');
+  ln([q[0]+11,q[1]-4],[q[0]+21,q[1]-12],'#6b4a26',2.2);
+  pp([[q[0]-11,q[1]-6],[q[0]+11,q[1]-6],[q[0]+11,q[1]+1],[q[0]-11,q[1]+1]],'#9a6a3a');
+  ln([q[0]-11,q[1]-2.5],[q[0]+11,q[1]-2.5],'rgba(0,0,0,.25)',1);
+  if(Object.values(c.inv||{}).some(v=>v>0)||Object.values(c.items||{}).some(v=>v>0))ell(q[0],q[1]-9,6,3,'#c9a25a');
+  if(c.hp<c.max*.5)ln([q[0]-3,q[1]-6],[q[0]+1,q[1]-2],'#3b2a1a',1);
+}
 /* ================= Sprites (Stylized Nature MegaKit, Quaternius, CC0) =================
    PNGs baked offline from the glTF pack (tools/sprite-bake). Keys:
    <biome>_oak_<c>, <biome>_pine_<c>, <biome>_bush, rock_<i>, pebble_<i>, flower_0.
@@ -1345,7 +1416,7 @@ function drawFlatB(b){const p=b.done?1:b.prog/b.work;switch(b.type){case'farm':r
   const d=BD[b.type];if(b.done&&!d.water&&!d.line&&!d.gate)pp([P(b.x+.15,b.y+.05),P(b.x+b.w+.35,b.y+.05),P(b.x+b.w+.35,b.y+b.h+.1),P(b.x+.15,b.y+b.h+.1)],'rgba(0,0,0,.13)')}
 function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
-    case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p)}
+    case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
   ({longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
 
@@ -1506,6 +1577,7 @@ function render(){
   for(const u of G.units)if(!u.hidden&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
+  for(const c of G.carts)if(vis(c.x,c.y))L.push([c.x+c.y,6,c]);
   L.sort((a,b)=>a[0]-b[0]);
   for(const[,k,o]of L){
     if(k===0)drawObj(G.obj[o],o%N,(o/N)|0);
@@ -1516,6 +1588,7 @@ function render(){
       if(o.done){if(o.type==='longhouse')LIGHTS.push([o.x+1.5,o.y+2.6,90]);else if(o.type==='smithy')LIGHTS.push([o.x+.9,o.y+1.7,80]);else if(o.type==='house')LIGHTS.push([o.x+1.7,o.y+1,45]);else if(o.type==='shelter')LIGHTS.push([o.x+1.2,o.y+1.75,80])}}
     else if(k===3){drawUnit(o);if(o.kind==='player')LIGHTS.push([o.x,o.y,38])}
     else if(k===5)drawTomb(o)
+    else if(k===6)drawCart(o)
     else{const D=DECOR[o.k];if(!D)continue;const q=P(o.x,o.y);const onW=inb(Math.floor(o.x),Math.floor(o.y))&&G.tiles[idx(Math.floor(o.x),Math.floor(o.y))]<=1;
       ctx.save();ctx.translate(q[0],q[1]+(onW?Math.sin(perfT*1.6+o.x)*1.2:0));ctx.scale(o.s*o.f,o.s);if(onW)ell(0,2,D.big?40:16,D.big?9:5,'rgba(255,255,255,.18)');D.d();ctx.restore();
       if(D.light)LIGHTS.push([o.x,o.y,D.light*o.s]);
@@ -1626,6 +1699,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
       mode.sel=null;sel=eb?{k:'b',id:eb.id}:null}
     openSheet('edit');return}
   const tmb=tombAt(wx,wy);if(tmb){sel={k:'t',id:tmb.id};openSheet('tomb');return}
+  const ctc=cartAt(wx,wy);if(ctc){closeDepMenu();sel={k:'c',id:ctc.id};openSheet('cart');return}
   const me=PL();
   if(me){const[sx,sy]=w2s(me.x,me.y,9);if(Math.hypot(px-sx,py-sy)<Math.max(16,18*cam.z)){openSheet('bag');return}}
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
@@ -1769,6 +1843,14 @@ function sheetHTML(){
       `<h4>Nos depósitos ${cap?`· até ${capLabel()}`:''}</h4>`+(cap?`<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.res[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.res[k]}</b><small>${RES[k][0]}</small></div>`).join('')}</div>${w>0?'<div class="row"><button class="gbtn" data-a="godeposit">'+icon('interface','depositar')+' Ir guardar tudo</button></div>':''}`:'<p class="hint">Nenhum depósito ainda. Construa uma Pilha de recursos.</p>')+
       `<h4>Equipamento</h4>${equipHTML()}<h4>Ferramentas e armas</h4>${bagItemsHTML()}`+
       `<h4>Assentamento</h4><table class="tbl"><tr><td>Construções</td><td>${G.bld.filter(b=>b.done&&!BD[b.type].line).length}</td></tr><tr><td>Peças de muro, cerca e piso</td><td>${G.bld.filter(b=>b.done&&BD[b.type].line).length}</td></tr><tr><td>Moradores</td><td>${popCount()} <span class="small">(em breve)</span></td></tr><tr><td>Dia</td><td>${Math.floor(G.t/240)+1} ${darkness()>.1?'🌙':'☀️'}</td></tr></table>`}
+  case'cart':{const c=sel&&sel.k==='c'?G.carts.find(x=>x.id===sel.id):null;if(!c)return null;const me=PL(),riding=me&&me.ride===c.id;
+    const it=[...Object.keys(c.inv).filter(k=>c.inv[k]>0).map(k=>`${icon('recursos',k)} ${c.inv[k]} ${RES[k][0]}`),...Object.keys(c.items).filter(k=>c.items[k]>0).map(k=>`${itemIcon(k)} ${c.items[k]} ${ITEMS[k].n}`)];
+    const near=G.bld.some(b=>b.done&&BD[b.type].store&&isNear(c,b));
+    let btn='';
+    if(riding)btn='<p class="hint">Você está conduzindo. Toque em Sair da carroça para descer.</p>';
+    else if(c.rider!=null)btn='<p class="hint">Alguém está conduzindo o carrinho.</p>';
+    else btn=`<button class="gbtn" data-a="cartop" data-v="ride">🛒 Mover</button> <button class="sbtn" data-a="cartop" data-v="stow">${icon('interface','mochila')} Guardar mochila</button>`+(near&&it.length?` <button class="sbtn" data-a="cartop" data-v="unload">📦 Descarregar tudo</button>`:'');
+    return head('Carrinho de mão',`Mochila do carrinho: ${cartW(c)}/${BAG}.`)+(it.length?`<p class="hint">${it.join(' · ')}</p>`:'<p class="hint">Vazio.</p>')+`<div class="row">${btn}</div>`}
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
   case'info':return infoHTML()}
@@ -1812,6 +1894,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'repair':if(b&&sendCmd({t:'repair',b:b.id}).ok)closeSheet();break;
   case'ring':if(b)sendCmd({t:'ring',b:b.id});break;
   case'sleep':if(b&&sendCmd({t:'sleep',b:b.id}).ok)closeSheet();break;
+  case'cartop':{if(sel&&sel.k==='c'){const r=sendCmd({t:'cartOp',id:sel.id,op:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else if(v==='ride')closeSheet();}break}
   case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)sendCmd({t:'loot',id:t.id});sel=null;break}
   case'demolish':if(b){sendCmd({t:'demolish',b:b.id});closeSheet()}break;
   case'bdel':if(b){sendCmd({t:'demolish',b:b.id});sel=null}break;
@@ -1835,11 +1918,13 @@ const BAR_RES=['stick','wood','stone','food']; // barra de cima: só estes + moc
 function updHUD(){if(!G)return;needsHUD();const w=bagW();
   const h=BAR_RES.map(k=>`<div class="chip" title="${RES[k][0]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
   if(h!==hudSig){hudSig=h;$('#res').innerHTML=h}
+  const pl=PL(),dm=$('#bDismount');if(dm)dm.classList.toggle('hidden',!(pl&&pl.ride!=null));
   const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');}
 $('#res').addEventListener('click',e=>{if(e.target.closest('[data-bag]')){if(sheetKind==='bag')closeSheet();else{if(mode.t!=='none')cancelMode();openSheet('bag')}}});
 $('#raid').addEventListener('click',()=>{const r=G.units.find(u=>u.kind==='raider');if(r)focusOn(r.x,r.y)});
 $('#bLoc').addEventListener('click',()=>{const p=PL();if(p)focusOn(p.x,p.y)});
 $('#bMenu').addEventListener('click',()=>openMenu(true));
+$('#bDismount').addEventListener('click',()=>sendCmd({t:'dismount'}));
 function toast(msg,kind){if(G&&G.demo)return;const box=$('#toasts');for(const c of box.children)if(c.dataset.msg===msg)return;const el=document.createElement('div');el.className='toast glass '+(kind||'');el.dataset.msg=msg;el.replaceChildren(richNodes(msg));box.appendChild(el);while(box.children.length>2)box.firstChild.remove();setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400)},kind==='bad'?3800:3000)}
 function centerOn(x,y){const q=P(x,y);cam.x=W/2-q[0]*cam.z;cam.y=H*.48-q[1]*cam.z}
 function focusOn(x,y){const q=P(x,y);camGo={x:W/2-q[0]*cam.z,y:H*.48-q[1]*cam.z}}
@@ -1877,9 +1962,9 @@ function audioTick(dt){if(!SND.ctx||!SND.wind)return;const w=windStrength(),on=s
 // snapState() é o estado do mundo como objeto simples. Serve ao save (neste aparelho)
 // e ao multijogador (o anfitrião manda ao amigo). Não leva a câmera nem nada que seja só deste aparelho.
 // applyState() é o caminho inverso: reconstrói G a partir dele.
-function snapState(){return{v:4,biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
+function snapState(){return{v:5,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
 function applyState(s){
-  BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0};
+  BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],carts:s.carts||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0};
   BMAP=new Map();UMAP=new Map();for(const b of G.bld){BMAP.set(b.id,b);for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)G.occ[idx(b.x+dx,b.y+dy)]=b.id}
   for(const u of G.units)UMAP.set(u.id,u);if(!G.units.some(u=>u.kind==='raider'))G.raidOn=false;
   if(!PL()){const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id}
@@ -1907,7 +1992,7 @@ const NET_V=1,NET_HZ=5,NET_WORLD_EVERY=10,NET_DT=1/5,NET_PREFIX='fjordheim-',NET
 const netErr=e=>({'peer-unavailable':'Sala não encontrada. Confira o código.','network':'Sem conexão com o servidor de salas.','browser-incompatible':'Este navegador não suporta conexão entre aparelhos.'})[e&&e.type]||('Não foi possível conectar'+(e&&e.type?' ('+e.type+')':'')+'.');
 function netCode(){let s='';for(let i=0;i<5;i++)s+=NET_CHARS[(Math.random()*NET_CHARS.length)|0];return s}
 // estado rápido: tudo que muda com frequência (sem terreno, sem obj e sem wear, que vão no canal 'world')
-function netFast(){return{units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false})),bld:G.bld.map(b=>({...b,pop:0})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,equip:G.equip,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,rs:G.rs,animT:G.animT}}
+function netFast(){return{units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false})),bld:G.bld.map(b=>({...b,pop:0})),decor:G.decor,tombs:G.tombs,carts:G.carts,res:G.res,inv:G.inv,items:G.items,equip:G.equip,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,rs:G.rs,animT:G.animT}}
 function netWorld(){return{obj:G.obj,wear:Array.from(G.wear,v=>Math.round(v*10)/10)}}
 function netStatus(){return NET.conn&&NET.conn.open?'amigo conectado':'aguardando amigo'}
 function rebuildIndex(){BMAP=new Map();UMAP=new Map();if(G.occ&&G.occ.length===N*N)G.occ.fill(0);else G.occ=new Int32Array(N*N);
@@ -1970,7 +2055,7 @@ function netApplyFast(s){
   G.units=s.units.map(d=>{let u=old.get(d.id);
     if(u){u._fx=u.x;u._fy=u.y;Object.assign(u,d)}else{u=d;u._fx=d.x;u._fy=d.y}
     u._gx=d.x;u._gy=d.y;u._t0=perfT;return u});
-  G.bld=s.bld;G.decor=s.decor;G.tombs=s.tombs;G.res=s.res;G.inv=s.inv;G.items=s.items;G.equip=s.equip;
+  G.bld=s.bld;G.decor=s.decor;G.tombs=s.tombs;G.carts=s.carts||[];G.res=s.res;G.inv=s.inv;G.items=s.items;G.equip=s.equip;
   G.t=s.t;G.speed=s.speed;G.raidOn=s.raidOn;G.nextRaid=s.nextRaid;G.raidN=s.raidN;G.regrow=s.regrow;G.fall=s.fall;
   G.hints=s.hints;G.flags=s.flags;G.idc=s.idc;G.animT=s.animT;G.pid=s.pid;G.start=s.start;G.rs=s.rs;
   rebuildIndex()}
@@ -2035,7 +2120,7 @@ function devPanel(){
 /* ================= Game setup ================= */
 const playerLook=()=>({name:'Você',tunic:'#2f5fa8',hair:'#d9a84e',skin:'#f1c9a0',fem:false,hp:100,max:100,speed:2,ox:0,oy:0});
 function newGame(biome,seed,demo){if(NET.role==='host')netLeave(true);BIO=BIOMES[biome];
-  G={biome,seed:seed||((Math.random()*1e9)|0),tiles:new Uint8Array(N*N),wear:new Float32Array(N*N),h:new Float32Array(N*N),obj:new Array(N*N).fill(null),occ:new Int32Array(N*N),bld:[],units:[],decor:[],tombs:[],
+  G={biome,seed:seed||((Math.random()*1e9)|0),tiles:new Uint8Array(N*N),wear:new Float32Array(N*N),h:new Float32Array(N*N),obj:new Array(N*N).fill(null),occ:new Int32Array(N*N),bld:[],units:[],decor:[],tombs:[],carts:[],
     res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,
     t:185,speed:1,idc:1,nextRaid:1e12,raidN:0,raidOn:false,regrow:[],fall:[],hints:{},flags:{},demo:!!demo};
   BMAP=new Map();UMAP=new Map();PT=[];AR=[];genMap();

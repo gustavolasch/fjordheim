@@ -2,7 +2,9 @@
 function myPid(){return NET.role==='guest'?NET.pid:G.pid}
 function PL(){return G&&UMAP.get(myPid())}
 function adjT(u,x,y){const[tx,ty]=utile(u);return Math.abs(tx-x)<=1&&Math.abs(ty-y)<=1}
-function setOrder(u,o){if(!u||u.down)return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
+// enquanto conduz o carrinho, só andar e as ações do carrinho
+const RIDE_OK=['move','ride','stow','unload'];
+function setOrder(u,o){if(!u||u.down)return;if(u.ride!=null&&!RIDE_OK.includes(o.type))return;const old=u.order;if(old&&old.paid&&!old.done)refund(old.paid,1);u.order=o;u.path=null;u.act=null;u.idleT=0}
 // replanejamentos: obstáculo que muda no meio do caminho (árvore cai, construção) não deve cancelar a ordem
 function stepTo(u,o,rx,ry,rw,rh,inside){if(o.tries>4){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}o.tries=(o.tries||0)+1;if(!goRect(u,rx,ry,rw,rh,inside,passV,9000)){u.order=null;if(!o.auto)toast('Não dá para chegar lá','bad');return false}return true}
 function faceTo(u,x,y){if(Math.abs((x-u.x)-(y-u.y))>.05)u.face=(x-u.x)-(y-u.y)>0?1:-1}
@@ -32,6 +34,12 @@ function updPlayer(u,dt){
     if(!canCarry('food')){bagFull();u.order=null;return}o.tries=0;faceTo(u,x+.5,y+.5);u.act={type:'fish',t:0,dur:4,fx:x+.5,fy:y+.5};return}
   case'farm':{const b=BMAP.get(o.b);if(!b||!b.done){u.order=null;return}const[tx,ty]=utile(u);
     if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;u.act={type:'farm',t:0,dur:3*(G.items.sickle>0?.62:1.25),b:b.id};return}
+  case'ride':{const ct=G.carts.find(x=>x.id===o.c);if(!ct||ct.rider!=null){u.order=null;return}
+    if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
+    ct.rider=u.id;u.ride=ct.id;u.act=null;u.path=null;u.order=null;toast('🛒 Você está conduzindo o carrinho. Toque em Sair da carroça para descer.');return}
+  case'stow':case'unload':{const ct=G.carts.find(x=>x.id===o.c);if(!ct){u.order=null;return}
+    if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
+    const r=cartExec(ct,o.type);if(r.msg)toast(r.msg,r.kind);u.order=null;return}
   case'sleep':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}sleepNight(u);u.order=null;return}
   case'craft':{if(!o.started){o.started=true;u.act={type:'craft',item:o.item,t:0,dur:1.4}}return}
   case'forge':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}if(!o.started){o.started=true;faceTo(u,b.x+1,b.y+1);u.act={type:'forge',item:o.item,t:0,dur:2.6}}return}

@@ -4,11 +4,13 @@ const BAR_RES=['stick','wood','stone','food']; // barra de cima: só estes + moc
 function updHUD(){if(!G)return;needsHUD();const w=bagW();
   const h=BAR_RES.map(k=>`<div class="chip" title="${RES[k][0]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
   if(h!==hudSig){hudSig=h;$('#res').innerHTML=h}
+  const pl=PL(),dm=$('#bDismount');if(dm)dm.classList.toggle('hidden',!(pl&&pl.ride!=null));
   const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');}
 $('#res').addEventListener('click',e=>{if(e.target.closest('[data-bag]')){if(sheetKind==='bag')closeSheet();else{if(mode.t!=='none')cancelMode();openSheet('bag')}}});
 $('#raid').addEventListener('click',()=>{const r=G.units.find(u=>u.kind==='raider');if(r)focusOn(r.x,r.y)});
 $('#bLoc').addEventListener('click',()=>{const p=PL();if(p)focusOn(p.x,p.y)});
 $('#bMenu').addEventListener('click',()=>openMenu(true));
+$('#bDismount').addEventListener('click',()=>sendCmd({t:'dismount'}));
 function toast(msg,kind){if(G&&G.demo)return;const box=$('#toasts');for(const c of box.children)if(c.dataset.msg===msg)return;const el=document.createElement('div');el.className='toast glass '+(kind||'');el.dataset.msg=msg;el.replaceChildren(richNodes(msg));box.appendChild(el);while(box.children.length>2)box.firstChild.remove();setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400)},kind==='bad'?3800:3000)}
 function centerOn(x,y){const q=P(x,y);cam.x=W/2-q[0]*cam.z;cam.y=H*.48-q[1]*cam.z}
 function focusOn(x,y){const q=P(x,y);camGo={x:W/2-q[0]*cam.z,y:H*.48-q[1]*cam.z}}

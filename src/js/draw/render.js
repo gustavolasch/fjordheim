@@ -40,6 +40,7 @@ function render(){
   for(const u of G.units)if(!u.hidden&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
+  for(const c of G.carts)if(vis(c.x,c.y))L.push([c.x+c.y,6,c]);
   L.sort((a,b)=>a[0]-b[0]);
   for(const[,k,o]of L){
     if(k===0)drawObj(G.obj[o],o%N,(o/N)|0);
@@ -50,6 +51,7 @@ function render(){
       if(o.done){if(o.type==='longhouse')LIGHTS.push([o.x+1.5,o.y+2.6,90]);else if(o.type==='smithy')LIGHTS.push([o.x+.9,o.y+1.7,80]);else if(o.type==='house')LIGHTS.push([o.x+1.7,o.y+1,45]);else if(o.type==='shelter')LIGHTS.push([o.x+1.2,o.y+1.75,80])}}
     else if(k===3){drawUnit(o);if(o.kind==='player')LIGHTS.push([o.x,o.y,38])}
     else if(k===5)drawTomb(o)
+    else if(k===6)drawCart(o)
     else{const D=DECOR[o.k];if(!D)continue;const q=P(o.x,o.y);const onW=inb(Math.floor(o.x),Math.floor(o.y))&&G.tiles[idx(Math.floor(o.x),Math.floor(o.y))]<=1;
       ctx.save();ctx.translate(q[0],q[1]+(onW?Math.sin(perfT*1.6+o.x)*1.2:0));ctx.scale(o.s*o.f,o.s);if(onW)ell(0,2,D.big?40:16,D.big?9:5,'rgba(255,255,255,.18)');D.d();ctx.restore();
       if(D.light)LIGHTS.push([o.x,o.y,D.light*o.s]);

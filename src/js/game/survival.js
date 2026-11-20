@@ -57,6 +57,7 @@ function killPlayer(u){
   respawnPlayer(u);
 }
 function respawnPlayer(u){
+  const ct=cartOf(u);if(ct)ct.rider=null;u.ride=null;
   u.hp=u.max;u.food=Math.max(u.food||0,50);u.warm=Math.max(u.warm||0,60);u.energy=Math.max(u.energy||0,60);
   u.act=null;u.order=null;u.path=null;u.moving=false;u.warnT={};u.sangue=0;u.stun=0;
   const s=G.bld.find(b=>b.done&&(b.type==='shelter'||b.type==='house'||b.type==='longhouse'));

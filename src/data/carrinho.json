@@ -1,0 +1,6 @@
+{
+  "_nota": "Carrinho de mão. Capacidade = mochila (BAG, em js/core/00-base.js). Velocidade = a do personagem que conduz. peso só informativo: o carrinho não entra na mochila.",
+  "custo": { "wood": 3, "stick": 4, "fibra": 2 },
+  "vida": 60,
+  "peso": 6
+}

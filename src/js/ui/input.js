@@ -47,6 +47,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
       mode.sel=null;sel=eb?{k:'b',id:eb.id}:null}
     openSheet('edit');return}
   const tmb=tombAt(wx,wy);if(tmb){sel={k:'t',id:tmb.id};openSheet('tomb');return}
+  const ctc=cartAt(wx,wy);if(ctc){closeDepMenu();sel={k:'c',id:ctc.id};openSheet('cart');return}
   const me=PL();
   if(me){const[sx,sy]=w2s(me.x,me.y,9);if(Math.hypot(px-sx,py-sy)<Math.max(16,18*cam.z)){openSheet('bag');return}}
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}

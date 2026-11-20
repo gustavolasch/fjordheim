@@ -11,14 +11,15 @@ function sendCmd(c,uid){
   const u=UMAP.get(uid==null?myPid():uid);if(!u)return{ok:false,msg:''};const h=CMDS[c.t];return h?h(u,c):{ok:false,msg:''}}
 const cmdFail=(msg,kind)=>({ok:false,msg,kind:kind===undefined?'bad':kind});
 // atalho usado pela tela para ordens de personagem (coletar, atacar, construir, etc.)
-function order(o){return sendCmd({t:'order',o})}
+function order(o){if(PL()&&PL().ride!=null&&!RIDE_OK.includes(o.type)){toast('Saia da carroça para isso','bad');return{ok:false}}return sendCmd({t:'order',o})}
 
 CMDS.order=(u,c)=>{setOrder(u,c.o);return{ok:true}};
 CMDS.walk=(u,c)=>{const p=astar(...utile(u),(x,y)=>x===c.x&&y===c.y,c.x,c.y,passV,9000)||astar(...utile(u),nearRect(c.x,c.y,1,1),c.x,c.y,passV,9000);
   if(!p)return cmdFail('Não dá para chegar lá','');setOrder(u,{type:'move'});u.path=p;return{ok:true}};
 
 // construção: a simulação confere o terreno, cobra e cria a obra
-CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
+CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');if(u.ride!=null)return cmdFail('Saia da carroça para construir');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
+  if(BD[c.type].mobile){if(G.carts.some(x=>Math.floor(x.x)===c.x&&Math.floor(x.y)===c.y))return cmdFail('Já tem um carrinho aqui');pay(BD[c.type].cost);sfx('place');cartPlace(c.x,c.y);return{ok:true}}
   const b=placeB(c.type,c.x,c.y);setOrder(u,{type:'build',b:b.id,auto:true});return{ok:true,b}};
 CMDS.line=(u,c)=>{if(!BD[c.type]||!c.a||!c.b)return cmdFail('','');let n=0,last='',first=null;
   for(const[x,y]of lineTiles(c.a,c.b)){const r=placeCheck(c.type,x,y);if(r===true){const b=placeB(c.type,x,y);first=first||b;n++}else last=r}
@@ -52,6 +53,14 @@ CMDS.godeposit=(u)=>{let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.t
 CMDS.desmontarDep=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||!BD[b.type].store)return cmdFail('','');
   const left=storeCap()-BD[b.type].store;for(const k in G.res)if(G.res[k]>left)return cmdFail('Os outros depósitos não cabem tudo. Construa outro antes.');
   destroyB(b);refund(BD[b.type].cost,DESMONTAR_DEP);toast('Depósito desmontado. Tudo continua guardado.','good');return{ok:true}};
+// carrinho: mover (sobe como condutor), guardar mochila, descarregar no depósito
+CMDS.cartOp=(u,c)=>{const ct=G.carts.find(x=>x.id===c.id);if(!ct)return cmdFail('','');
+  if(c.op==='ride'){if(u.ride!=null)return cmdFail('Você já está no carrinho');if(ct.rider!=null)return cmdFail('Outro personagem já está conduzindo');setOrder(u,{type:'ride',c:ct.id});return{ok:true}}
+  if(c.op==='stow'||c.op==='unload'){if(cartNear(u,ct)){const r=cartExec(ct,c.op);if(r.msg)toast(r.msg,r.kind);return r.ok?{ok:true}:cmdFail('')}
+    setOrder(u,{type:c.op,c:ct.id});return{ok:true}}
+  return cmdFail('','')};
+// desce do carrinho: o carrinho fica onde está
+CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=null;u.ride=null;const p=freeNear(Math.floor(ct.x),Math.floor(ct.y),2);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.order=null;return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 

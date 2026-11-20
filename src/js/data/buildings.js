@@ -23,6 +23,7 @@ const BD={
  fgate:{n:'Porteira',cat:'doors',grp:'fence',w:1,h:1,cost:{stick:3},hp:80,work:2,gate:true,desc:'Encaixa nas cercas.'},
  stonegate:{n:'Portão de pedra',cat:'doors',grp:'wall',w:1,h:1,cost:{stone:4},hp:380,work:5,gate:true,stone:true,desc:'Encaixa no muro de pedra. Você passa, invasores não.'},
  railgate:{n:'Porteira de tábuas',cat:'doors',grp:'fence',w:1,h:1,cost:{wood:2},hp:120,work:3,gate:true,desc:'Encaixa na cerca de tábuas.'},
+ cart:{n:'Carrinho de mão',cat:'store',w:1,h:1,cost:CARRINHO.custo,hp:CARRINHO.vida,mobile:true,desc:'Leva a mochila. Toque em Mover para conduzir. Estacionado, guarda a mochila com um toque.'},
  stockpile:{n:'Pilha de recursos',cat:'store',w:2,h:2,cost:{stick:4},hp:80,work:3,flat:true,store:30,desc:'Toque para guardar o que carrega. 30 de cada recurso.'},
  storage:{n:'Armazém',cat:'store',w:2,h:2,cost:{wood:12,stone:4},hp:260,work:14,wallH:12,store:150,desc:'Guarda 150 de cada recurso.'}
 };

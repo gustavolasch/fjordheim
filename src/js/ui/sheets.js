@@ -37,6 +37,14 @@ function sheetHTML(){
       `<h4>Nos depósitos ${cap?`· até ${capLabel()}`:''}</h4>`+(cap?`<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.res[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.res[k]}</b><small>${RES[k][0]}</small></div>`).join('')}</div>${w>0?'<div class="row"><button class="gbtn" data-a="godeposit">'+icon('interface','depositar')+' Ir guardar tudo</button></div>':''}`:'<p class="hint">Nenhum depósito ainda. Construa uma Pilha de recursos.</p>')+
       `<h4>Equipamento</h4>${equipHTML()}<h4>Ferramentas e armas</h4>${bagItemsHTML()}`+
       `<h4>Assentamento</h4><table class="tbl"><tr><td>Construções</td><td>${G.bld.filter(b=>b.done&&!BD[b.type].line).length}</td></tr><tr><td>Peças de muro, cerca e piso</td><td>${G.bld.filter(b=>b.done&&BD[b.type].line).length}</td></tr><tr><td>Moradores</td><td>${popCount()} <span class="small">(em breve)</span></td></tr><tr><td>Dia</td><td>${Math.floor(G.t/240)+1} ${darkness()>.1?'🌙':'☀️'}</td></tr></table>`}
+  case'cart':{const c=sel&&sel.k==='c'?G.carts.find(x=>x.id===sel.id):null;if(!c)return null;const me=PL(),riding=me&&me.ride===c.id;
+    const it=[...Object.keys(c.inv).filter(k=>c.inv[k]>0).map(k=>`${icon('recursos',k)} ${c.inv[k]} ${RES[k][0]}`),...Object.keys(c.items).filter(k=>c.items[k]>0).map(k=>`${itemIcon(k)} ${c.items[k]} ${ITEMS[k].n}`)];
+    const near=G.bld.some(b=>b.done&&BD[b.type].store&&isNear(c,b));
+    let btn='';
+    if(riding)btn='<p class="hint">Você está conduzindo. Toque em Sair da carroça para descer.</p>';
+    else if(c.rider!=null)btn='<p class="hint">Alguém está conduzindo o carrinho.</p>';
+    else btn=`<button class="gbtn" data-a="cartop" data-v="ride">🛒 Mover</button> <button class="sbtn" data-a="cartop" data-v="stow">${icon('interface','mochila')} Guardar mochila</button>`+(near&&it.length?` <button class="sbtn" data-a="cartop" data-v="unload">📦 Descarregar tudo</button>`:'');
+    return head('Carrinho de mão',`Mochila do carrinho: ${cartW(c)}/${BAG}.`)+(it.length?`<p class="hint">${it.join(' · ')}</p>`:'<p class="hint">Vazio.</p>')+`<div class="row">${btn}</div>`}
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
   case'info':return infoHTML()}
@@ -80,6 +88,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'repair':if(b&&sendCmd({t:'repair',b:b.id}).ok)closeSheet();break;
   case'ring':if(b)sendCmd({t:'ring',b:b.id});break;
   case'sleep':if(b&&sendCmd({t:'sleep',b:b.id}).ok)closeSheet();break;
+  case'cartop':{if(sel&&sel.k==='c'){const r=sendCmd({t:'cartOp',id:sel.id,op:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else if(v==='ride')closeSheet();}break}
   case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)sendCmd({t:'loot',id:t.id});sel=null;break}
   case'demolish':if(b){sendCmd({t:'demolish',b:b.id});closeSheet()}break;
   case'bdel':if(b){sendCmd({t:'demolish',b:b.id});sel=null}break;
