@@ -16,6 +16,8 @@ const JS_ORDER = [
   'js/core/00-base.js',
   'GENERATED:sprites',
   'GENERATED:combate',
+  'GENERATED:icones',
+  'js/draw/icons.js',
   'js/data/biomes.js',
   'js/data/buildings.js',
   'js/data/resources.js',
@@ -77,6 +79,7 @@ const ORDER = JS_ORDER;
 const js = ORDER.map(rel => {
   if (rel === 'GENERATED:sprites') return genSprites();
   if (rel === 'GENERATED:combate') return genJson('combate.json', 'CDATA');
+  if (rel === 'GENERATED:icones') return genJson('icones.json', 'ICONES');
   return read(rel);
 }).join('');
 
@@ -97,4 +100,6 @@ fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, html);
 // Manifesto e ícones (src/pwa/) vão junto do HTML, para o app instalado e para dist/ abrir sem erro.
 fs.cpSync(path.join(SRC, 'pwa'), path.dirname(OUT), { recursive: true });
+// Ícones WebP vão para dist/icones/ (carregados sob demanda). Os PNG originais ficam fora do build.
+fs.cpSync(path.join(SRC, 'icones'), path.join(path.dirname(OUT), 'icones'), { recursive: true, filter: (f) => !/[\\/]png([\\/]|$)/.test(f) && (fs.statSync(f).isDirectory() || f.endsWith('.webp')) });
 console.log(`ok: ${path.relative(ROOT, OUT)} (${(html.length / 1024).toFixed(1)} KB, ${ORDER.length} módulos JS)`);
