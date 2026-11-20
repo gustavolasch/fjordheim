@@ -66,6 +66,10 @@
       "use": "Lento. Quebra armaduras.", "slot": "mao", "peso": 4, "era": 4,
       "arma": {"dano": "impacto", "dmg": 18, "alcance": 1.3, "vel": 2.0, "fol": 18, "efeito": ["quebra"]}
     },
+    "curativo": {
+      "n": "Curativo de fibra", "ic": "🩹", "cost": {"fibra": 1}, "hand": 1,
+      "use": "Estanca o sangramento. Gasta um ao usar.", "peso": 0.2, "era": 1
+    },
     "shield": {
       "n": "Escudo", "ic": "🛡️", "cost": {"wood": 3, "iron": 1},
       "use": "Segure o botão de bloqueio para absorver golpes.", "slot": "escudo", "peso": 3, "era": 2,

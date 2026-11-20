@@ -66,11 +66,11 @@ function dmgUnit(t,d,tipo,atq){
   if(t.kind==='player'){if(t.hp<=0)killPlayer(t);return}
   if(t.hp<=0)killUnit(t)}
 function sangra(t){
-  if(t.kind==='player'&&G.inv.fibra>0){G.inv.fibra--;toast('🧵 Curativo de fibra estancou o sangue','good');return}
-  if(t.kind==='player')toast('🩸 Sangramento! Use fibra para estancar.','bad');
+  if(t.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;toast('🩹 Curativo estancou o sangue','good');return}
+  if(t.kind==='player')toast('🩸 Sangramento! Faça um curativo de fibra para estancar.','bad');
   t.sangue=CB.sangramento.segundos}
 function sangueTick(u,dt){if(!(u.sangue>0))return;
-  if(u.kind==='player'&&G.inv.fibra>0){G.inv.fibra--;u.sangue=0;toast('🧵 Você estancou o sangramento','good');return}
+  if(u.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;u.sangue=0;toast('🩹 Você estancou o sangramento','good');return}
   u.sangue-=dt;u.hp-=CB.sangramento.dps*dt;
   if(u.hp<=0){if(u.kind==='player')killPlayer(u);else killUnit(u)}}
 
