@@ -14,14 +14,14 @@ function devApply(){
     devEl.onclick=()=>{devOpen=!devOpen;devPanel()};document.body.appendChild(devEl)}
   devPanel()}
 function devSet(k,v){DEV[k]=v;devPanel()}
-function devGive(kind,key,n){if(!G)return;if(kind==='res'){G.inv[key]+=n;toast(`+${n} ${RES[key][1]}`,'good')}else{G.items[key]=(G.items[key]||0)+n;toast(`+${n} ${ITEMS[key].n}`,'good')}devPanel()}
+function devGive(kind,key,n){if(!G)return;if(kind==='res'){G.inv[key]+=n;toast(`+${n} ${RES[key][0]}`,'good')}else{G.items[key]=(G.items[key]||0)+n;toast(`+${n} ${ITEMS[key].n}`,'good')}devPanel()}
 function devPanel(){
   let el=document.getElementById('devPanel');
   if(!devOpen||!settings.dev||!G){if(el)el.remove();return}
   if(!el){el=document.createElement('div');el.id='devPanel';el.className='panel';
     el.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);max-height:55vh;overflow-y:auto;z-index:9;padding:10px;border-radius:14px;font-size:12px';document.body.appendChild(el)}
   const tg=(k,n)=>`<button class="sbtn ${DEV[k]?'on':''}" data-dev="t:${k}">${n}: ${DEV[k]?'ON':'off'}</button>`;
-  const res=Object.keys(RES).map(k=>`<button class="sbtn" data-dev="r:${k}">${RES[k][0]} +100 ${RES[k][1]}</button>`).join(' ');
+  const res=Object.keys(RES).map(k=>`<button class="sbtn" data-dev="r:${k}">${icon('recursos',k)} +100 ${RES[k][0]}</button>`).join(' ');
   const items=Object.keys(ITEMS).map(k=>`<button class="sbtn" data-dev="i:${k}">${itemIcon(k)} ${ITEMS[k].n}</button>`).join(' ');
   el.innerHTML=`<b style="font-family:Cinzel,serif;color:#f3c969">Modo desenvolvedor</b>
     <div class="row">${tg('inf','Recursos infinitos')} ${tg('instant','Construção instantânea')} ${tg('god','Invencível')}</div>

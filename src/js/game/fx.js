@@ -1,6 +1,6 @@
 /* ================= Hints (contextual, dismiss on completion) ================= */
 let hintCur=null,hintAt=0;
-function showHint(id,force){if(!G||G.demo||G.hints[id])return;if(hintCur===id)return;if(hintCur&&!force)return;hintCur=id;hintAt=perfT;$('#hintT').textContent=HINTS[id];$('#hint').classList.remove('off')}
+function showHint(id,force){if(!G||G.demo||G.hints[id])return;if(hintCur===id)return;if(hintCur&&!force)return;hintCur=id;hintAt=perfT;$('#hintT').replaceChildren(richNodes(HINTS[id]));$('#hint').classList.remove('off')}
 function completeHint(id){if(!G)return;G.hints[id]=1;if(hintCur===id){hintCur=null;$('#hint').classList.add('off')}}
 $('#hintX').addEventListener('click',()=>{if(hintCur)completeHint(hintCur)});
 function hintChecks(){if(!G||G.demo||menuOpen)return;

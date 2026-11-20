@@ -33,12 +33,12 @@ function sheetHTML(){
       return`<h4>Ferramentas de trabalho</h4><div class="items">${tools.map(card).join('')}</div>`+(arm.length?`<h4>Armas e equipamentos</h4><div class="items">${arm.map(card).join('')}</div>`:'')})()}
   case'bag':{const w=bagW(),cap=storeCap();
     return head('Mochila',`Peso ${w}/${BAG}. Toras pesam 5 · pedra e ferro 2 · galho 1 · comida 0,5.`)+`<div class="row" style="margin-top:0"><div class="meter"><i style="width:${Math.min(100,w/BAG*100)}%;background:${w>=BAG?'#e2533f':'#f3c969'}"></i></div></div>`+
-      `<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.inv[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.inv[k]}</b><small>${RES[k][1]}</small></div>`).join('')}</div>`+
-      `<h4>Nos depósitos ${cap?`· até ${cap} de cada`:''}</h4>`+(cap?`<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.res[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.res[k]}</b><small>${RES[k][1]}</small></div>`).join('')}</div>${w>0?'<div class="row"><button class="gbtn" data-a="godeposit">'+icon('interface','depositar')+' Ir guardar tudo</button></div>':''}`:'<p class="hint">Nenhum depósito ainda. Construa uma Pilha de recursos.</p>')+
+      `<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.inv[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.inv[k]}</b><small>${RES[k][0]}</small></div>`).join('')}</div>`+
+      `<h4>Nos depósitos ${cap?`· até ${cap} de cada`:''}</h4>`+(cap?`<div class="inv">${Object.keys(RES).map(k=>`<div class="slot ${G.res[k]?'':'z'}"><span>${icon('recursos',k)}</span><b>${G.res[k]}</b><small>${RES[k][0]}</small></div>`).join('')}</div>${w>0?'<div class="row"><button class="gbtn" data-a="godeposit">'+icon('interface','depositar')+' Ir guardar tudo</button></div>':''}`:'<p class="hint">Nenhum depósito ainda. Construa uma Pilha de recursos.</p>')+
       `<h4>Equipamento</h4>${equipHTML()}<h4>Ferramentas e armas</h4>${bagItemsHTML()}`+
       `<h4>Assentamento</h4><table class="tbl"><tr><td>Construções</td><td>${G.bld.filter(b=>b.done&&!BD[b.type].line).length}</td></tr><tr><td>Peças de muro, cerca e piso</td><td>${G.bld.filter(b=>b.done&&BD[b.type].line).length}</td></tr><tr><td>Moradores</td><td>${popCount()} <span class="small">(em breve)</span></td></tr><tr><td>Dia</td><td>${Math.floor(G.t/240)+1} ${darkness()>.1?'🌙':'☀️'}</td></tr></table>`}
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
-    return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">🎒 Resgatar mochila</button></div>`}
+    return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
   case'info':return infoHTML()}
   return null}
 /* Mochila: 8 espaços de equipamento e a lista de itens (toque para vestir) */
@@ -52,17 +52,17 @@ function infoHTML(){if(!sel)return null;
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;
-  if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?'🔨 Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um 🔨 Martelo acelera.')}</p>`}
+  if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?icon('interface','construindo')+' Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um '+icon('ferramentas','hammer')+' Martelo acelera.')}</p>`}
   else{
-    if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][1]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
+    if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
     if(d.jobs)h+=`<p class="hint">👥 Posto para ${d.jobs} trabalhador(es). Moradores poderão ser encontrados no futuro.</p>`;
-    if(b.type==='quarry')h+=`<div class="row"><b>Extrair:</b><button class="sbtn ${b.mode==='stone'?'on':''}" data-a="qmode" data-v="stone">🪨 Pedra</button><button class="sbtn ${b.mode==='iron'?'on':''}" data-a="qmode" data-v="iron">🔩 Ferro</button></div>`;
+    if(b.type==='quarry')h+=`<div class="row"><b>Extrair:</b><button class="sbtn ${b.mode==='stone'?'on':''}" data-a="qmode" data-v="stone">${icon('recursos','stone')} Pedra</button><button class="sbtn ${b.mode==='iron'?'on':''}" data-a="qmode" data-v="iron">${icon('recursos','iron')} Ferro</button></div>`;
     if(b.type==='smithy')h+=`<p class="hint">Abra Criar para forjar armas. Você caminha até a ferraria para trabalhar.</p>`;
-    if(b.type==='tower')h+=`<p class="hint">🏹 Alcance de 6 casas. Funciona sozinha.</p>`}
+    if(b.type==='tower')h+=`<p class="hint">${icon('interface','alvo_arco')} Alcance de 6 casas. Funciona sozinha.</p>`}
   if(b.done&&b.hp<b.max)h+=`<div class="row"><button class="sbtn" data-a="repair">🔧 Reparar (${costHTML(repCusto(b))})</button></div>`;
   if(b.done&&b.type==='bell')h+=`<div class="row"><button class="sbtn" data-a="ring">🔔 Tocar o sino</button></div>`;
-  if(b.done&&['shelter','house','longhouse'].includes(b.type))h+=`<div class="row"><button class="sbtn" data-a="sleep">🛏 Dormir até o amanhecer</button></div>`;
-  h+=`<div class="row"><button class="sbtn red" data-a="demolish">🔨 Desmontar (devolve ${b.done?'metade':'80%'})</button></div>`;
+  if(b.done&&['shelter','house','longhouse'].includes(b.type))h+=`<div class="row"><button class="sbtn" data-a="sleep">${icon('interface','dormir')} Dormir até o amanhecer</button></div>`;
+  h+=`<div class="row"><button class="sbtn red" data-a="demolish">${icon('interface','desmontar')} Desmontar (devolve ${b.done?'metade':'80%'})</button></div>`;
   return h}
 $('#sheet').addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||el.disabled)return;act(el.dataset.a,el.dataset.v)});
 function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;

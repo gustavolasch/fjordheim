@@ -34,13 +34,13 @@ function eatIfNeeded(u){
   if(u.food>=35||foodStock()<=0)return;
   if(G.inv.food>0)G.inv.food--;else G.res.food--;
   u.food=Math.min(100,u.food+30);
-  toast('🍓 Você comeu','good');
+  toast('[[recursos.food]] Você comeu','good');
 }
 function needWarn(u){
   if(!u.warnT)u.warnT={};
   const w=(key,cond,msg)=>{if(!cond)return;if(u.warnT[key]==null||G.t-u.warnT[key]>WARN_GAP){u.warnT[key]=G.t;toast(msg,'bad')}};
-  w('food',u.food<35&&foodStock()<=0,'🍓 Acabou a comida! Colha frutinhas, pesque ou plante uma lavoura.');
-  w('warm',u.warm<25,'🔥 Frio! Chegue perto de uma fogueira ou casa.');
+  w('food',u.food<35&&foodStock()<=0,'[[recursos.food]] Acabou a comida! Colha frutinhas, pesque ou plante uma lavoura.');
+  w('warm',u.warm<25,'[[interface.fogo]] Frio! Chegue perto de uma fogueira ou casa.');
   w('energy',u.energy<20,'⚡ Cansado! Durma numa cama para recuperar a energia.');
   w('hp',u.hp<30,'❤️ Vida baixa!');
 }
@@ -69,7 +69,7 @@ function lootTomb(t){
   for(const k in t.inv)G.inv[k]=(G.inv[k]||0)+t.inv[k];
   for(const k in t.items)G.items[k]=(G.items[k]||0)+t.items[k];
   G.tombs=G.tombs.filter(x=>x!==t);
-  toast('🎒 Você pegou sua mochila de volta','good');
+  toast('[[interface.mochila]] Você pegou sua mochila de volta','good');
 }
 function drawTomb(t){const q=P(t.x,t.y);
   ell(q[0],q[1]+1,11,4.5,'rgba(0,0,0,.25)');
@@ -85,7 +85,7 @@ function sleepNight(u){
   G.t+=delta;
   u.food=Math.max(0,u.food-delta*(100/480)*.5*calmF());
   u.energy=100;u.warm=Math.max(u.warm,60);
-  toast('🛏 Você dormiu até o amanhecer','good');
+  toast('[[interface.dormir]] Você dormiu até o amanhecer','good');
 }
 
 // barras na tela (fora do topo, acima da barra de navegação)

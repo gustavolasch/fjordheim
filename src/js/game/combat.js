@@ -55,7 +55,7 @@ function dmgUnit(t,d,tipo,atq){
   if(efe.includes('quebra'))v=d*Math.sqrt(fatorArmadura(t,tipo)); // martelo de guerra: quebra parte da armadura
   if(bloqueando(t)){
     v*=1-fracaoBloqueio(atq);t.stam=Math.max(0,t.stam-v*CB.fol.custo_bloqueio_por_dano);
-    if(tipo==='impacto'||efe.includes('puxa_escudo')){t.quebraT=G.t+CB.escudo_quebrado_segundos;toast('🛡️ Escudo quebrado!','bad');sfx('bad')}
+    if(tipo==='impacto'||efe.includes('puxa_escudo')){t.quebraT=G.t+CB.escudo_quebrado_segundos;toast('[[itens.shield]] Escudo quebrado!','bad');sfx('bad')}
   }
   if(tipo==='impacto'&&(d>=CB.atordoar_dano||efe.includes('atordoa')||efe.includes('quebra')))t.stun=Math.max(t.stun||0,CB.atordoar_segundos);
   if((tipo==='corte'||tipo==='perfuracao')&&rnd()<CB.sangramento.chance)sangra(t);
@@ -66,21 +66,21 @@ function dmgUnit(t,d,tipo,atq){
   if(t.kind==='player'){if(t.hp<=0)killPlayer(t);return}
   if(t.hp<=0)killUnit(t)}
 function sangra(t){
-  if(t.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;toast('🩹 Curativo estancou o sangue','good');return}
+  if(t.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;toast('[[itens.curativo]] Curativo estancou o sangue','good');return}
   if(t.kind==='player')toast('🩸 Sangramento! Faça um curativo de fibra para estancar.','bad');
   t.sangue=CB.sangramento.segundos}
 function sangueTick(u,dt){if(!(u.sangue>0))return;
-  if(u.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;u.sangue=0;toast('🩹 Você estancou o sangramento','good');return}
+  if(u.kind==='player'&&(G.items.curativo||0)>0){G.items.curativo--;u.sangue=0;toast('[[itens.curativo]] Você estancou o sangramento','good');return}
   u.sangue-=dt;u.hp-=CB.sangramento.dps*dt;
   if(u.hp<=0){if(u.kind==='player')killPlayer(u);else killUnit(u)}}
 
 /* ---- morte de unidades (inimigos, animais) e drops ---- */
 function killUnit(u){for(let k=0;k<8;k++)puff(u.x,u.y,'smoke');removeUnit(u);
-  if(u.kind==='raider'){if(!raidActive()&&G.raidOn){G.raidOn=false;const iron=3+G.raidN*2;addInv('iron',iron);toast(`🏆 Invasores derrotados! Deixaram 🔩${iron}`,'good')}}
+  if(u.kind==='raider'){if(!raidActive()&&G.raidOn){G.raidOn=false;const iron=3+G.raidN*2;addInv('iron',iron);toast(`🏆 Invasores derrotados! Deixaram [[recursos.iron]]${iron}`,'good')}}
   else if(u.kind==='animal'){const A=ANIMAIS[u.sp],txt=[];
     for(const k in A.drop){const n=A.drop[k];if(!(n>0))continue;
-      if(canCarry(k,n)){addInv(k,n,u.x,u.y);txt.push(RES[k][0]+n)}
-      else toast(`🎒 Mochila cheia: ${RES[k][1].toLowerCase()} ficou no chão`,'bad')}
+      if(canCarry(k,n)){addInv(k,n,u.x,u.y);txt.push('[['+'recursos.'+k+']]'+n)}
+      else toast(`[[interface.mochila]] Mochila cheia: ${RES[k][0].toLowerCase()} ficou no chão`,'bad')}
     toast(`${A.ic} ${A.n} abatido${txt.length?' · '+txt.join(' '):''}`,'good');sfx('pick')}
   else toast(`💀 ${u.name} caiu em combate`,'bad')}
 
@@ -128,11 +128,11 @@ function damageB(b,d,tipo){tipo=tipo||'corte';
   puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,'debris');
   if(tipo==='fogo'&&matOf(b.type)==='madeira'&&b.done)b.burn=CB.queima.segundos;
   if(b.type==='longhouse'&&b.hp<=b.max*.1){sack();b.hp=Math.round(b.max*.3);return}
-  if(b.hp<=0)destroyB(b,`🔥 ${BD[b.type].n} foi destruído!`)}
+  if(b.hp<=0)destroyB(b,`[[interface.fogo]] ${BD[b.type].n} foi destruído!`)}
 function queimaTick(b,dt){if(!(b.burn>0))return false;
   b.burn-=dt;b.hp-=CB.queima.dano_por_segundo*dt;
   if(Math.random()<dt*5)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,'fire');
-  if(b.hp<=0){destroyB(b,`🔥 ${BD[b.type].n} queimou`);return true}
+  if(b.hp<=0){destroyB(b,`[[interface.fogo]] ${BD[b.type].n} queimou`);return true}
   return false}
 
 /* ---- armadilha de estacas: o invasor que pisa leva um golpe e ela recarrega ---- */

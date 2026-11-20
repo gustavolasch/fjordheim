@@ -10,9 +10,9 @@ function canCarry(k,n){if(DEV.inf)return true;return bagW()+WEIGHT[k]*(n||1)<=BA
 function addInv(k,n,x,y){G.inv[k]+=n;if(x!=null)floater(x,y,`+${n} [[recursos.${k}]]`)}
 function addRes(k,v,x,y){const cap=storeCap();G.res[k]=Math.min(cap,G.res[k]+v);if(x!=null)floater(x,y,`+${v} [[recursos.${k}]]`)}
 function deposit(b){const cap=storeCap();let moved=0;for(const k in G.inv){const n=Math.min(G.inv[k],Math.max(0,cap-G.res[k]));if(n>0){G.inv[k]-=n;G.res[k]+=n;moved+=n}}
-  if(moved){sfx('store');floater(b.x+b.w/2,b.y+b.h/2,'📦 guardado');completeHint('full');G.flags.deposited=true;if(bagW()>0)toast('Depósito cheio para alguns itens. Construa outro.')}
+  if(moved){sfx('store');floater(b.x+b.w/2,b.y+b.h/2,'[[interface.depositar]] guardado');completeHint('full');G.flags.deposited=true;if(bagW()>0)toast('Depósito cheio para alguns itens. Construa outro.')}
   else if(bagW()>0)toast('Os depósitos estão cheios. Construa outro.','bad');else toast('Mochila vazia')}
-function bagFull(k){const w=bagW();toast(k&&w<BAG?`🎒 Sem espaço para ${RES[k][1].toLowerCase()} (pesa ${WEIGHT[k]}). Mochila ${w}/${BAG}.`:`🎒 Mochila cheia (${w}/${BAG}). Guarde numa Pilha de recursos.`,'bad');showHint('full');sfx('bad')}
+function bagFull(k){const w=bagW();toast(k&&w<BAG?`[[interface.mochila]] Sem espaço para ${RES[k][0].toLowerCase()} (pesa ${WEIGHT[k]}). Mochila ${w}/${BAG}.`:`[[interface.mochila]] Mochila cheia (${w}/${BAG}). Guarde numa Pilha de recursos.`,'bad');showHint('full');sfx('bad')}
 
 /* ================= Buildings logic ================= */
 function bAt(x,y){if(!inb(x,y))return null;const id=G.occ[idx(x,y)];return id?BMAP.get(id):null}
@@ -46,7 +46,7 @@ function destroyB(b,msg){for(const u of G.units)if(u.work===b.id)unassign(u);
   for(let k=0;k<12;k++)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,k%2?'debris':'smoke');
   if(sel&&sel.k==='b'&&sel.id===b.id){sel=null;closeSheet()}
   if(msg)toast(msg,'bad')}
-function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*.3);G.res[k]-=v;if(v)lost.push(`${RES[k][0]}${v}`)}
+function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*.3);G.res[k]-=v;if(v)lost.push(`[[recursos.${k}]]${v}`)}
   for(const u of G.units.slice())if(u.kind==='raider'){puff(u.x,u.y,'smoke');removeUnit(u)}
   G.raidOn=false;toast(`💰 Os invasores saquearam a Casa Comunal e fugiram com ${lost.join(' ')||'nada'}`,'bad')}
 function idleVillagers(){return G.units.filter(u=>u.kind==='villager'&&!u.job)}

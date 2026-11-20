@@ -58,7 +58,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   // natural objects: exact tile, then canopy of a tree standing in front
   const oi=pickObj(px,py);
   closeSheet();sel=null;
-  if(oi!=null){const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');const lab={tree:'🪓 Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'⛏️ Quebrar',ore:'⛏️ Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab);return}
+  if(oi!=null){const ob=G.obj[oi];order({type:'obj',i:oi});puff(oi%N+.5,(oi/N|0)+.5,'ring');const lab={tree:'[[itens.axe]] Derrubar',log:'Recolher toras',branch:'Pegar galho',pebble:'Pegar pedra',stone:'[[ferramentas.pick]] Quebrar',ore:'[[ferramentas.pick]] Minerar',bush:'Colher frutinhas'}[ob.t];if(lab)floater(oi%N+.5,(oi/N|0)+.5,lab);return}
   if(!inb(tx,ty))return;
   if(G.tiles[idx(tx,ty)]<=1){order({type:'fish',x:tx,y:ty});puff(tx+.5,ty+.5,'ring');return}
   if(me){const r=sendCmd({t:'walk',x:tx,y:ty});if(r.ok)puff(tx+.5,ty+.5,'ring');else toast(r.msg,r.kind)}}
@@ -104,4 +104,4 @@ $('#place').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if
 
 /* ---- combate: tocar em animal ou invasor ataca; segurar um pouco dá golpe forte ---- */
 function ataqueAlvo(t,forte){const me=PL();if(!me||me.down)return;closeSheet();sel=null;
-  order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'⚔️ Golpe forte':'⚔️ Atacar')}
+  order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'[[interface.combate]] Golpe forte':'[[interface.combate]] Atacar')}

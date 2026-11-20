@@ -616,6 +616,18 @@
    "icone": "3_ferramentas_armas/arco_curto",
    "status": "provisorio",
    "obs": "Provisório: arco curto"
+  },
+  "fogo": {
+   "n": "Fogo (combate)",
+   "icone": "6_construcoes/fogueira",
+   "status": "ok",
+   "obs": "Mesma imagem do calor"
+  },
+  "depositar": {
+   "n": "Ir guardar tudo",
+   "emoji": "📦",
+   "icone": "6_construcoes/pilha_recursos",
+   "status": "ok"
   }
  },
  "animais": {

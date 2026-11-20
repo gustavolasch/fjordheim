@@ -118,4 +118,4 @@ function spawnRaid(){G.raidN++;const n=Math.min(14,2+Math.floor(G.raidN*1.6));co
     if(astar(x,y,nearRect(L.x,L.y,L.w,L.h),L.x+1,L.y+1,passR,12000))sp=[x,y]}
   if(!sp){G.nextRaid=G.t+90;return}
   for(let i=0;i<n;i++)spawnSaqueador(sp[0]+.5+(rnd()-.5)*.8,sp[1]+.5+(rnd()-.5)*.8,G.raidN);
-  G.raidOn=true;toast(`⚔️ ${n} invasores atacam a vila!`,'bad')}
+  G.raidOn=true;toast(`[[interface.combate]] ${n} invasores atacam a vila!`,'bad')}
