@@ -131,7 +131,7 @@
   "sino": {"recarga": 20},
   "torre": {"dano": 9, "tipo": "perfuracao", "alcance": 6.5, "recarga": 1.4},
 
-  "fome_sangramento": {"dps": 1.2, "segundos": 12, "chance": 0.25},
+  "sangramento": {"dps": 1.2, "segundos": 12, "chance": 0.25},
   "atordoar_dano": 12,
   "atordoar_segundos": 1.0,
   "escudo_quebrado_segundos": 2.5,
