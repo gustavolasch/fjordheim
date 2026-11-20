@@ -5,13 +5,16 @@ function pay(c){if(DEV.inf)return;for(const k in c){let n=c[k];const a=Math.min(
 function refund(c,f){const cap=storeCap();for(const k in c){let v=Math.floor(c[k]*f);const s=Math.min(v,Math.max(0,cap-G.res[k]));G.res[k]+=s;G.inv[k]+=v-s}}
 function costHTML(c){const ks=Object.keys(c);if(!ks.length)return'grátis';return ks.map(k=>`<span class="${have(k)<c[k]?'no':''}">${icon('recursos',k)}${c[k]}</span>`).join(' ')}
 function storeCap(){let c=0;for(const b of G.bld)if(b.done&&BD[b.type].store)c+=BD[b.type].store;return c}
+// texto do limite: "180 de cada (Armazém 150 + Pilha de recursos 30)"
+function capLabel(){const cap=storeCap();if(!cap)return'';const parts={};for(const b of G.bld)if(b.done&&BD[b.type].store)parts[BD[b.type].n]=(parts[BD[b.type].n]||0)+BD[b.type].store;return`${cap} de cada (${Object.keys(parts).map(n=>`${n} ${parts[n]}`).join(' + ')})`}
 function bagW(){let w=0;for(const k in G.inv)w+=G.inv[k]*WEIGHT[k];for(const k in G.items)if(G.items[k]>0)w+=G.items[k]*(ITEMS[k]?.peso||0);return Math.round(w*10)/10}
 function canCarry(k,n){if(DEV.inf)return true;return bagW()+WEIGHT[k]*(n||1)<=BAG+1e-6}
 function addInv(k,n,x,y){G.inv[k]+=n;if(x!=null)floater(x,y,`+${n} [[recursos.${k}]]`)}
 function addRes(k,v,x,y){const cap=storeCap();G.res[k]=Math.min(cap,G.res[k]+v);if(x!=null)floater(x,y,`+${v} [[recursos.${k}]]`)}
-function deposit(b){const cap=storeCap();let moved=0;for(const k in G.inv){const n=Math.min(G.inv[k],Math.max(0,cap-G.res[k]));if(n>0){G.inv[k]-=n;G.res[k]+=n;moved+=n}}
-  if(moved){sfx('store');floater(b.x+b.w/2,b.y+b.h/2,'[[interface.depositar]] guardado');completeHint('full');G.flags.deposited=true;if(bagW()>0)toast('Depósito cheio para alguns itens. Construa outro.')}
-  else if(bagW()>0)toast('Os depósitos estão cheios. Construa outro.','bad');else toast('Mochila vazia')}
+// só recursos (G.inv) entram no depósito; ferramentas e armas ficam na mochila e não contam como "sobra"
+function deposit(b){const cap=storeCap();let moved=0,left=0;for(const k in G.inv){const n=Math.min(G.inv[k],Math.max(0,cap-G.res[k]));if(n>0){G.inv[k]-=n;G.res[k]+=n;moved+=n}left+=G.inv[k]}
+  if(moved){sfx('store');floater(b.x+b.w/2,b.y+b.h/2,'[[interface.depositar]] guardado');completeHint('full');G.flags.deposited=true;if(left>0)toast('Depósito cheio para alguns itens. Construa outro.')}
+  else if(left>0)toast('Os depósitos estão cheios. Construa outro.','bad');else toast('Nada de recurso para guardar')}
 function bagFull(k){const w=bagW();toast(k&&w<BAG?`[[interface.mochila]] Sem espaço para ${RES[k][0].toLowerCase()} (pesa ${WEIGHT[k]}). Mochila ${w}/${BAG}.`:`[[interface.mochila]] Mochila cheia (${w}/${BAG}). Guarde numa Pilha de recursos.`,'bad');showHint('full');sfx('bad')}
 
 /* ================= Buildings logic ================= */
