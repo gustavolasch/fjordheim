@@ -105,7 +105,3 @@ $('#place').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if
 /* ---- combate: tocar em animal ou invasor ataca; segurar um pouco dá golpe forte ---- */
 function ataqueAlvo(t,forte){const me=PL();if(!me||me.down)return;closeSheet();sel=null;
   order({type:'attack',uid:t.id,heavy:!!forte});puff(t.x,t.y,'ring');floater(t.x,t.y,forte?'⚔️ Golpe forte':'⚔️ Atacar')}
-/* ---- bloqueio: segurar o botão de escudo (gasta fôlego) ---- */
-const bBlock=$('#bBlock');
-bBlock.addEventListener('pointerdown',e=>{e.preventDefault();if(PL()&&!menuOpen){sendCmd({t:'block',on:true});bBlock.classList.add('on')}});
-for(const ev of['pointerup','pointercancel','pointerleave']){bBlock.addEventListener(ev,()=>{sendCmd({t:'block',on:false});bBlock.classList.remove('on')})}
