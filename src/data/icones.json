@@ -60,80 +60,93 @@
   "cevada": {
    "n": "Cevada",
    "emoji": "🌾",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/cevada"
   },
   "nabo": {
    "n": "Nabo",
    "emoji": "🥕",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/nabo"
   },
   "linho": {
    "n": "Linho",
    "emoji": "🧵",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/linho_planta"
   },
   "ovo": {
    "n": "Ovo",
    "emoji": "🥚",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "2_comida/ovo"
   },
   "la": {
    "n": "Lã",
    "emoji": "🧶",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "5_materiais/la"
   },
   "semente_cevada": {
    "n": "Semente de cevada",
    "emoji": "🌱",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/sementes"
   },
   "semente_nabo": {
    "n": "Semente de nabo",
    "emoji": "🌱",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/sementes"
   },
   "semente_linho": {
    "n": "Semente de linho",
    "emoji": "🌱",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "7_campo_e_moveis/sementes"
   },
   "tabua": {
    "n": "Tábua",
    "emoji": "🪵",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "5_materiais/tabuas"
   },
   "carvao": {
    "n": "Carvão",
    "emoji": "🪨",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "1_recursos/carvao"
   },
   "lingote": {
    "n": "Lingote de ferro",
    "emoji": "🔩",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "5_materiais/lingote_ferro"
   },
   "couro_curtido": {
    "n": "Couro curtido",
    "emoji": "🟫",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "5_materiais/couro_curtido"
   },
   "carne": {
    "n": "Carne",
    "emoji": "🥩",
-   "status": "pendente",
-   "fonte": "src/js/data/resources.js"
+   "status": "ok",
+   "fonte": "src/js/data/resources.js",
+   "icone": "1_recursos/carne_crua"
   }
  },
  "ferramentas": {
@@ -540,8 +553,33 @@
   "pen": {
    "n": "Cercado",
    "emoji": "🐑",
-   "status": "pendente",
-   "fonte": "src/js/data/buildings.js"
+   "status": "ok",
+   "fonte": "src/js/data/buildings.js",
+   "icone": "8_construcoes_avancadas/curral"
+  },
+  "runa": {
+   "icone": "8_construcoes_avancadas/pedra_runica",
+   "status": "ok"
+  },
+  "bancada": {
+   "icone": "6_construcoes/bancada",
+   "status": "ok"
+  },
+  "cavalete": {
+   "icone": "7_campo_e_moveis/cavalete",
+   "status": "ok"
+  },
+  "curtume": {
+   "icone": "6_construcoes/curtume",
+   "status": "ok"
+  },
+  "fundicao": {
+   "icone": "6_construcoes/fundicao",
+   "status": "ok"
+  },
+  "salao": {
+   "icone": "9_construcoes_extra/palacio_real",
+   "status": "ok"
   }
  },
  "interface": {
