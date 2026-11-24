@@ -376,6 +376,10 @@ Depois da 1.0: **gráficos em 3D**, depois **interiores**, depois **primeira pes
 
 **Como usar este plano no Claude Code:** peça uma atualização por vez, indicando a seção correspondente deste documento, e peça para ele rodar o teste por toque ao final de cada uma.
 
+## Pendências de testes
+
+- **0.6 — teste por toque, passo "recrutar andarilho" (pendente):** o passo 5b junta material (8 galhos e 2 toras) depois de construir a pilha (4 galhos) e espera o andarilho. Duas tentativas falharam: a 1ª deu timeout ao juntar material do abrigo (6/7 passos); a 2ª, com meta de 12 galhos, travou em derrubar árvore. Causa não confirmada: provavelmente poucos galhos no mapa (o anel inicial tem ~6 e o regrow é lento). Próximo passo: medir galhos disponíveis no cenário e decidir entre mais galhos no início, um ponto de galhos na área ou outra fonte de material.
+
 ## Multijogador com amigo (fora do roteiro)
 
 Sem servidor e sem conta. Anfitrião cria a sala (“Jogar com amigo”) e recebe um código de 5 caracteres; o amigo digita o código (“Entrar com código”) e entra na ilha. PeerJS 1.5.5 vendorizado em `src/vendor/` e embutido no HTML.

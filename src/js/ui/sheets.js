@@ -56,6 +56,7 @@ function bagItemsHTML(){return`<div class="inv">${Object.keys(ITEMS).map(k=>{con
   return`<div class="slot ${n?'':'z'}" ${eq?`data-a="equip" data-v="${k}" title="Toque para vestir"`:''}><span>${itemIcon(k)}</span><b>${n}</b><small>${it.n.split(' ')[0]}</small></div>`}).join('')}</div>`}
 function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
+    if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
@@ -83,6 +84,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'qmode':if(b)sendCmd({t:'qmode',b:b.id,v});break;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
+  case'recruit':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(!a)break;const r=sendCmd({t:'recruit',id:a.id});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast,'good');closeSheet();sel=null;break}
   case'equip':sendCmd({t:'equip',item:v});break;
   case'unequip':sendCmd({t:'unequip',slot:v});break;
   case'repair':if(b&&sendCmd({t:'repair',b:b.id}).ok)closeSheet();break;

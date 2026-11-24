@@ -16,6 +16,7 @@ const JS_ORDER = [
   'js/core/00-base.js',
   'GENERATED:sprites',
   'GENERATED:combate',
+  'GENERATED:pessoas',
   'GENERATED:icones',
   'js/draw/icons.js',
   'js/data/biomes.js',
@@ -36,6 +37,7 @@ const JS_ORDER = [
   'js/game/survival.js',
   'js/game/combat.js',
   'js/game/commands.js',
+  'js/game/recruit.js',
   'js/game/carrinho.js',
   'js/draw/sprites.js',
   'js/draw/primitives.js',
@@ -83,6 +85,7 @@ const js = ORDER.map(rel => {
   if (rel === 'GENERATED:sprites') return genSprites();
   if (rel === 'GENERATED:combate') return genJson('combate.json', 'CDATA');
   if (rel === 'GENERATED:carrinho') return genJson('carrinho.json', 'CARRINHO');
+  if (rel === 'GENERATED:pessoas') return genJson('pessoas.json', 'PESSOAS');
   if (rel === 'GENERATED:icones') return genJson('icones.json', 'ICONES');
   return read(rel);
 }).join('');

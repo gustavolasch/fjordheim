@@ -2,7 +2,7 @@
 // Desmontar um depósito: os itens guardados vão para o outro depósito; devolve esta fração do custo.
 const DESMONTAR_DEP=.6;
 const BD={
- shelter:{n:'Abrigo',cat:'struct',w:2,h:2,cost:{stick:8,wood:2},hp:150,work:6,wallH:8,desc:'Seu primeiro teto: uma cobertura de galhos com fogueira.'},
+ shelter:{n:'Abrigo',cat:'struct',w:2,h:2,cost:{stick:8,wood:2},hp:150,house:2,work:6,wallH:8,desc:'Seu primeiro teto: uma cobertura de galhos com fogueira.'},
  house:{n:'Casa',cat:'struct',w:2,h:2,cost:{wood:10,stone:4},hp:250,house:4,work:16,wallH:14,desc:'Uma casa de verdade, com lareira.'},
  longhouse:{n:'Casa Comunal',cat:'struct',w:3,h:3,cost:{wood:24,stone:12,stick:6},hp:800,house:6,store:100,work:30,wallH:18,desc:'Coração da vila. Guarda 100 de cada recurso.'},
  lumber:{n:'Lenhador',cat:'struct',w:2,h:2,cost:{wood:6,stick:4},hp:200,jobs:2,job:'lumber',work:12,wallH:10,desc:'Posto de trabalho para lenhadores (futuros moradores).'},

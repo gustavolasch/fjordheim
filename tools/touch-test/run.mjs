@@ -124,7 +124,7 @@ try {
   await waitFor(() => G.inv.wood + G.res.wood > 0, null, 60_000);
   ok('derrubar árvore por toque', true);
   // juntar galhos até o depósito (4) mais a construção
-  await collect('juntar galhos', () => G.inv.stick >= 4, ['branch']);
+  await collect("juntar galhos", () => G.inv.stick >= 4, ["branch"]);
 
   await snap('02-arvore');
 
@@ -141,6 +141,40 @@ try {
   await waitFor(() => G.bld.some(b => b.type === 'stockpile' && b.done), null, STEP_TIMEOUT);
   ok('terminar a construção', true);
   await snap('03-construido');
+
+  // 5b. Recrutar (antes de guardar: o material ainda está na mochila): juntar material, construir um Abrigo (2 camas), esperar um andarilho e convidá-lo
+  // junta material: toras (de árvores derrubadas), galhos e pedrinhas, sem depender de um tipo só
+  const matOk = () => G.inv.stick + G.res.stick >= 8 && G.inv.wood + G.res.wood >= 2;
+  const t0m = Date.now();
+  while (!(await page.evaluate(matOk))) {
+    if (Date.now() - t0m > STEP_TIMEOUT) throw new Error("timeout ao juntar material do abrigo: " + JSON.stringify(await page.evaluate(() => ({ inv: G.inv, res: G.res }))));
+    const log = await nearestObj(['log']);
+    if (log) { await tapTile(log.x, log.y); await page.waitForTimeout(2500); continue }
+    const br = await nearestObj(['branch', 'pebble']);
+    if (br) { await tapTile(br.x, br.y); await page.waitForTimeout(2000); continue }
+    const tree = await nearestObj(['tree']);
+    if (tree) { await tapTile(tree.x, tree.y); await page.waitForTimeout(4000); continue }
+    await page.waitForTimeout(1500);
+  }
+  await tapSel('#bar button[data-tab="build"]');
+  await page.waitForSelector('#sheet [data-a="build"][data-v="shelter"]', { timeout: 10_000 });
+  await tapSel('#sheet [data-a="build"][data-v="shelter"]');
+  await page.waitForSelector('#place.open [data-p="ok"]:not([disabled])', { timeout: 10_000 });
+  await tapSel('#place [data-p="ok"]');
+  await waitFor(() => G.bld.some(b => b.type === 'shelter' && b.done), null, STEP_TIMEOUT);
+  // espera o andarilho chegar (fica sozinho: ele passeia perto da praia)
+  await waitFor(() => G.units.some(u => u.kind === 'wanderer'), null, STEP_TIMEOUT);
+  let recruited = false;
+  for (let k = 0; k < 40 && !recruited; k++) {
+    const wd = await page.evaluate(() => { const a = G.units.find(u => u.kind === 'wanderer'); if (!a) return null; const [sx, sy] = w2s(a.x, a.y, 9); return { x: a.x, y: a.y, sx, sy, d: Math.hypot(a.x - PL().x, a.y - PL().y) }; });
+    if (!wd) { await waitFor(() => G.units.some(u => u.kind === 'wanderer'), null, STEP_TIMEOUT); continue; }
+    if (wd.d > 2 || wd.sy < 110 || wd.sy > innerHeight - 200) { await tapTile(Math.floor(wd.x), Math.floor(wd.y)); await page.waitForTimeout(2500); continue; }
+    await tap(wd.sx, wd.sy);
+    const open = await page.waitForSelector('#sheet [data-a="recruit"]:not([disabled])', { timeout: 4000 }).then(() => true).catch(() => false);
+    if (open) { await tapSel('#sheet [data-a="recruit"]'); recruited = await waitFor(() => G.units.some(u => u.kind === 'villager'), null, 10_000).then(() => true).catch(() => false); }
+  }
+  ok('recrutar andarilho por toque', recruited, `moradores ${await page.evaluate(() => popCount())}`);
+  await snap('06-morador');
 
   // 6. Guardar no depósito: toca na pilha e espera o material entrar
   const dep = await page.evaluate(() => { const b = G.bld.find(b => b.type === 'stockpile' && b.done); return { x: b.x, y: b.y, w: b.w, h: b.h }; });

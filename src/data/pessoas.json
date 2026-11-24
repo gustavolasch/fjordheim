@@ -1,0 +1,12 @@
+{
+  "_nota": "Tabela das pessoas (0.6). Equilibrar é editar números aqui. O build embute este arquivo como PESSOAS. Camas vêm de 'house' em buildings.js.",
+  "andarilho": {
+    "nome": "Andarilho",
+    "intervalo_min": 45,
+    "intervalo_max": 75,
+    "tempo_fica": 200,
+    "custo_comida": 2,
+    "borda": 6,
+    "chegada": "Um andarilho chegou pela praia. Toque nele para convidar a ficar."
+  }
+}
