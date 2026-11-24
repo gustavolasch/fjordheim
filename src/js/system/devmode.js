@@ -23,15 +23,23 @@ function devPanel(){
   const tg=(k,n)=>`<button class="sbtn ${DEV[k]?'on':''}" data-dev="t:${k}">${n}: ${DEV[k]?'ON':'off'}</button>`;
   const res=Object.keys(RES).map(k=>`<button class="sbtn" data-dev="r:${k}">${icon('recursos',k)} +100 ${RES[k][0]}</button>`).join(' ');
   const items=Object.keys(ITEMS).map(k=>`<button class="sbtn" data-dev="i:${k}">${itemIcon(k)} ${ITEMS[k].n}</button>`).join(' ');
+  const s=estacao();
   el.innerHTML=`<b style="font-family:Cinzel,serif;color:#f3c969">Modo desenvolvedor</b>
+    <p class="help"><b>Era ${G.era}: ${ERAS.nomes[G.era-1]}</b> · ${s.e.emoji} ${s.e.n} (dia ${s.dia}) · ${isNoite()?'🌙 noite':'☀️ dia'}</p>
     <div class="row">${tg('inf','Recursos infinitos')} ${tg('instant','Construção instantânea')} ${tg('god','Invencível')}</div>
-    <h4>Recursos</h4><div class="row">${res}</div>
+    <h4>Era e tempo</h4><div class="row"><button class="sbtn" data-dev="era:-1">◀ Era anterior</button><button class="sbtn" data-dev="era:1">Próxima era ▶</button><button class="sbtn" data-dev="liberar">🔓 Liberar tudo</button><button class="sbtn" data-dev="dia:manha">☀️ Pular para manhã</button><button class="sbtn" data-dev="dia:noite">🌙 Pular para noite</button><button class="sbtn" data-dev="estacao">🍂 Próxima estação</button></div>
+    <h4>Recursos</h4><div class="row"><button class="sbtn" data-dev="res:all">+100 de cada recurso</button></div><div class="row">${res}</div>
     <h4>Ferramentas e armas (+1)</h4><div class="row">${items}</div>
     <h4>Outros</h4><div class="row"><button class="sbtn" data-dev="clear">Esvaziar mochila</button><button class="sbtn" data-dev="heal">Curar jogador</button><button class="sbtn" data-dev="raid">Invasão agora</button><button class="sbtn" data-dev="all">Tudo</button></div>
     <p class="help">Construir: use o menu Construir normalmente (custa 0 com recursos infinitos).</p>`;
   el.onclick=e=>{const b=e.target.closest('[data-dev]');if(!b)return;const a=b.dataset.dev;
     if(a.startsWith('t:'))return devSet(a.slice(2),!DEV[a.slice(2)]);
     if(a.startsWith('r:'))return devGive('res',a.slice(2),100);
+    if(a==='era:-1'||a==='era:1'){G.era=clamp(G.era+Number(a.slice(4)),1,5);toast(`Era: ${ERAS.nomes[G.era-1]}`,'good');return devPanel()}
+    if(a==='liberar'){G.era=5;for(const k of MUNDO.lugares.ruina.receitas)if(!G.receitas.includes(k))G.receitas.push(k);toast('Tudo liberado: eras, receitas e construções','good');return devPanel()}
+    if(a==='res:all'){for(const k in RES)G.inv[k]+=100;toast('+100 de cada recurso','good');return devPanel()}
+    if(a==='dia:manha'||a==='dia:noite'){const alvo=a==='dia:noite';let n=0;while(isNoite()!==alvo&&n<1000){G.t+=1;n++}toast(alvo?'🌙 Noite':'☀️ Manhã','good');return devPanel()}
+    if(a==='estacao'){const d=Math.floor(G.t/DIA());G.t=(Math.floor(d/CAMPO.dias_por_estacao)+1)*CAMPO.dias_por_estacao*DIA()+1;toast(`Estação: ${estacao().e.n}`,'good');return devPanel()}
     if(a.startsWith('i:'))return devGive('item',a.slice(2),1);
     if(a==='clear'){for(const k in G.inv)G.inv[k]=0;toast('Mochila esvaziada','good');devPanel()}
     if(a==='heal'){const p=PL();if(p){p.hp=p.max;p.down=0}toast('Curado','good')}
