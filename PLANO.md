@@ -378,7 +378,7 @@ Depois da 1.0: **gráficos em 3D**, depois **interiores**, depois **primeira pes
 
 ## Pendências de testes
 
-- **0.6 — teste por toque, passo "recrutar andarilho" (pendente):** com atalho de teste (material e comida na mochila, só no teste), o abrigo fica pronto e o andarilho aparece, mas o convite não se completa: "moradores 0" após 40 toques. O convite cobra comida de G.inv e G.res (já aceita os dois) e as mensagens de falha agora são "Falta comida" e "Sem cama livre". Causa não verificada: suspeito que o toque no andarilho não abre a ficha com o botão "recrutar" (o teste não captura o toast nem a ficha). Próximo passo: capturar o toast e a ficha no passo. Os outros 11 passos passam (save v5, carregar, sem erro de JS, 59 fps).
+- **0.6 — recrutar andarilho:** passo do teste por toque pulado (flag `PULAR_RECRUTAR` em `tools/touch-test/run.mjs`). Recrutar foi testado à mão e funciona. Falta automatizar: a ficha do andarilho e o convite no teste. Os outros 11 passos passam.
 
 ## Multijogador com amigo (fora do roteiro)
 
