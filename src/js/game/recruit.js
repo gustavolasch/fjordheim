@@ -33,11 +33,12 @@ function updWanderer(u,dt){
 }
 // convite: o andarilho vira morador e ocupa uma cama
 function recruitUnit(a){
-  if(camasLivres()<=0)return cmdFail('Sem cama livre');
+  const cama=acharCama();
+  if(!cama)return cmdFail('Sem cama livre');
   const custo={food:PESSOAS.andarilho.custo_comida};
   if(!afford(custo))return cmdFail('Falta comida');
   pay(custo);
-  Object.assign(a,{kind:'villager',vida:null,cool:0,path:null,act:null,hidden:false});
+  Object.assign(a,{kind:'villager',vida:null,cool:0,path:null,act:null,hidden:false,cama:cama.id,moral:PESSOAS.moral.inicial,comeu:false,fome:false,hab:{lumber:0,miner:0,collector:0},tracos:sorteiaTracos(),dormindo:false,indo:false});
   sfx('craft');
   return{ok:true,toast:`${a.name} ficou na vila.`}}
 CMDS.recruit=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='wanderer')return cmdFail('','');return recruitUnit(a)};

@@ -47,6 +47,7 @@ function updVillager(u,dt){
   if(u.hidden){if(!G.raidOn&&!raidActive()){u.hidden=false;const L=longhouse();const p=L&&freeNear(L.x+1,L.y+3,3);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.act=null}return}
   if(G.raidOn&&!u.flee){const r=nearestUnit(u.x,u.y,6,v=>v.kind==='raider');if(r){u.flee=true;u.act=null;const L=longhouse();u.path=null;if(L)goRect(u,L.x,L.y,L.w,L.h)}}
   if(u.flee){if(!moveUnit(u,dt)){u.hidden=true;u.flee=false}return}
+  if(vaiDormir(u,dt))return; // de noite: vai para a cama e dorme
   if(moveUnit(u,dt))return;
   if(u.act){u.act.t+=dt;actTick(u,dt);if(u.act&&u.act.t>=u.act.dur){const a=u.act;u.act=null;finishAct(u,a)}return}
   u.cool-=dt;if(u.cool>0)return;u.cool=.25+Math.random()*.3;think(u)}
@@ -54,6 +55,7 @@ function actTick(u,dt){const a=u.act;if(a.type==='repair'){const b=BMAP.get(a.b)
     if(!b.done){b.prog+=rate*dt;b.hp=Math.min(b.max,b.max*(.3+.7*b.prog/b.work));if(Math.random()<dt*2)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,'dust');if(Math.random()<dt*1.2)sfx('hammer');if(b.prog>=b.work){completeB(b);u.act=null}}
     else{b.hp=Math.min(b.max,b.hp+rate*dt*8);if(b.hp>=b.max)u.act=null}}}
 function finishAct(u,a){const w=BMAP.get(u.work);
+  if(u.kind==='villager'&&DEPOT_JOBS.includes(u.job)&&HAB_ACOES.includes(a.type))ganhaHab(u,u.job);
   switch(a.type){
   case'chop':{const o=G.obj[a.i];if(o&&o.t==='tree')chopHit(a.i,o);wearTool(u);break}
   case'takelog':{const o=G.obj[a.i];if(o&&o.t==='log'){o.amt--;u.carry++;u.carryT='wood';if(o.amt<=0){toStump(a.i,o);u.tgt=null}}break}

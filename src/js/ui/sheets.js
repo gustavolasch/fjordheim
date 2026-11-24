@@ -58,9 +58,15 @@ function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
-    if(u.kind==='villager'){const semVaga=DEPOT_JOBS.includes(u.job)&&!depotNear(u);const st=!u.job?'Sem trabalho':semVaga?'Sem vaga':(u.status||'Trabalhando');
+    if(u.kind==='villager'){const semVaga=DEPOT_JOBS.includes(u.job)&&!depotNear(u);const st=u.dormindo?'Dormindo':!u.job?'Sem trabalho':semVaga?'Sem vaga':(u.status||'Trabalhando');
       const btn=(k,n)=>`<button class="sbtn ${u.job===k?'on':''}" data-a="setjob" data-v="${k}">${n}</button>`;
-      return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div><p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
+      const M=PESSOAS.moral,mt=Math.round(u.moral??M.inicial),cor=mt<M.aviso_abaixo?'#e2533f':mt>=M.alta_acima?'#7fd46a':'#f3c969';
+      const nv=u.job&&DEPOT_JOBS.includes(u.job)?nivelHab(u,u.job):0,cama=camaDo(u);
+      const tr=(u.tracos||[]).map(k=>PESSOAS.tracos[k]).filter(Boolean);
+      return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">😊 <div class="meter"><i style="width:${mt}%;background:${cor}"></i></div><span class="small">Moral ${mt}</span></div>`+
+        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${PESSOAS.habilidade.nivel_max} (${JOBNAME[u.job]})`:'—'}</td></tr><tr><td>Cama</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr></table>`+
+        `<div class="small">${tr.map(t=>`<div><b style="color:${t.tipo==='bom'?'#7fd46a':'#e2533f'}">${t.nome}</b> · ${t.desc}</div>`).join('')}</div>`+
+        `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;

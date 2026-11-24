@@ -12,7 +12,7 @@ function update(dt){G.t+=dt;
     if(b.type==='tower'){b.cd-=dt;if(b.cd<=0){const t=nearestUnit(b.x+.5,b.y+.5,CB.torre.alcance,v=>v.kind==='raider');if(t){b.cd=CB.torre.recarga;AR.push({x:b.x+.5,y:b.y+.5,z:46,tid:t.id,dmg:CB.torre.dano,tipo:CB.torre.tipo,sp:10})}else b.cd=.3}}
     b.smokeT-=dt;if(b.smokeT<=0){b.smokeT=.6+Math.random()*.6;const c=chimney(b);if(c){puff(c[0],c[1],'chimney');const p=PT[PT.length-1];if(p)p.z=c[2]}}
     if(b.hp<b.max*.45&&Math.random()<dt*6)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,Math.random()<.5?'fire':'smoke')}
-  updFalling(dt);animaisTick(dt);cartTick(dt);recruitTick(dt);
+  updFalling(dt);animaisTick(dt);cartTick(dt);recruitTick(dt);moradoresTick(dt);
   for(let k=G.regrow.length-1;k>=0;k--){const i=G.regrow[k],o=G.obj[i];if(!o||G.occ[i]){G.regrow.splice(k,1);continue}
     if(o.t==='stump'){o.timer-=dt;if(o.timer<=0)G.obj[i]={t:'tree',k:o.k,c:o.c,ox:o.ox,oy:o.oy,s:o.s,hp:5,g:.2}}
     else if(o.t==='tree'){o.g=Math.min(1,o.g+dt/150);if(o.g>=1)G.regrow.splice(k,1)}

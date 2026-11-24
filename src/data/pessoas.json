@@ -1,5 +1,6 @@
 {
-  "_nota": "Tabela das pessoas (0.6). Equilibrar é editar números aqui. O build embute este arquivo como PESSOAS. Camas vêm de 'house' em buildings.js.",
+  "_nota": "Tabela das pessoas (0.6). Equilibrar é editar números aqui. O build embute este arquivo como PESSOAS. Camas vêm de 'house' em buildings.js. Dia = dia_segundos (mesmo ciclo do dia e noite). Valores 'por_dia' são pontos de moral por dia de jogo.",
+  "dia_segundos": 240,
   "andarilho": {
     "nome": "Andarilho",
     "intervalo_min": 45,
@@ -8,5 +9,41 @@
     "custo_comida": 2,
     "borda": 6,
     "chegada": "Um andarilho chegou pela praia. Toque nele para convidar a ficar."
+  },
+  "necessidades": {
+    "comida_dia": 1
+  },
+  "moral": {
+    "inicial": 60,
+    "por_dia": {
+      "cama": 20,
+      "sem_cama": -20,
+      "comida": 10,
+      "fome": -25,
+      "fogueira": 10,
+      "frio": -15
+    },
+    "frio_limite": 0.6,
+    "alta_acima": 70,
+    "bonus_alta": 0.2,
+    "baixa_abaixo": 35,
+    "penalidade_baixa": 0.2,
+    "aviso_abaixo": 20,
+    "sair_abaixo": 5,
+    "aviso_intervalo": 60
+  },
+  "habilidade": {
+    "xp_por_acao": 1,
+    "xp_para_nivel": 12,
+    "nivel_max": 5,
+    "bonus_por_nivel": 0.1
+  },
+  "tracos": {
+    "forte":      { "nome": "Forte",      "tipo": "bom",   "efeito": { "velocidade": 0.15 },  "desc": "Trabalha 15% mais rápido." },
+    "bom_de_mao": { "nome": "Bom de mão", "tipo": "bom",   "efeito": { "xp": 0.5 },           "desc": "Aprende 50% mais depressa." },
+    "madrugador": { "nome": "Madrugador", "tipo": "bom",   "efeito": { "moral_dia": 5 },      "desc": "Acorda cedo e de bom humor: +5 de moral por dia." },
+    "guloso":     { "nome": "Guloso",     "tipo": "ruim",  "efeito": { "comida_dia": 1 },     "desc": "Come 1 a mais por dia." },
+    "preguicoso": { "nome": "Preguiçoso", "tipo": "ruim",  "efeito": { "velocidade": -0.15 }, "desc": "Trabalha 15% mais devagar." },
+    "medroso":    { "nome": "Medroso",    "tipo": "ruim",  "efeito": { "moral_dia": -8 },     "desc": "Vive com medo: -8 de moral por dia." }
   }
 }

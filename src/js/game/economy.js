@@ -64,7 +64,7 @@ function assignWorker(b,silent){const d=BD[b.type];if(!d.jobs||!b.done)return;if
   const u=idle[0];if(u.tool){G.items[u.tool]++;u.tool=null}u.job=d.job;u.work=b.id;u.path=null;u.act=null;u.tgt=null;takeTool(u)}
 function unassign(u){if(u.tool){G.items[u.tool]++;u.tool=null}u.job=null;u.work=null;u.path=null;u.act=null;u.carry=0;u.tgt=null}
 function takeTool(u){const t=JOBTOOL[u.job||'builder'];if(!u.tool&&G.items[t]>0){G.items[t]--;u.tool=t}}
-function toolF(u){if(u.kind==='player')return G.items.hammer>0?.62:1.25;return u.tool&&u.tool===JOBTOOL[u.job||'builder']?.62:1.25}
+function toolF(u){if(u.kind==='player')return G.items.hammer>0?.62:1.25;const base=u.tool&&u.tool===JOBTOOL[u.job||'builder']?.62:1.25;return u.kind==='villager'?base/velocidadeMorador(u):base}
 function wearTool(u){if(u.tool&&Math.random()<.008){toast(`💥 ${itemMark(u.tool)} ${ITEMS[u.tool].n} de ${u.name} quebrou`);u.tool=null;takeTool(u)}}
 
 /* ================= Natural objects ================= */
