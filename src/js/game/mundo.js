@@ -92,7 +92,7 @@ function mundoTick(dt){if(!G.lugares)return;for(const k of FERR_KEYS())garantiaF
 
 // ---- o que o jogador faz ao chegar num lugar ----
 CMDS.poi=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.feito||p.k==='acampamento')return cmdFail('','');setOrder(u,{type:'poi',id:p.id});return{ok:true}};
-function aprendeReceita(){const R=MUNDO.lugares.ruina.receitas.filter(k=>!G.receitas.includes(k));if(!R.length)return null;G.receitas.push(R[0]);return R[0]}
+function aprendeReceita(){const R=MUNDO.lugares.ruina.receitas.filter(k=>!G.receitas.includes(k));if(!R.length)return null;G.receitas.push(R[0]);novidade('item',R[0]);return R[0]}
 function poiChegou(u,o){const p=lugarPorId(o.id);if(!p||p.feito){u.order=null;return}
   if(!(Math.hypot(p.x+.5-u.x,p.y+.5-u.y)<=1.6)){stepTo(u,o,p.x,p.y,1,1);return}
   o.tries=0;

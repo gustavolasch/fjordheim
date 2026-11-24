@@ -22,6 +22,8 @@ body.tilt-on .tilt{display:block}
 #hint.off{opacity:0;transform:translate(-50%,-8px);pointer-events:none}
 #hint .ic{color:#f3c969;font-size:15px}
 #hint button{background:none;border:none;color:rgba(246,234,210,.6);font-size:15px;padding:2px 6px;cursor:pointer}
+#novo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 150px);right:12px;z-index:5;width:34px;height:34px;border-radius:50%;padding:0;font-size:17px;font-weight:900;color:#1a1208;background:#f3c969;border:2px solid #fff3d6;box-shadow:0 0 12px rgba(243,201,105,.7);animation:novoPulse 1.6s ease-in-out infinite}
+@keyframes novoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
 #raid{position:fixed;top:calc(env(safe-area-inset-top,0px) + 100px);left:50%;transform:translateX(-50%);background:#8e1f17;border:1px solid #ff9b84;color:#fff;font-weight:900;border-radius:999px;padding:6px 14px;z-index:5;animation:pulse .8s infinite alternate;cursor:pointer;white-space:nowrap;font-size:13px}
 @keyframes pulse{to{background:#c2342a}}
 #toasts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 100px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;z-index:6;pointer-events:none;width:min(92vw,420px)}

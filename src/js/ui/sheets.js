@@ -20,16 +20,16 @@ function renderSheet(){if(!sheetKind||!G)return;const h=sheetHTML();if(h==null){
 const head=(t,hint)=>`<div class="shead"><div><h2>${t}</h2>${hint?`<p class="hint">${hint}</p>`:''}</div><button class="x" data-a="close">✕</button></div>`;
 function sheetHTML(){
   switch(sheetKind){
-  case'build':{const cat=lastCat,cur=mode.type||mode.kind;const items=cat==='decor'?DECOR_ORDER:BUILD_ORDER.filter(k=>BD[k].cat===cat&&eraPredio(k)<=G.era);
-    return`<button class="grab" data-a="expand" aria-label="Expandir"></button><div class="cats">${CATS.map(([k,n])=>`<button class="cat ${k===cat?'on':''}" data-a="cat" data-v="${k}">${svg(k)}${n}</button>`).join('')}</div><div class="strip ${expanded?'grid':''}">${items.map(k=>{const isD=cat==='decor',def=isD?DECOR[k]:BD[k];return`<button class="pc ${k===cur?'sel':''} ${afford(def.cost)?'':'dis'}" data-a="${isD?'decor':'build'}" data-v="${k}"><img src="${isD?DTHUMB[k]:THUMB[k]}" alt=""><b>${def.n}</b><i>${costHTML(def.cost)}</i></button>`}).join('')}</div>`}
+  case'build':{const cat=lastCat,cur=mode.type||mode.kind;const items=cat==='decor'?DECOR_ORDER:BUILD_ORDER.filter(k=>BD[k].cat===cat);
+    return`<button class="grab" data-a="expand" aria-label="Expandir"></button><div class="cats">${CATS.map(([k,n])=>`<button class="cat ${k===cat?'on':''}" data-a="cat" data-v="${k}">${svg(k)}${n}</button>`).join('')}</div><div class="strip ${expanded?'grid':''}">${items.map(k=>{const isD=cat==='decor',def=isD?DECOR[k]:BD[k];if(!isD&&eraPredio(k)>G.era)return`<button class="pc lock" data-a="locked" data-v="build:${k}"><img src="${THUMB[k]}" alt="" style="opacity:.35"><b>${def.n}</b><i>🔒 ${bloqMotivo('build',k)}</i></button>`;return`<button class="pc ${k===cur?'sel':''} ${afford(def.cost)?'':'dis'}" data-a="${isD?'decor':'build'}" data-v="${k}"><img src="${isD?DTHUMB[k]:THUMB[k]}" alt=""><b>${def.n}</b><i>${costHTML(def.cost)}</i></button>`}).join('')}</div>`}
   case'edit':{const d=mode.sel;
     if(!d&&sel&&sel.k==='b'){const eb=BMAP.get(sel.id);if(eb){const ed=BD[eb.type];
       return head(ed.n,'Construção selecionada. Remover devolve parte do material.')+`<div class="row"><button class="sbtn red" data-a="bdel">🗑 Remover (devolve ${eb.done?'metade':'80%'})</button><button class="sbtn" data-a="done">Sair do modo edição</button></div>`}}
     if(!d)return head('Editar objetos','Toque numa decoração ou construção para selecionar. Arraste decoração para mover. Remover apaga qualquer peça, inclusive cercas e muros.')+`<div class="row"><button class="sbtn" data-a="done">Sair do modo edição</button></div>`;
     return head(DECOR[d.k].n,'Arraste o objeto para movê-lo livremente.')+`<div class="row"><button class="sbtn" data-a="flip">↔ Virar</button><button class="sbtn" data-a="small">➖</button><button class="sbtn" data-a="big">➕</button><button class="sbtn" data-a="dup">⧉ Duplicar (${costHTML(DECOR[d.k].cost)})</button><button class="sbtn red" data-a="del">🗑 Remover</button><button class="gbtn" data-a="done">Pronto</button></div>`}
   case'craft':{const sm=G.bld.find(b=>b.type==='smithy'&&b.done);return head('Criar','Ferramentas de pedra se fazem à mão. Armas pedem uma Ferraria pronta.')+
-    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div>${isFerr(k)&&G.ferr&&G.ferr[k]&&G.ferr[k][0]?`<div class="small">${OFICIO.qualidade.efeito[G.ferr[k][0].q].n} · ${G.ferr[k][0].d}/${maxFerr(k,G.ferr[k][0].q)} usos</div>`:''}<div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
-      tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS).filter(k=>(!MUNDO.lugares.ruina.receitas.includes(k)||G.receitas.includes(k))&&eraItem(k)<=G.era),arm=ks.filter(k=>!tools.includes(k));
+    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);if(bloqueado('item',k))return`<div class="item lock" data-a="locked" data-v="item:${k}" style="opacity:.55"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">🔒</span></div><div class="small">${bloqMotivo('item',k)}. Toque para ver o que falta.</div></div>`;return`<div class="item"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div>${isFerr(k)&&G.ferr&&G.ferr[k]&&G.ferr[k][0]?`<div class="small">${OFICIO.qualidade.efeito[G.ferr[k][0].q].n} · ${G.ferr[k][0].d}/${maxFerr(k,G.ferr[k][0].q)} usos</div>`:''}<div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
+      tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS),arm=ks.filter(k=>!tools.includes(k));
       return`<h4>Ferramentas de trabalho</h4><div class="items">${tools.map(card).join('')}</div>`+(arm.length?`<h4>Armas e equipamentos</h4><div class="items">${arm.map(card).join('')}</div>`:'')})()}
   case'bag':{const w=bagW(),cap=storeCap();
     return head('Mochila',`Peso ${w}/${BAG}. Toras pesam 5 · pedra e ferro 2 · galho 1 · comida 0,5.`)+`<div class="row" style="margin-top:0"><div class="meter"><i style="width:${Math.min(100,w/BAG*100)}%;background:${w>=BAG?'#e2533f':'#f3c969'}"></i></div></div>`+
@@ -51,6 +51,8 @@ function sheetHTML(){
   case'assento':return assentoHTML();
   case'bandeira':return bandeiraHTML();
   case'era':return eraHTML();
+  case'bloqueado':return bloqueadoHTML();
+  case'novo':return novoHTML();
   case'info':return infoHTML()}
   return null}
 /* Mochila: 8 espaços de equipamento e a lista de itens (toque para vestir) */
@@ -72,7 +74,7 @@ function infoHTML(){if(!sel)return null;
       const nv=u.job&&DEPOT_JOBS.includes(u.job)?nivelHab(u,u.job):0,cama=camaDo(u);
       const tr=(u.tracos||[]).map(k=>PESSOAS.tracos[k]).filter(Boolean);
       return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">😊 <div class="meter"><i style="width:${mt}%;background:${cor}"></i></div><span class="small">Moral ${mt}</span></div>`+
-        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${PESSOAS.habilidade.nivel_max} (${JOBNAME[u.job]})`:'—'}</td></tr><tr><td>Cama</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
+        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${PESSOAS.habilidade.nivel_max} (${JOBNAME[u.job]})`:'—'}</td></tr><tr><td>Cama</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Mochila</td><td>${Math.round((u.carry||0)*(WEIGHT[u.carryT]||0)*10)/10}/${PESSOAS.mochila.fracao_do_jogador*BAG}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
         `<div class="small">${tr.map(t=>`<div><b style="color:${t.tipo==='bom'?'#7fd46a':'#e2533f'}">${t.nome}</b> · ${t.desc}</div>`).join('')}</div>`+
         `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
@@ -113,6 +115,8 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
   case'trade':{const m=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(m){const r=sendCmd({t:'trade',id:m.id,i:+v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else sfx('craft')}break}
   case'bandeiraAbre':openSheet('bandeira');break;
+  case'novoIr':{const i=String(v).indexOf(':');const t=String(v).slice(0,i),k=String(v).slice(i+1);if(t==='build'){lastCat=BD[k].cat;openSheet('build')}else openSheet('craft');break}
+  case'locked':{const i=String(v).indexOf(':');BLOQ={tipo:String(v).slice(0,i)==='build'?'build':'item',k:String(v).slice(i+1)};openSheet('bloqueado');break}
   case'templo':{if(sel&&sel.k==='p'){const r=sendCmd({t:'temploEsc',id:sel.id,c:v});if(!r.ok&&r.msg)toast(r.msg,'bad');else closeSheet()}break}
   case'bandeiraSet':{const i=String(v).indexOf(':');const r=sendCmd({t:'bandeiraSet',k:String(v).slice(0,i),v:String(v).slice(i+1)});if(!r.ok&&r.msg)toast(r.msg,'bad');break}
   case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}

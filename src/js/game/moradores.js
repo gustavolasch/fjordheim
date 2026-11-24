@@ -90,7 +90,7 @@ function vaiDormir(u,dt){
       if(!p){u.indo=false;return false}if(!p.length){u.dormindo=true;u.indo=false;return true}u.path=p}
     if(moveUnit(u,dt))return true;
     u.indo=false;return false}
-  if(isNear(u,b)){if(!u.dormindo){u.dormindo=true;u.act=null;u.path=null;u.moving=false}return true}
+  if(isNear(u,b)){if(!u.dentro)u.dentro=b.id;u.dormindo=true;u.act=null;u.path=null;u.moving=false;return true}
   u.dormindo=false;
   if(!u.indo){u.indo=true;u.act=null;if(!goRect(u,b.x,b.y,b.w,b.h)){u.indo=false;return false}}  // replaneja o caminho até a cama
   if(moveUnit(u,dt))return true;
@@ -122,3 +122,7 @@ function vidaVila(u){const V=PESSOAS.vila;
   if(!inb(tx,ty)||!passV(tx,ty)){u.act={type:'idle',t:0,dur:1};return}
   const p=astar(...utile(u),(x,y)=>x===tx&&y===ty,tx,ty,passV,600);
   if(p&&p.length){u.dest=[tx+.5,ty+.5];u.path=p}else u.act={type:'idle',t:0,dur:2}}
+
+// dentro de casa: o morador some do mapa até amanhecer; de manhã sai pela porta (lado de baixo do prédio)
+function sairDaCasa(u){const b=u.dentro!=null?BMAP.get(u.dentro):null;u.dentro=null;u.dormindo=false;
+  const c=b?[b.x+(b.w>>1),b.y+b.h]:[u.x,u.y];const p=freeNear(c[0],c[1],3);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.act=null}

@@ -42,7 +42,7 @@ function metaOk(c){const aldeoes=G.units.filter(u=>u.kind==='villager').length;
 function metasDaEra(){return G.era>=5?ERAS.fim:ERAS.metas[G.era-1]}
 function eraPronta(){return metasDaEra().every(metaOk)}
 CMDS.eraAvanca=()=>{if(G.era>=5)return cmdFail('','');if(!eraPronta())return cmdFail('Ainda faltam metas');
-  G.era++;sfx('craft');toast(`👑 Nova era: ${ERAS.nomes[G.era-1]}. Novas construções e receitas apareceram.`,'good');return{ok:true}};
+  G.era++;novidadesEra(G.era);sfx('craft');toast(`👑 Nova era: ${ERAS.nomes[G.era-1]}. Novas construções e receitas apareceram.`,'good');return{ok:true}};
 const META_TXT={predio:c=>`${BD[c.b]?BD[c.b].n:c.b} pronto`,fogueira:()=>'Fogueira acesa',moradores:c=>`${c.n} moradores`,dias:c=>`${c.n} dias sobrevividos`,flag:c=>({colheita:'Primeira colheita da lavoura',lingote:'Primeiro lingote de ferro',mercador:'Mercador recebido'})[c.f]||c.f,invasoes:c=>`${c.n} invasão repelida`,saga:c=>`Saga: ${MUNDO.sagas.find(s=>s.id===c.id)?.n||c.id}`};
 function eraHTML(){const n=ERAS.nomes[G.era-1],metas=metasDaEra();
   const lista=metas.map(c=>`<div class="small">${metaOk(c)?'✅':'⬜'} ${META_TXT[c.tipo](c)}</div>`).join('');
@@ -76,6 +76,8 @@ function oficioFim(u,a){const o=u.order;
   sfx('craft');if(o)o.done=true;u.order=null}
 // painel da estação (receitas e reparo)
 function estacaoHTML(b){let h='';const R=OFICIO.estacoes[b.type];
+  if(['house','shelter','longhouse'].includes(b.type)){const q=G.units.filter(u=>u.dentro===b.id).map(u=>u.name);
+    h+=`<p class="hint">${q.length?'💤 Dormindo aqui: '+q.join(', '):'Ninguém dorme aqui agora.'}</p>`}
   if(R)h+=`<p class="hint">Estação de trabalho. Você leva o tempo da receita; ingredientes são pagos ao começar.</p><div class="row" style="flex-wrap:wrap">`+
     Object.keys(R).map(k=>{const X=R[k],ok=afford(X.entrada);return`<button class="sbtn" data-a="proc" data-v="${k}" ${ok?'':'disabled'}>${X.n}: ${costHTML(X.entrada)} → ${Object.keys(X.saida).map(s=>`${icon('recursos',s)}${X.saida[s]}`).join(' ')}</button>`}).join('')+`</div>`;
   if(b.type==='bancada')h+=`<p class="hint">Reparo: custa metade do material original e devolve a ferramenta a 100%.</p><div class="row" style="flex-wrap:wrap">`+
@@ -89,3 +91,35 @@ function drawRuna(b){const q=P(b.x+.5,b.y+.5,0);ell(q[0],q[1],9,4.5,'rgba(0,0,0,
 // migração v9: eras, ferramentas (cada uma com durabilidade) e pedra rúnica para saves antigos
 function migraV9(){G.era=G.era||1;G.ferr=G.ferr||{};for(const k of FERR_KEYS())garantiaFerr(k);
   if(!G.bld.some(b=>b.type==='runa'))colocaPedra()}
+
+// ---- bloqueios: o que impede um item ou construção (cadeado + motivo) ----
+function bloqueado(tipo,k){return tipo==='build'?eraPredio(k)>G.era:(eraItem(k)>G.era||(MUNDO.lugares.ruina.receitas.includes(k)&&!G.receitas.includes(k)))}
+function bloqMotivo(tipo,k){if(tipo==='item'&&MUNDO.lugares.ruina.receitas.includes(k)&&!G.receitas.includes(k)&&eraItem(k)<=G.era)return'Aprenda numa ruína';
+  return`Era ${tipo==='build'?eraPredio(k):eraItem(k)}`}
+let BLOQ=null; // item bloqueado que o jogador tocou
+function bloqueadoHTML(){if(!BLOQ)return null;const{tipo,k}=BLOQ,nome=tipo==='build'?BD[k].n:ITEMS[k].n;
+  let falta='';
+  if(MUNDO.lugares.ruina.receitas.includes(k)&&!G.receitas.includes(k)&&(tipo==='item'))falta='<p class="hint">Encontre uma ruína no mapa e toque nela para aprender a receita.</p>';
+  else{const n=tipo==='build'?eraPredio(k):eraItem(k);const ms=n>=2?(ERAS.metas[n-2]||ERAS.fim):[];
+    falta=`<p class="hint">Libera na Era ${n}: ${ERAS.nomes[n-1]||''}. Para chegar lá:</p><div class="item">${ms.map(c=>`<div class="small">${metaOk(c)?'✅':'⬜'} ${META_TXT[c.tipo](c)}</div>`).join('')}</div>`}
+  return head(`🔒 ${nome}`,bloqMotivo(tipo,k))+falta}
+// "Zzz" pequeno flutuando acima da casa onde há gente dormindo
+function drawZzz(b){const t=perfT,q=P(b.x+b.w/2,b.y+b.h/2,(BD[b.type].wallH||12)+22);
+  ctx.save();ctx.font='800 9px Nunito, sans-serif';ctx.textAlign='center';
+  for(let k=0;k<2;k++){const ph=(t*.6+k*.5)%1;ctx.globalAlpha=.8*(1-ph);ctx.fillStyle='#fff3d6';ctx.fillText('Zz',q[0]+k*6+ph*4,q[1]-ph*16)}
+  ctx.restore()}
+
+// ---- aviso de liberação: "i" pulsando no canto; a lista leva direto ao menu certo ----
+function novidade(tipo,k){G.novidades=G.novidades||[];if(!G.novidades.some(n=>n.tipo===tipo&&n.k===k))G.novidades.push({tipo,k})}
+function novidadesEra(n){for(const k of Object.keys(ERAS.predios))if(ERAS.predios[k]===n&&BD[k])novidade('build',k);
+  for(const k of Object.keys(ITEMS))if((ITEMS[k].era||1)===n)novidade('item',k)}
+let novoEl=null,NOVO_LISTA=[];
+function updNovo(){const n=(G.novidades||[]).length;
+  if(!n){if(novoEl)novoEl.style.display='none';return}
+  if(!novoEl){novoEl=document.createElement('button');novoEl.id='novo';novoEl.className='glass';novoEl.textContent='i';novoEl.title='O que foi liberado';
+    novoEl.onclick=()=>{NOVO_LISTA=G.novidades.slice();G.novidades=[];novoEl.style.display='none';openSheet('novo')};
+    const h=document.getElementById('hud');(h||document.body).appendChild(novoEl)}
+  novoEl.style.display=''}
+function novoHTML(){const L=NOVO_LISTA;if(!L.length)return head('Nada novo','Você já viu tudo que foi liberado.');
+  return head('Liberado','Toque num item para ir até ele.')+`<div class="row" style="flex-wrap:wrap">`+
+    L.map(n=>n.tipo==='build'?`<button class="sbtn" data-a="novoIr" data-v="build:${n.k}">🏗️ ${BD[n.k].n}</button>`:`<button class="sbtn" data-a="novoIr" data-v="item:${n.k}">🔨 ${ITEMS[n.k].n}</button>`).join('')+`</div>`}

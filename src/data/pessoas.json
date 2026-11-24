@@ -108,5 +108,9 @@
       "A colheita vem aí.",
       "Esse machado corta bem."
     ]
+  },
+  "mochila": {
+    "_nota": "Mochila do morador (peso). Fração da mochila do jogador (BAG). Cheia = volta ao depósito, descarrega e volta ao trabalho.",
+    "fracao_do_jogador": 0.5
   }
 }

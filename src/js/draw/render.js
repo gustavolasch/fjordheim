@@ -38,7 +38,7 @@ function render(){
   for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
   for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5))L.push([p.x+p.y+1.5,7,p]);
   for(const b of G.bld){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')continue;const cx=b.x+b.w/2,cy=b.y+b.h/2;if(vis(cx,cy))L.push([cx+cy,2,b])}
-  for(const u of G.units)if(!u.hidden&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
+  for(const u of G.units)if(!u.hidden&&!u.dentro&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
   for(const c of G.carts)if(vis(c.x,c.y))L.push([c.x+c.y,6,c]);
@@ -48,7 +48,8 @@ function render(){
     else if(k===1){const x=o%N,y=(o/N)|0,h=G.h[o];const tc=G.tcs[o],cl=BIO.cliff;box(x,y,1,1,0,h,tc,shade(cl,-.28),cl);const hs=hash2(x*3,y*5);
       for(let j=1;j<4;j++){const f=j/4+(hash2(x+j,y)-.5)*.12;ln(P(x+f,y+1,0),P(x+f,y+1,h*(.55+hash2(x,y+j)*.4)),'rgba(0,0,0,.13)',1.1);ln(P(x+1,y+f,0),P(x+1,y+f,h*(.5+hash2(x+j,y+j)*.45)),'rgba(0,0,0,.1)',1.1)}
       ln(P(x,y+1,h),P(x+1,y+1,h),'rgba(255,255,255,.22)',1.4);ln(P(x+1,y+1,h),P(x+1,y,h),'rgba(255,255,255,.3)',1.4);if(hs>.5){const q=P(x+.3+hs*.4,y+.35,h);ell(q[0],q[1],2.2,1.2,'rgba(0,0,0,.14)')}}
-    else if(k===2){if(o.pop>0){const c=P(o.x+o.w/2,o.y+o.h/2),s=o.pop/.35;ctx.save();ctx.translate(c[0],c[1]);ctx.scale(1+s*.12,1-s*.12);ctx.translate(-c[0],-c[1]);drawB(o);ctx.restore()}else drawB(o);
+    else if(k===2){if(o.done&&G.units.some(u=>u.dentro===o.id))drawZzz(o);if(o.pop>0){const c=P(o.x+o.w/2,o.y+o.h/2),s=o.pop/.35;ctx.save();ctx.translate(c[0],c[1]);ctx.scale(1+s*.12,1-s*.12);ctx.translate(-c[0],-c[1]);drawB(o);ctx.restore()}else drawB(o);
+      if(o.done&&G.units.some(u=>u.dentro===o.id))LIGHTS.push([o.x+1,o.y+1,30]);
       if(o.done){if(o.type==='longhouse')LIGHTS.push([o.x+1.5,o.y+2.6,90]);else if(o.type==='smithy')LIGHTS.push([o.x+.9,o.y+1.7,80]);else if(o.type==='house')LIGHTS.push([o.x+1.7,o.y+1,45]);else if(o.type==='shelter')LIGHTS.push([o.x+1.2,o.y+1.75,80])}}
     else if(k===3){drawUnit(o);if(o.kind==='player')LIGHTS.push([o.x,o.y,38])}
     else if(k===7)drawLugar(o);

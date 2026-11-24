@@ -44,6 +44,7 @@ function raidActive(){return G.units.some(u=>u.kind==='raider'&&u.camp==null)}
 function nearestUnit(x,y,R,f){let b=null,bd=R;for(const u of G.units){if(!f(u))continue;const d=Math.hypot(u.x-x,u.y-y);if(d<bd){bd=d;b=u}}return b}
 /* ---- villagers (kept for future recruitment; none exist at start) ---- */
 function updVillager(u,dt){
+  if(u.dentro){if(isNoite()&&camaDo(u))return;sairDaCasa(u)}
   if(u.hidden){if(!G.raidOn&&!raidActive()){u.hidden=false;const L=longhouse();const p=L&&freeNear(L.x+1,L.y+3,3);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.act=null}return}
   if(G.raidOn&&!u.flee){const r=nearestUnit(u.x,u.y,6,v=>v.kind==='raider');if(r){u.flee=true;u.act=null;const L=longhouse();u.path=null;if(L)goRect(u,L.x,L.y,L.w,L.h)}}
   if(u.flee){if(!moveUnit(u,dt)){u.hidden=true;u.flee=false}return}
@@ -83,7 +84,7 @@ function think(u){
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
   if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){
     // coletor: leva um tipo por vez (galho ou pedrinha)
-    const types=u.job==='lumber'?['log','tree']:u.job==='collector'?(u.carry>0?(u.carryT==='stick'?['branch']:['pebble']):['branch','pebble']):(w.mode==='iron'?['ore']:['stone']),cap=u.job==='lumber'?2:3;
+    const types=u.job==='lumber'?['log','tree']:u.job==='collector'?(u.carry>0?(u.carryT==='stick'?['branch']:['pebble']):['branch','pebble']):(w.mode==='iron'?['ore']:['stone']),cap=Math.floor(PESSOAS.mochila.fracao_do_jogador*BAG/(WEIGHT[u.carryT]||1)+1e-9);
     let ti=u.tgt;const o=ti!=null?G.obj[ti]:null;if(!o||!types.includes(o.t)||(o.t==='tree'&&o.g<.7))ti=null;
     if(u.carry>=cap||(u.carry>0&&ti==null&&findObj(cx,cy,12,types,u)==null)){if(isNear(u,w)){addRes(u.carryT,u.carry,w.x+w.w/2,w.y+w.h/2);u.carry=0}else if(!goRect(u,w.x,w.y,w.w,w.h)){u.carry=0}return}
     if(ti==null)ti=findObj(cx,cy,12,types,u);
