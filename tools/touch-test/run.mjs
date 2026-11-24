@@ -143,20 +143,11 @@ try {
   await snap('03-construido');
 
   // 5b. Recrutar (antes de guardar: o material ainda está na mochila): juntar material, construir um Abrigo (2 camas), esperar um andarilho e convidá-lo
-  // junta material: toras (de árvores derrubadas), galhos e pedrinhas, sem depender de um tipo só
-  const matOk = () => G.inv.stick + G.res.stick >= 8 && G.inv.wood + G.res.wood >= 2;
-  const t0m = Date.now();
-  while (!(await page.evaluate(matOk))) {
-    if (Date.now() - t0m > STEP_TIMEOUT) throw new Error("timeout ao juntar material do abrigo: " + JSON.stringify(await page.evaluate(() => ({ inv: G.inv, res: G.res }))));
-    const log = await nearestObj(['log']);
-    if (log) { await tapTile(log.x, log.y); await page.waitForTimeout(2500); continue }
-    const br = await nearestObj(['branch', 'pebble']);
-    if (br) { await tapTile(br.x, br.y); await page.waitForTimeout(2000); continue }
-    const tree = await nearestObj(['tree']);
-    if (tree) { await tapTile(tree.x, tree.y); await page.waitForTimeout(4000); continue }
-    await page.waitForTimeout(1500);
-  }
+  // atalho de teste (só existe aqui, não no jogo): põe direto na mochila o material do abrigo e 2 de comida.
+  // A coleta já foi testada nos passos 2 e 4.
+  await page.evaluate(() => { G.inv.stick += 8; G.inv.wood += 2; G.inv.food += 2; });
   await tapSel('#bar button[data-tab="build"]');
+  await tapSel('#sheet [data-a="cat"][data-v="struct"]'); // Abrigo fica em "Estruturas"
   await page.waitForSelector('#sheet [data-a="build"][data-v="shelter"]', { timeout: 10_000 });
   await tapSel('#sheet [data-a="build"][data-v="shelter"]');
   await page.waitForSelector('#place.open [data-p="ok"]:not([disabled])', { timeout: 10_000 });

@@ -378,7 +378,7 @@ Depois da 1.0: **gráficos em 3D**, depois **interiores**, depois **primeira pes
 
 ## Pendências de testes
 
-- **0.6 — teste por toque, passo "recrutar andarilho" (pendente):** o passo 5b junta material (8 galhos e 2 toras) depois de construir a pilha (4 galhos) e espera o andarilho. Duas tentativas falharam: a 1ª deu timeout ao juntar material do abrigo (6/7 passos); a 2ª, com meta de 12 galhos, travou em derrubar árvore. Causa não confirmada: provavelmente poucos galhos no mapa (o anel inicial tem ~6 e o regrow é lento). Próximo passo: medir galhos disponíveis no cenário e decidir entre mais galhos no início, um ponto de galhos na área ou outra fonte de material.
+- **0.6 — teste por toque, passo "recrutar andarilho" (pendente):** com atalho de teste (material do abrigo e 2 comidas postos direto na mochila, só no teste), o abrigo fica pronto e o andarilho aparece, mas convidar não funciona: "moradores 0" após 40 toques. Causa não verificada. Próximo passo: checar se o toque no andarilho abre a ficha com o botão "recrutar" e se a cama livre e a comida são contadas. Os outros 11 passos passam (save v5, carregar, sem erro de JS, 60 fps).
 
 ## Multijogador com amigo (fora do roteiro)
 
