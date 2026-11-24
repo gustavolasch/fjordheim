@@ -61,6 +61,8 @@ CMDS.cartOp=(u,c)=>{const ct=G.carts.find(x=>x.id===c.id);if(!ct)return cmdFail(
   return cmdFail('','')};
 // desce do carrinho: o carrinho fica onde está
 CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=null;u.ride=null;const p=freeNear(Math.floor(ct.x),Math.floor(ct.y),2);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.order=null;return{ok:true}};
+// morador: trabalho em volta do depósito (job null = sem trabalho)
+CMDS.setjob=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='villager')return cmdFail('','');if(c.job&&!DEPOT_JOBS.includes(c.job))return cmdFail('','');setJob(a,c.job||null);return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 

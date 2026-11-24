@@ -58,6 +58,7 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'chop':{const o=G.obj[a.i];if(o&&o.t==='tree')chopHit(a.i,o);wearTool(u);break}
   case'takelog':{const o=G.obj[a.i];if(o&&o.t==='log'){o.amt--;u.carry++;u.carryT='wood';if(o.amt<=0){toStump(a.i,o);u.tgt=null}}break}
   case'mine':{const o=G.obj[a.i];if(o&&(o.t==='stone'||o.t==='ore')){const iron=o.t==='ore';o.amt--;u.carry++;u.carryT=iron?'iron':'stone';for(let k=0;k<3;k++)puff(a.i%N+.5,(a.i/N|0)+.5,'rockchip');if(o.amt<=0){G.obj[a.i]=null;u.tgt=null}}wearTool(u);break}
+  case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
   case'farm':{if(w){w.grow+=.12;if(w.grow>=1){w.grow=0;addRes('food',4,w.x+1.5,w.y+1.5)}}wearTool(u);break}
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
   case'forge':{if(w){G.items[a.item]++;floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
@@ -70,17 +71,21 @@ function think(u){
     const site=nearestSite(u,5);
     if(site){u.tb=site.id;if(!u.tool)takeTool(u);if(isNear(u,site)){u.act={type:'build',b:site.id,t:0,dur:3}}else if(!goRect(u,site.x,site.y,site.w,site.h)){site.unr=G.t+8;u.tb=null}return}
     u.tb=null;u.act={type:'idle',t:0,dur:1.5+Math.random()*2.5};return}
-  const w=BMAP.get(u.work);if(!w||!w.done){unassign(u);return}
+  const depot=DEPOT_JOBS.includes(u.job);
+  const w=depot?depotNear(u):BMAP.get(u.work);
+  if(depot){if(!w){u.status='Sem vaga';u.act={type:'idle',t:0,dur:3};return}}
+  else if(!w||!w.done){unassign(u);return}
   if(!u.tool)takeTool(u);
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
-  if(u.job==='lumber'||u.job==='miner'){
-    const types=u.job==='lumber'?['log','tree']:(w.mode==='iron'?['ore']:['stone']),cap=u.job==='lumber'?2:3;
+  if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){
+    // coletor: leva um tipo por vez (galho ou pedrinha)
+    const types=u.job==='lumber'?['log','tree']:u.job==='collector'?(u.carry>0?(u.carryT==='stick'?['branch']:['pebble']):['branch','pebble']):(w.mode==='iron'?['ore']:['stone']),cap=u.job==='lumber'?2:3;
     let ti=u.tgt;const o=ti!=null?G.obj[ti]:null;if(!o||!types.includes(o.t)||(o.t==='tree'&&o.g<.7))ti=null;
     if(u.carry>=cap||(u.carry>0&&ti==null&&findObj(cx,cy,12,types,u)==null)){if(isNear(u,w)){addRes(u.carryT,u.carry,w.x+w.w/2,w.y+w.h/2);u.carry=0}else if(!goRect(u,w.x,w.y,w.w,w.h)){u.carry=0}return}
     if(ti==null)ti=findObj(cx,cy,12,types,u);
     if(ti==null){u.status='Sem recursos por perto';u.act={type:'idle',t:0,dur:3};return}
     u.status=null;u.tgt=ti;const x=ti%N,y=(ti/N)|0,ob=G.obj[ti];
-    if(Math.abs(Math.floor(u.x)-x)<=1&&Math.abs(Math.floor(u.y)-y)<=1){u.face=(x+.5-u.x)-(y+.5-u.y)>0?1:-1;u.act={type:ob.t==='log'?'takelog':ob.t==='tree'?'chop':'mine',i:ti,t:0,dur:1.6*toolF(u)}}
+    if(Math.abs(Math.floor(u.x)-x)<=1&&Math.abs(Math.floor(u.y)-y)<=1){u.face=(x+.5-u.x)-(y+.5-u.y)>0?1:-1;u.act=ob.t==='log'?{type:'takelog',i:ti,t:0,dur:1.6*toolF(u)}:ob.t==='tree'?{type:'chop',i:ti,t:0,dur:1.6*toolF(u)}:(ob.t==='branch'||ob.t==='pebble')?{type:'pick',i:ti,t:0,dur:1}:{type:'mine',i:ti,t:0,dur:1.6*toolF(u)}}
     else if(!goRect(u,x,y,1,1)){G.obj[ti].bad=G.t+25;u.tgt=null}
     return}
   if(u.job==='farmer'){const[x,y]=utile(u);if(x>=w.x&&y>=w.y&&x<w.x+3&&y<w.y+3&&Math.random()<.7){u.act={type:'farm',t:0,dur:3.6*toolF(u)}}else{const tx=w.x+((Math.random()*3)|0),ty=w.y+((Math.random()*3)|0);const p=astar(x,y,(a,b)=>a===tx&&b===ty,tx,ty,passV);if(p)u.path=p;else u.act={type:'idle',t:0,dur:2}}return}

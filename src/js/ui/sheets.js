@@ -58,6 +58,9 @@ function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
+    if(u.kind==='villager'){const semVaga=DEPOT_JOBS.includes(u.job)&&!depotNear(u);const st=!u.job?'Sem trabalho':semVaga?'Sem vaga':(u.status||'Trabalhando');
+      const btn=(k,n)=>`<button class="sbtn ${u.job===k?'on':''}" data-a="setjob" data-v="${k}">${n}</button>`;
+      return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div><p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;
@@ -84,6 +87,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'qmode':if(b)sendCmd({t:'qmode',b:b.id,v});break;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
+  case'setjob':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(a)sendCmd({t:'setjob',id:a.id,job:v||null});break}
   case'recruit':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(!a)break;const r=sendCmd({t:'recruit',id:a.id});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast,'good');closeSheet();sel=null;break}
   case'equip':sendCmd({t:'equip',item:v});break;
   case'unequip':sendCmd({t:'unequip',slot:v});break;

@@ -53,6 +53,10 @@ function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*
   for(const u of G.units.slice())if(u.kind==='raider'){puff(u.x,u.y,'smoke');removeUnit(u)}
   G.raidOn=false;toast(`💰 Os invasores saquearam a Casa Comunal e fugiram com ${lost.join(' ')||'nada'}`,'bad')}
 function idleVillagers(){return G.units.filter(u=>u.kind==='villager'&&!u.job)}
+// trabalhos sem posto: o morador trabalha em volta do depósito mais perto (Lenhador, Minerador, Coletor)
+const DEPOT_JOBS=['lumber','miner','collector'];
+function depotNear(u){let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x+s.w/2-u.x,s.y+s.h/2-u.y);if(d<bd){bd=d;best=s}}return best}
+function setJob(u,job){unassign(u);if(job){u.job=job;takeTool(u)}}
 function workersOf(b){return G.units.filter(u=>u.work===b.id)}
 function assignWorker(b,silent){const d=BD[b.type];if(!d.jobs||!b.done)return;if(workersOf(b).length>=d.jobs)return;
   const idle=idleVillagers();if(!idle.length){if(!silent)toast('Ainda não há moradores. Eles serão encontrados pelo mundo em breve.','bad');return}

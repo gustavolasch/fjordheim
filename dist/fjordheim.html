@@ -303,7 +303,7 @@ const ITEMS={
 };
 Object.assign(ITEMS,CDATA.itens);
 const JOBTOOL={lumber:'axe',miner:'pick',farmer:'sickle',fisher:'rod',smith:'hammer',builder:'hammer'};
-const JOBNAME={lumber:'Lenhador',miner:'Mineiro',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',builder:'Construtor'};
+const JOBNAME={lumber:'Lenhador',miner:'Minerador',collector:'Coletor',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',builder:'Construtor'};
 const WC={
  warrior:{n:'Guerreiro',hp:130,dmg:12,range:1.2,rate:1,speed:1.8,needs:{sword:1,shield:1}},
  archer:{n:'Arqueiro',hp:70,dmg:9,range:5.5,rate:1.5,speed:1.9,ranged:true,needs:{bow:1}}
@@ -461,6 +461,10 @@ function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*
   for(const u of G.units.slice())if(u.kind==='raider'){puff(u.x,u.y,'smoke');removeUnit(u)}
   G.raidOn=false;toast(`💰 Os invasores saquearam a Casa Comunal e fugiram com ${lost.join(' ')||'nada'}`,'bad')}
 function idleVillagers(){return G.units.filter(u=>u.kind==='villager'&&!u.job)}
+// trabalhos sem posto: o morador trabalha em volta do depósito mais perto (Lenhador, Minerador, Coletor)
+const DEPOT_JOBS=['lumber','miner','collector'];
+function depotNear(u){let best=null,bd=1e9;for(const s of G.bld)if(s.done&&BD[s.type].store){const d=Math.hypot(s.x+s.w/2-u.x,s.y+s.h/2-u.y);if(d<bd){bd=d;best=s}}return best}
+function setJob(u,job){unassign(u);if(job){u.job=job;takeTool(u)}}
 function workersOf(b){return G.units.filter(u=>u.work===b.id)}
 function assignWorker(b,silent){const d=BD[b.type];if(!d.jobs||!b.done)return;if(workersOf(b).length>=d.jobs)return;
   const idle=idleVillagers();if(!idle.length){if(!silent)toast('Ainda não há moradores. Eles serão encontrados pelo mundo em breve.','bad');return}
@@ -543,6 +547,7 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'chop':{const o=G.obj[a.i];if(o&&o.t==='tree')chopHit(a.i,o);wearTool(u);break}
   case'takelog':{const o=G.obj[a.i];if(o&&o.t==='log'){o.amt--;u.carry++;u.carryT='wood';if(o.amt<=0){toStump(a.i,o);u.tgt=null}}break}
   case'mine':{const o=G.obj[a.i];if(o&&(o.t==='stone'||o.t==='ore')){const iron=o.t==='ore';o.amt--;u.carry++;u.carryT=iron?'iron':'stone';for(let k=0;k<3;k++)puff(a.i%N+.5,(a.i/N|0)+.5,'rockchip');if(o.amt<=0){G.obj[a.i]=null;u.tgt=null}}wearTool(u);break}
+  case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
   case'farm':{if(w){w.grow+=.12;if(w.grow>=1){w.grow=0;addRes('food',4,w.x+1.5,w.y+1.5)}}wearTool(u);break}
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
   case'forge':{if(w){G.items[a.item]++;floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
@@ -555,17 +560,21 @@ function think(u){
     const site=nearestSite(u,5);
     if(site){u.tb=site.id;if(!u.tool)takeTool(u);if(isNear(u,site)){u.act={type:'build',b:site.id,t:0,dur:3}}else if(!goRect(u,site.x,site.y,site.w,site.h)){site.unr=G.t+8;u.tb=null}return}
     u.tb=null;u.act={type:'idle',t:0,dur:1.5+Math.random()*2.5};return}
-  const w=BMAP.get(u.work);if(!w||!w.done){unassign(u);return}
+  const depot=DEPOT_JOBS.includes(u.job);
+  const w=depot?depotNear(u):BMAP.get(u.work);
+  if(depot){if(!w){u.status='Sem vaga';u.act={type:'idle',t:0,dur:3};return}}
+  else if(!w||!w.done){unassign(u);return}
   if(!u.tool)takeTool(u);
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
-  if(u.job==='lumber'||u.job==='miner'){
-    const types=u.job==='lumber'?['log','tree']:(w.mode==='iron'?['ore']:['stone']),cap=u.job==='lumber'?2:3;
+  if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){
+    // coletor: leva um tipo por vez (galho ou pedrinha)
+    const types=u.job==='lumber'?['log','tree']:u.job==='collector'?(u.carry>0?(u.carryT==='stick'?['branch']:['pebble']):['branch','pebble']):(w.mode==='iron'?['ore']:['stone']),cap=u.job==='lumber'?2:3;
     let ti=u.tgt;const o=ti!=null?G.obj[ti]:null;if(!o||!types.includes(o.t)||(o.t==='tree'&&o.g<.7))ti=null;
     if(u.carry>=cap||(u.carry>0&&ti==null&&findObj(cx,cy,12,types,u)==null)){if(isNear(u,w)){addRes(u.carryT,u.carry,w.x+w.w/2,w.y+w.h/2);u.carry=0}else if(!goRect(u,w.x,w.y,w.w,w.h)){u.carry=0}return}
     if(ti==null)ti=findObj(cx,cy,12,types,u);
     if(ti==null){u.status='Sem recursos por perto';u.act={type:'idle',t:0,dur:3};return}
     u.status=null;u.tgt=ti;const x=ti%N,y=(ti/N)|0,ob=G.obj[ti];
-    if(Math.abs(Math.floor(u.x)-x)<=1&&Math.abs(Math.floor(u.y)-y)<=1){u.face=(x+.5-u.x)-(y+.5-u.y)>0?1:-1;u.act={type:ob.t==='log'?'takelog':ob.t==='tree'?'chop':'mine',i:ti,t:0,dur:1.6*toolF(u)}}
+    if(Math.abs(Math.floor(u.x)-x)<=1&&Math.abs(Math.floor(u.y)-y)<=1){u.face=(x+.5-u.x)-(y+.5-u.y)>0?1:-1;u.act=ob.t==='log'?{type:'takelog',i:ti,t:0,dur:1.6*toolF(u)}:ob.t==='tree'?{type:'chop',i:ti,t:0,dur:1.6*toolF(u)}:(ob.t==='branch'||ob.t==='pebble')?{type:'pick',i:ti,t:0,dur:1}:{type:'mine',i:ti,t:0,dur:1.6*toolF(u)}}
     else if(!goRect(u,x,y,1,1)){G.obj[ti].bad=G.t+25;u.tgt=null}
     return}
   if(u.job==='farmer'){const[x,y]=utile(u);if(x>=w.x&&y>=w.y&&x<w.x+3&&y<w.y+3&&Math.random()<.7){u.act={type:'farm',t:0,dur:3.6*toolF(u)}}else{const tx=w.x+((Math.random()*3)|0),ty=w.y+((Math.random()*3)|0);const p=astar(x,y,(a,b)=>a===tx&&b===ty,tx,ty,passV);if(p)u.path=p;else u.act={type:'idle',t:0,dur:2}}return}
@@ -1108,6 +1117,8 @@ CMDS.cartOp=(u,c)=>{const ct=G.carts.find(x=>x.id===c.id);if(!ct)return cmdFail(
   return cmdFail('','')};
 // desce do carrinho: o carrinho fica onde está
 CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=null;u.ride=null;const p=freeNear(Math.floor(ct.x),Math.floor(ct.y),2);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.order=null;return{ok:true}};
+// morador: trabalho em volta do depósito (job null = sem trabalho)
+CMDS.setjob=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='villager')return cmdFail('','');if(c.job&&!DEPOT_JOBS.includes(c.job))return cmdFail('','');setJob(a,c.job||null);return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 
@@ -1912,6 +1923,9 @@ function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
+    if(u.kind==='villager'){const semVaga=DEPOT_JOBS.includes(u.job)&&!depotNear(u);const st=!u.job?'Sem trabalho':semVaga?'Sem vaga':(u.status||'Trabalhando');
+      const btn=(k,n)=>`<button class="sbtn ${u.job===k?'on':''}" data-a="setjob" data-v="${k}">${n}</button>`;
+      return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div><p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;
@@ -1938,6 +1952,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'qmode':if(b)sendCmd({t:'qmode',b:b.id,v});break;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
+  case'setjob':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(a)sendCmd({t:'setjob',id:a.id,job:v||null});break}
   case'recruit':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(!a)break;const r=sendCmd({t:'recruit',id:a.id});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast,'good');closeSheet();sel=null;break}
   case'equip':sendCmd({t:'equip',item:v});break;
   case'unequip':sendCmd({t:'unequip',slot:v});break;
