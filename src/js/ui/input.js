@@ -53,6 +53,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
   if(best){if(best.kind==='animal'||best.kind==='raider'){ataqueAlvo(best,held>450);return}sel={k:'u',id:best.id};openSheet('info');return}
   // vários objetos no toque (construção, decoração, recurso, árvore na frente): lista para escolher
+  const pz=lugarEm(tx,ty);if(pz&&visto(idx(tx,ty))){poiTap(pz);return}
   const cands=tapCands(px,py,tx,ty);
   if(cands.length>1){closeSheet();sel=null;openPickMenu(cands,px,py,tx,ty);return}
   if(cands.length===1&&(cands[0].k!=='b'||cands[0].inter)){runCand(cands[0],tx,ty);return}

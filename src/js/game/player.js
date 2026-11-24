@@ -46,6 +46,7 @@ function updPlayer(u,dt){
   case'sleep':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}sleepNight(u);u.order=null;return}
   case'craft':{if(!o.started){o.started=true;u.act={type:'craft',item:o.item,t:0,dur:1.4}}return}
   case'forge':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}if(!o.started){o.started=true;faceTo(u,b.x+1,b.y+1);u.act={type:'forge',item:o.item,t:0,dur:2.6}}return}
+  case'poi':poiChegou(u,o);return;
   case'repair':reparaOrdem(u,o);return;
   }}
 function startObj(u,o,ob){
@@ -70,6 +71,7 @@ function finishP(u,a){const o=u.order;if(o&&o.type==='obj')o.cont=true;const ob=
   case'pickup':if(ob){G.obj[a.i]=null;addInv(a.k,1,ox,oy);sfx('pick');for(let k=0;k<3;k++)puff(ox,oy,'pop');completeHint('walk')}break;
   case'mine':if(ob&&(ob.t==='stone'||ob.t==='ore')){ob.amt--;addInv(a.k,1,ox,oy);sfx('mine');for(let k=0;k<3;k++)puff(ox,oy,'rockchip');if(ob.amt<=0){G.obj[a.i]=null;for(let k=0;k<5;k++)puff(ox,oy,'dust')}ptool('pick')}break;
   case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(Math.random()<CAMPO.semente_chance_frutinha)addInv('semente_cevada',1,ox,oy);if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
+  case'salvage':poiSalvo(u,a);u.order=null;break;
   case'repair':toast('🔧 Reparado','good');u.order=null;break;
   case'fish':if(Math.random()<.65){addInv('food',1,a.fx,a.fy);fishJump(a.fx,a.fy);sfx('splash')}ptool('rod');if(!canCarry('food')){u.order=null;bagFull()}break;
   case'plot':{const b=BMAP.get(a.b);if(b&&applyPlot(b,a.q,a.op,a.c)){if(o&&o.type==='farmop')o.n=(o.n||0)+1;puff(b.x+.5+a.q%3,b.y+.5+((a.q/3)|0),'dust');sfx('store')}break}

@@ -41,7 +41,7 @@ CMDS.decorOp=(u,c)=>{const d=G.decor.find(x=>x.id===c.id);if(!d)return cmdFail('
   return cmdFail('','')};
 
 // criar e forjar
-CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(!afford(it.cost))return cmdFail('Faltam recursos');
+CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(MUNDO.lugares.ruina.receitas.includes(c.item)&&!G.receitas.includes(c.item))return cmdFail('Receita ainda não aprendida','');if(!afford(it.cost))return cmdFail('Faltam recursos');
   if(it.hand){pay(it.cost);setOrder(u,{type:'craft',item:c.item,paid:it.cost});return{ok:true}}
   const sm=G.bld.find(x=>x.type==='smithy'&&x.done);if(!sm)return cmdFail('Construa uma Ferraria primeiro');
   pay(it.cost);setOrder(u,{type:'forge',b:sm.id,item:c.item,paid:it.cost});return{ok:true,toast:'Indo até a Ferraria…'}};

@@ -40,7 +40,7 @@ function moveUnit(u,dt){
   let sp=u.speed*dt;if(u.kind==='player')sp*=survivalSpeed(u);if(u.kind==='villager'&&G.res.food<=0)sp*=.7;if(u.kind==='player'&&bagW()>BAG*.75)sp*=.85;
   if(d<=sp){u.x=gx;u.y=gy;u.path.shift();wearTile(tx,ty);if(u.kind==='raider')armadilhaCheck(u,tx,ty)}else{u.x+=dx/d*sp;u.y+=dy/d*sp}
   if(Math.abs(dx-dy)>.01)u.face=(dx-dy)>0?1:-1;u.moving=true;return true}
-function raidActive(){return G.units.some(u=>u.kind==='raider')}
+function raidActive(){return G.units.some(u=>u.kind==='raider'&&u.camp==null)}
 function nearestUnit(x,y,R,f){let b=null,bd=R;for(const u of G.units){if(!f(u))continue;const d=Math.hypot(u.x-x,u.y-y);if(d<bd){bd=d;b=u}}return b}
 /* ---- villagers (kept for future recruitment; none exist at start) ---- */
 function updVillager(u,dt){

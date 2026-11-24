@@ -5,7 +5,7 @@ function updHUD(){if(!G)return;needsHUD();const w=bagW();
   const h=BAR_RES.map(k=>`<div class="chip" title="${RES[k][0]}">${icon('recursos',k)} ${Math.floor(have(k))}</div>`).join('')+`<button class="chip bag ${w>=BAG?'full':''}" data-bag="1">${icon('interface','mochila')} ${w}/${BAG}</button>`;
   if(h!==hudSig){hudSig=h;$('#res').innerHTML=h}
   const pl=PL(),dm=$('#bDismount');if(dm)dm.classList.toggle('hidden',!(pl&&pl.ride!=null));
-  const r=G.units.filter(u=>u.kind==='raider').length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');}
+  const r=G.units.filter(u=>u.kind==='raider'&&u.camp==null).length,el=$('#raid');if(r){el.classList.remove('hidden');el.replaceChildren(richNodes(`[[interface.combate]] Invasão: ${r} · tocar para ver`))}else el.classList.add('hidden');}
 $('#res').addEventListener('click',e=>{if(e.target.closest('[data-bag]')){if(sheetKind==='bag')closeSheet();else{if(mode.t!=='none')cancelMode();openSheet('bag')}}});
 $('#raid').addEventListener('click',()=>{const r=G.units.find(u=>u.kind==='raider');if(r)focusOn(r.x,r.y)});
 $('#bLoc').addEventListener('click',()=>{const p=PL();if(p)focusOn(p.x,p.y)});

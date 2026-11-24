@@ -172,7 +172,7 @@ function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
     case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
-  ({longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
+  ({salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
 
 
 /* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */

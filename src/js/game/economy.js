@@ -50,8 +50,8 @@ function destroyB(b,msg){for(const u of G.units)if(u.work===b.id)unassign(u);
   for(let k=0;k<12;k++)puff(b.x+Math.random()*b.w,b.y+Math.random()*b.h,k%2?'debris':'smoke');
   if(sel&&sel.k==='b'&&sel.id===b.id){sel=null;closeSheet()}
   if(msg)toast(msg,'bad')}
-function sack(){const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*.3);G.res[k]-=v;if(v)lost.push(`[[recursos.${k}]]${v}`)}
-  for(const u of G.units.slice())if(u.kind==='raider'){puff(u.x,u.y,'smoke');removeUnit(u)}
+function sack(){G.saqueT=G.t;const lost=[];for(const k in G.res){const v=Math.floor(G.res[k]*.3);G.res[k]-=v;if(v)lost.push(`[[recursos.${k}]]${v}`)}
+  for(const u of G.units.slice())if(u.kind==='raider'&&u.camp==null){puff(u.x,u.y,'smoke');removeUnit(u)}
   G.raidOn=false;toast(`💰 Os invasores saquearam a Casa Comunal e fugiram com ${lost.join(' ')||'nada'}`,'bad')}
 function idleVillagers(){return G.units.filter(u=>u.kind==='villager'&&!u.job)}
 // trabalhos sem posto: o morador trabalha em volta do depósito mais perto (Lenhador, Minerador, Coletor)
