@@ -80,6 +80,7 @@ function estraga(dt){const E=CAMPO.estraga;const f=ehInverno()?E.inverno_fator:1
 // tick geral (roda em update): amanhecer dos animais, crescimento, estrago, animais sem cercado
 function campoTick(dt){
   updSeason();
+  G.capimVolta=G.capimVolta||[];for(const e of G.capimVolta.slice())if(G.t>=e.t){TUFT[e.i]=e.tf;G.capimVolta.splice(G.capimVolta.indexOf(e),1)}
   const d=Math.floor(G.t/DIA());if(G.campoDia==null)G.campoDia=d;
   if(d>G.campoDia){const n=Math.min(d-G.campoDia,5);G.campoDia=d;for(let k=0;k<n;k++)alimentaAnimais()}
   farmoCrescer(dt);estraga(dt);

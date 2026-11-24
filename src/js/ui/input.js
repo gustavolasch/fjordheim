@@ -60,6 +60,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   closeSheet();sel=null;
   if(!inb(tx,ty))return;
   if(G.tiles[idx(tx,ty)]<=1){order({type:'fish',x:tx,y:ty});puff(tx+.5,ty+.5,'ring');return}
+  if(TUFT[idx(tx,ty)]&&!G.obj[idx(tx,ty)]&&!G.occ[idx(tx,ty)]){const r=sendCmd({t:'capim',i:idx(tx,ty)});if(r.ok){puff(tx+.5,ty+.5,'pop');return}}
   if(me){const r=sendCmd({t:'walk',x:tx,y:ty});if(r.ok)puff(tx+.5,ty+.5,'ring');else toast(r.msg,r.kind)}}
 function tapBuilding(b,tx,ty){const d=BD[b.type];
   if(d.flat&&d.pass&&b.type!=='farm')return false; // floors & paths: just walk on them

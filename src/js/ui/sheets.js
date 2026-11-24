@@ -121,7 +121,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'unequip':sendCmd({t:'unequip',slot:v});break;
   case'repair':if(b&&sendCmd({t:'repair',b:b.id}).ok)closeSheet();break;
   case'ring':if(b)sendCmd({t:'ring',b:b.id});break;
-  case'sleep':if(b&&sendCmd({t:'sleep',b:b.id}).ok)closeSheet();break;
+  case'sleep':{if(b){const r=sendCmd({t:'sleep',b:b.id});if(r.ok)closeSheet();else if(r.msg)toast(r.msg,'bad')}break}
   case'cartop':{if(sel&&sel.k==='c'){const r=sendCmd({t:'cartOp',id:sel.id,op:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else if(v==='ride')closeSheet();}break}
   case'loot':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(t)sendCmd({t:'loot',id:t.id});sel=null;break}
   case'demolish':if(b){sendCmd({t:'demolish',b:b.id});closeSheet()}break;

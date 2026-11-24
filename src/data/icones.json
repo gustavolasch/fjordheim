@@ -128,6 +128,12 @@
    "emoji": "🟫",
    "status": "pendente",
    "fonte": "src/js/data/resources.js"
+  },
+  "carne": {
+   "n": "Carne",
+   "emoji": "🥩",
+   "status": "pendente",
+   "fonte": "src/js/data/resources.js"
   }
  },
  "ferramentas": {

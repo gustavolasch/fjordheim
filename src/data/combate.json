@@ -140,11 +140,11 @@
   "bloqueio_ignorado_por_lanca": 0.3,
 
   "animais": {
-    "cervo":  {"n": "Cervo",  "ic": "🦌", "hp": 30, "dano": 0, "vel": 3.0, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"food": 4, "hide": 1, "bone": 2}},
-    "lebre":  {"n": "Lebre",  "ic": "🐇", "hp": 8,  "dano": 0, "vel": 3.4, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"food": 2, "hide": 1}},
-    "javali": {"n": "Javali", "ic": "🐗", "hp": 34, "dano": 9, "tipo": "corte", "alcance": 1.2, "vel_ataque": 1.4, "vel": 2.2, "comportamento": "ataca", "aggro": 3.5, "perseguicao": 8, "drop": {"food": 6, "hide": 2, "bone": 2}},
-    "lobo":   {"n": "Lobo",   "ic": "🐺", "hp": 26, "dano": 6, "tipo": "perfuracao", "alcance": 1.2, "vel_ataque": 1.0, "vel": 2.5, "comportamento": "ataca", "aggro": 6, "perseguicao": 14, "bando": 4, "drop": {"food": 2, "hide": 2, "bone": 1}},
-    "urso":   {"n": "Urso",   "ic": "🐻", "hp": 90, "dano": 16, "tipo": "corte", "alcance": 1.4, "vel_ataque": 1.8, "vel": 2.0, "comportamento": "ataca", "aggro": 4, "perseguicao": 10, "drop": {"food": 10, "hide": 5, "bone": 4}}
+    "cervo":  {"n": "Cervo",  "ic": "🦌", "hp": 30, "dano": 0, "vel": 3.0, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"carne": 4, "hide": 1, "bone": 2}},
+    "lebre":  {"n": "Lebre",  "ic": "🐇", "hp": 8,  "dano": 0, "vel": 3.4, "comportamento": "foge", "medo": 6, "perseguicao": 0, "drop": {"carne": 2, "hide": 1}},
+    "javali": {"n": "Javali", "ic": "🐗", "hp": 34, "dano": 9, "tipo": "corte", "alcance": 1.2, "vel_ataque": 1.4, "vel": 2.2, "comportamento": "ataca", "aggro": 3.5, "perseguicao": 8, "drop": {"carne": 6, "hide": 2, "bone": 2}},
+    "lobo":   {"n": "Lobo",   "ic": "🐺", "hp": 26, "dano": 6, "tipo": "perfuracao", "alcance": 1.2, "vel_ataque": 1.0, "vel": 1.8, "comportamento": "ataca", "aggro": 6, "perseguicao": 14, "bando": 4, "drop": {"carne": 2, "hide": 2, "bone": 1}},
+    "urso":   {"n": "Urso",   "ic": "🐻", "hp": 90, "dano": 16, "tipo": "corte", "alcance": 1.4, "vel_ataque": 1.8, "vel": 2.0, "comportamento": "ataca", "aggro": 4, "perseguicao": 10, "drop": {"carne": 10, "hide": 5, "bone": 4}}
   },
   "animais_por_bioma": {
     "autumn": {"cervo": 4, "lebre": 3, "javali": 2},

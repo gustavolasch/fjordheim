@@ -80,14 +80,25 @@ function drawTomb(t){const q=P(t.x,t.y);
   const w=Math.sin(perfT*3)*1.5;pp([[q[0],q[1]-22],[q[0]+8+w,q[1]-20],[q[0],q[1]-17]],'#c8243a')}
 
 // dormir numa cama: passa a noite (até o amanhecer) e enche a energia
+// dormir: só com energia abaixo de 50. A noite passa em ~4 s: a tela escurece, o relógio corre e clareia ao acordar.
+let sonoEl=null;
 function sleepNight(u){
+  if(u.energy>=50){toast('Você não está com sono','bad');return false}
   let delta=60;
   if(settings.daynight&&nightDark(G.t)>0){delta=0;while(nightDark(G.t+delta)>0&&delta<400)delta++}
-  G.t+=delta;
-  u.food=Math.max(0,u.food-delta*(100/480)*.5*calmF());
-  u.energy=100;u.warm=Math.max(u.warm,60);
-  toast('[[interface.dormir]] Você dormiu até o amanhecer','good');
-}
+  G.sono={u:u.id,ini:G.t,delta,t:0,dur:4};
+  u.order=null;u.act=null;u.path=null;u.moving=false;
+  toast('😴 Você vai dormir...','good');
+  return true}
+function sonoTick(dt){const S=G.sono;
+  if(!S){if(sonoEl)sonoEl.style.opacity=0;return}
+  if(!sonoEl){sonoEl=document.createElement('div');sonoEl.id='sono';sonoEl.style.cssText='position:fixed;inset:0;background:#05080f;opacity:0;pointer-events:none;z-index:9';document.body.appendChild(sonoEl)}
+  S.t+=dt;const f=Math.min(1,S.t/S.dur);
+  G.t+=S.delta*dt/S.dur;
+  sonoEl.style.opacity=(f<.5?f*2:(1-f)*2).toFixed(3);
+  if(S.t>=S.dur){G.t=S.ini+S.delta;G.sono=null;sonoEl.style.opacity=0;
+    const u=UMAP.get(S.u);if(u){u.energy=100;u.warm=Math.max(u.warm,60);u.food=Math.max(0,u.food-S.delta*(100/480)*.5*calmF())}
+    toast(`🌅 Você dormiu. Dia ${Math.floor(G.t/DIA())+1}`,'good')}}
 
 // barras na tela (fora do topo, acima da barra de navegação)
 function needsHUD(){const p=PL();if(!p||p.food==null)return;

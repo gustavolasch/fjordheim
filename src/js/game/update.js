@@ -1,5 +1,5 @@
 /* ================= Update ================= */
-function update(dt){G.t+=dt;
+function update(dt){G.t+=dt;sonoTick(dt);
   const pop=popCount();
   // raids only once there is a real village to defend (Casa Comunal + inhabitants)
   if(settings.raids&&!G.demo&&longhouse()&&pop>0){if(!G.raidOn&&!G.raidWarned&&G.t>=G.nextRaid-25){G.raidWarned=true;toast('🔭 Invasores avistados! Chegam em 25 segundos.','bad')}

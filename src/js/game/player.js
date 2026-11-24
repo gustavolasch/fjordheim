@@ -48,6 +48,7 @@ function updPlayer(u,dt){
   case'forge':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}if(!o.started){o.started=true;faceTo(u,b.x+1,b.y+1);u.act={type:'forge',item:o.item,t:0,dur:2.6}}return}
   case'poi':poiChegou(u,o);return;
   case'proc':procChegou(u,o);return;
+  case'capim':{const x=o.i%N,y=(o.i/N)|0;if(!adjT(u,x,y)){stepTo(u,o,x,y,1,1);return}o.tries=0;if(!TUFT[o.i]){u.order=null;return}u.act={type:'capim',t:0,dur:.8,i:o.i};return}
   case'repair':reparaOrdem(u,o);return;
   }}
 function startObj(u,o,ob){
@@ -71,9 +72,10 @@ function finishP(u,a){const o=u.order;if(o&&o.type==='obj')o.cont=true;const ob=
   case'takelog':if(ob&&ob.t==='log'&&canCarry('wood')){ob.amt--;addInv('wood',1,ox+.6,oy);sfx('pick');if(ob.amt<=0)toStump(a.i,ob);completeHint('log')}break;
   case'pickup':if(ob){G.obj[a.i]=null;addInv(a.k,1,ox,oy);sfx('pick');for(let k=0;k<3;k++)puff(ox,oy,'pop');completeHint('walk')}break;
   case'mine':if(ob&&(ob.t==='stone'||ob.t==='ore')){ob.amt--;addInv(a.k,1,ox,oy);sfx('mine');for(let k=0;k<3;k++)puff(ox,oy,'rockchip');if(ob.amt<=0){G.obj[a.i]=null;for(let k=0;k<5;k++)puff(ox,oy,'dust')}ptool('pick')}break;
-  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(Math.random()<CAMPO.semente_chance_frutinha)addInv('semente_cevada',1,ox,oy);if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
+  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(Math.random()<CAMPO.semente_chance_frutinha){addInv('semente_cevada',1,ox,oy);showHint('semente')}if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
   case'salvage':poiSalvo(u,a);u.order=null;break;
   case'proc':oficioFim(u,a);break;
+  case'capim':if(TUFT[a.i]){const tf=TUFT[a.i];TUFT[a.i]=null;G.capimVolta=G.capimVolta||[];G.capimVolta.push({i:a.i,tf,t:G.t+CAMPO.capim_volta_seg});sfx('pick');if(Math.random()<CAMPO.capim_semente_chance){addInv('semente_cevada',1,ox,oy);showHint('semente')}}break;
   case'repair':toast('🔧 Reparado','good');u.order=null;break;
   case'fish':if(Math.random()<.65){addInv('food',1,a.fx,a.fy);fishJump(a.fx,a.fy);sfx('splash')}ptool('rod');if(!canCarry('food')){u.order=null;bagFull()}break;
   case'plot':{const b=BMAP.get(a.b);if(b&&applyPlot(b,a.q,a.op,a.c)){if(o&&o.type==='farmop')o.n=(o.n||0)+1;puff(b.x+.5+a.q%3,b.y+.5+((a.q/3)|0),'dust');sfx('store')}break}

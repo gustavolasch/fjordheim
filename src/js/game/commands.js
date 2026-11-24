@@ -73,7 +73,9 @@ CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 // edifícios: modo da pedreira, reparo, sino, dormir, desmontar, saquear túmulo
 CMDS.qmode=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');b.mode=c.v;return{ok:true}};
 CMDS.repair=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');setOrder(u,{type:'repair',b:b.id});return{ok:true}};
-CMDS.sleep=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');setOrder(u,{type:'sleep',b:b.id});return{ok:true}};
+// capim alto: toque num tufo de capim para colher (às vezes dá semente de cevada); o tufo volta depois
+CMDS.capim=(u,c)=>{if(!TUFT[c.i]||G.obj[c.i]||G.occ[c.i])return cmdFail('','');setOrder(u,{type:'capim',i:c.i});return{ok:true}};
+CMDS.sleep=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');if(u.energy>=50)return cmdFail('Você não está com sono');setOrder(u,{type:'sleep',b:b.id});return{ok:true}};
 CMDS.ring=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');tocaSino(b);return{ok:true}};
 CMDS.demolish=(u,c)=>{const b=BMAP.get(c.b);if(!b||b.type==='runa')return cmdFail(b?'A pedra rúnica não se desmonta.':'','');refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);return{ok:true}};
 CMDS.loot=(u,c)=>{const t=G.tombs.find(x=>x.id===c.id);if(!t)return cmdFail('','');lootTomb(t);return{ok:true}};

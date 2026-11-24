@@ -168,15 +168,19 @@ function engage(u,t){const d=Math.hypot(t.x-u.x,t.y-u.y);
   if(d<=u.range){u.path=null;u.moving=false;u.face=(t.x-u.x)-(t.y-u.y)>0?1:-1;if(u.atkCd<=0){u.atkCd=u.rate;u.swing=.3;attack(u,t)}return true}
   if(u.repath||!u.path||!u.path.length){u.repath=false;const[tx,ty]=utile(t);const p=astar(...utile(u),nearRect(tx,ty,1,1),tx,ty,u.kind==='raider'?passR:passV,3000);if(p)u.path=p}
   return false}
+// fogueira acesa: animal não entra a menos de 3 tiles dela
+function pertoFogo(x,y){return G.decor.some(d=>d.k==='campfire'&&Math.hypot(d.x-x,d.y-y)<3)}
 function updAnimal(u,dt){
   u.atkCd-=dt;u.thinkT-=dt;const A=ANIMAIS[u.sp],pl=PL(),veP=!!pl&&!pl.down;
+  if(pertoFogo(u.x,u.y)){u.target=null;u.path=null}
+  if(u.path&&u.path.length&&pertoFogo(u.path[0][0]+.5,u.path[0][1]+.5))u.path=null;
   if(u.thinkT<=0){u.thinkT=.35+rnd()*.25;u.repath=true;
     const dP=veP?Math.hypot(pl.x-u.x,pl.y-u.y):1e9;
     if(A.comportamento==='foge'){const silencioso=veP&&(armaDe(pl).efeito||[]).includes('silencioso');
       if(dP<A.medo&&!(silencioso&&dP>2))u.fleeT=Math.max(u.fleeT,G.t+3)}
-    else if(veP&&dP<=A.aggro){u.target=pl.id;
+    else if(veP&&dP<=A.aggro&&G.t>=(u.desistiuT||0)&&!pertoFogo(pl.x,pl.y)){if(!u.target)u.chaseT=G.t;u.target=pl.id;
       if(A.bando)for(const v of G.units)if(v!==u&&v.kind==='animal'&&v.sp===u.sp&&!v.target&&Math.hypot(v.x-u.x,v.y-u.y)<6)v.target=pl.id}
-    if(u.target){const t=UMAP.get(u.target);if(!t||t.hp<=0||t.down||Math.hypot(t.x-u.x,t.y-u.y)>A.perseguicao)u.target=null}}
+    if(u.target){const t=UMAP.get(u.target);const longe=!t||t.hp<=0||t.down||Math.hypot(t.x-u.x,t.y-u.y)>12||G.t-(u.chaseT||0)>10;if(longe){u.target=null;u.desistiuT=G.t+20}}}
   if(u.target){const t=UMAP.get(u.target);
     if(t){if(engage(u,t))return;if(moveUnit(u,dt))return}}
   if(u.fleeT>G.t&&veP){
