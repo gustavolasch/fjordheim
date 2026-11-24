@@ -97,21 +97,21 @@
    "emoji": "🌱",
    "status": "ok",
    "fonte": "src/js/data/resources.js",
-   "icone": "7_campo_e_moveis/sementes"
+   "icone": "12_extras/saco_sementes"
   },
   "semente_nabo": {
    "n": "Semente de nabo",
    "emoji": "🌱",
    "status": "ok",
    "fonte": "src/js/data/resources.js",
-   "icone": "7_campo_e_moveis/sementes"
+   "icone": "12_extras/saco_sementes"
   },
   "semente_linho": {
    "n": "Semente de linho",
    "emoji": "🌱",
    "status": "ok",
    "fonte": "src/js/data/resources.js",
-   "icone": "7_campo_e_moveis/sementes"
+   "icone": "12_extras/saco_sementes"
   },
   "tabua": {
    "n": "Tábua",
@@ -580,6 +580,12 @@
   "salao": {
    "icone": "9_construcoes_extra/palacio_real",
    "status": "ok"
+  },
+  "cart": {
+   "n": "cart",
+   "emoji": "",
+   "icone": "12_extras/carrinho_mao",
+   "status": "ok"
   }
  },
  "interface": {
@@ -826,6 +832,18 @@
    "icone": "10_armas_animais_estados/urso",
    "status": "ok",
    "fonte": "src/data/combate.json"
+  },
+  "galinha": {
+   "n": "galinha",
+   "emoji": "",
+   "icone": "12_extras/galinha",
+   "status": "ok"
+  },
+  "ovelha": {
+   "n": "ovelha",
+   "emoji": "",
+   "icone": "12_extras/ovelha",
+   "status": "ok"
   }
  },
  "guardados": {
