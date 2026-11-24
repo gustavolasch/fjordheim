@@ -1153,9 +1153,9 @@ function updWanderer(u,dt){
 }
 // convite: o andarilho vira morador e ocupa uma cama
 function recruitUnit(a){
-  if(camasLivres()<=0)return cmdFail('Não há cama livre. Construa uma casa ou abrigo.');
+  if(camasLivres()<=0)return cmdFail('Sem cama livre');
   const custo={food:PESSOAS.andarilho.custo_comida};
-  if(!afford(custo))return cmdFail('Faltam recursos');
+  if(!afford(custo))return cmdFail('Falta comida');
   pay(custo);
   Object.assign(a,{kind:'villager',vida:null,cool:0,path:null,act:null,hidden:false});
   sfx('craft');
