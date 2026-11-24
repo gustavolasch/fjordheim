@@ -15,7 +15,8 @@ function ocupacao(b){let c=0;for(const u of G.units)if(u.kind==='villager'&&u.ca
 function acharCama(){for(const b of G.bld){if(!b.done||!BD[b.type].house)continue;if(ocupacao(b)<BD[b.type].house)return b}return null}
 function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b:null}
 // tenta dar cama a quem não tem (ou perdeu a cama numa demolição)
-function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(!camaDo(u)){const b=acharCama();u.cama=b?b.id:null}}}
+// dá cama a quem nunca teve uma (cama=null). Cama destruída fica com o id antigo e não é reatribuída.
+function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(u.cama==null){const b=acharCama();u.cama=b?b.id:null}}}
 
 // ---- traços: 1 bom e 1 ruim, sorteados da lista do JSON ----
 function sorteiaTracos(){
@@ -64,6 +65,7 @@ function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
 // moradores: moral, aviso, saída e camas (roda a cada quadro, barato)
 function moradoresTick(dt){
   diaTick();
+  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;acertaCamas()}
   for(const u of G.units)if(u.kind==='villager'&&u.fala){u.fala.t-=dt;if(u.fala.t<=0)u.fala=null}
   const M=PESSOAS.moral;
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
@@ -78,7 +80,16 @@ function moradoresTick(dt){
 function vaiDormir(u,dt){
   if(!isNoite()){u.dormindo=false;u.indo=false;return false}
   const b=camaDo(u);
-  if(!b){u.dormindo=false;u.indo=false;return false}
+  if(!b){ // sem cama: dorme perto de uma fogueira
+    const fogo=G.decor.filter(d=>d.k==='campfire');
+    let f=null,bd=1e9;for(const d of fogo){const dd=Math.hypot(d.x-u.x,d.y-u.y);if(dd<bd){bd=dd;f=[d.x,d.y]}}
+    if(!f){u.dormindo=false;u.indo=false;return false}
+    if(Math.hypot(u.x-f[0],u.y-f[1])<=2){if(!u.dormindo){u.dormindo=true;u.act=null;u.path=null;u.moving=false}return true}
+    u.dormindo=false;
+    if(!u.indo){u.indo=true;u.act=null;const p=astar(...utile(u),(x,y)=>Math.hypot(x+.5-f[0],y+.5-f[1])<=1.5,Math.round(f[0]),Math.round(f[1]),passV,600);
+      if(!p){u.indo=false;return false}if(!p.length){u.dormindo=true;u.indo=false;return true}u.path=p}
+    if(moveUnit(u,dt))return true;
+    u.indo=false;return false}
   if(isNear(u,b)){if(!u.dormindo){u.dormindo=true;u.act=null;u.path=null;u.moving=false}return true}
   u.dormindo=false;
   if(!u.indo){u.indo=true;u.act=null;if(!goRect(u,b.x,b.y,b.w,b.h)){u.indo=false;return false}}  // replaneja o caminho até a cama

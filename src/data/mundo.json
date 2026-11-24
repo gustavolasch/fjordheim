@@ -51,7 +51,8 @@
         "max": 3
       },
       "libertar": {
-        "_nota": "Prisioneiros viram moradores se houver cama livre. Sem cama, o resto se perde."
+        "moral_sem_cama": 20,
+        "_nota": "Prisioneiros viram moradores. Sem cama livre, dormem perto da fogueira com moral baixa até ganhar uma cama."
       },
       "deixar": {
         "moral_perda": 15,

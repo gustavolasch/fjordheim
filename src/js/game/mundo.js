@@ -135,9 +135,10 @@ function migraV8(){if(!G.lugares)G.lugares=sorteiaLugares();
 CMDS.temploEsc=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.k!=='templo'||!p.aguarda||p.feito)return cmdFail('','');
   const T=MUNDO.lugares.templo;
   if(c.c==='libertar'){let solto=0;const n=p.prisioneiros||0;
-    for(let k=0;k<n;k++){const cama=acharCama();if(!cama)break;
-      spawnUnit('villager',p.x+.5+(k%2)*.8,p.y+1.5,{vida:null,cool:0,path:null,act:null,hidden:false,cama:cama.id,moral:PESSOAS.moral.inicial,comeu:false,fome:false,hab:{lumber:0,miner:0,collector:0},tracos:sorteiaTracos(),dormindo:false,indo:false});solto++}
-    toast(`⛓️ ${solto} prisioneiro(s) viraram moradores.${solto<n?` Sem cama para ${n-solto}: eles se perderam.`:''}`,'good')}
+    let semCama=0;
+    for(let k=0;k<n;k++){const cama=acharCama();if(!cama)semCama++;
+      spawnUnit('villager',p.x+.5+(k%2)*.8,p.y+1.5,{vida:null,cool:0,path:null,act:null,hidden:false,cama:cama?cama.id:null,moral:cama?PESSOAS.moral.inicial:T.libertar.moral_sem_cama,comeu:false,fome:false,hab:{lumber:0,miner:0,collector:0},tracos:sorteiaTracos(),dormindo:false,indo:false});solto++}
+    toast(`⛓️ ${solto} prisioneiro(s) viraram moradores.${semCama?` ${semCama} sem cama: dormem perto da fogueira até ganharem uma.`:''}`,'good')}
   else if(c.c==='deixar'){const R=T.deixar.recompensas[(Math.random()*T.deixar.recompensas.length)|0];
     if(R.res)for(const k in R.res)ganhaEstoque(k,R.res[k]);
     if(R.item){ferrAdd(R.item)}
