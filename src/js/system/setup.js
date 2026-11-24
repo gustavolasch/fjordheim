@@ -2,10 +2,11 @@
 const playerLook=()=>({name:'Você',tunic:'#2f5fa8',hair:'#d9a84e',skin:'#f1c9a0',fem:false,hp:100,max:100,speed:2,ox:0,oy:0});
 function newGame(biome,seed,demo){if(NET.role==='host')netLeave(true);BIO=BIOMES[biome];
   G={biome,seed:seed||((Math.random()*1e9)|0),tiles:new Uint8Array(N*N),wear:new Float32Array(N*N),h:new Float32Array(N*N),obj:new Array(N*N).fill(null),occ:new Int32Array(N*N),bld:[],units:[],decor:[],tombs:[],carts:[],
-    res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,receitas:[],sagas:{},perdas:0,invasoesRepelidas:0,
+    res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,era:1,ferr:{},receitas:[],sagas:{},perdas:0,invasoesRepelidas:0,
     t:185,speed:1,idc:1,nextRaid:1e12,raidN:0,raidOn:false,regrow:[],fall:[],hints:{},flags:{},demo:!!demo};
   BMAP=new Map();UMAP=new Map();PT=[];AR=[];genMap();G.lugares=sorteiaLugares();
   const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;G.rs=(G.seed|0)^0x9e3779b9;spawnAnimais();G.lugares.filter(p=>p.k==='acampamento').forEach(spawnCampo);
+  colocaPedra();
   initTiles();bgGrad=null;initWeather();makeThumbs();cam.z=isTouch?1.2:1.3;centerCam()}
 function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$('#hud').classList.add('hidden');
   const guest=NET.role==='guest';let h='';

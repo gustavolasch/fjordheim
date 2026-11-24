@@ -60,49 +60,73 @@
   "cevada": {
    "n": "Cevada",
    "emoji": "🌾",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "nabo": {
    "n": "Nabo",
    "emoji": "🥕",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "linho": {
    "n": "Linho",
    "emoji": "🧵",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "ovo": {
    "n": "Ovo",
    "emoji": "🥚",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "la": {
    "n": "Lã",
    "emoji": "🧶",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "semente_cevada": {
    "n": "Semente de cevada",
    "emoji": "🌱",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "semente_nabo": {
    "n": "Semente de nabo",
    "emoji": "🌱",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   },
   "semente_linho": {
    "n": "Semente de linho",
    "emoji": "🌱",
-      "status": "pendente",
+   "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "tabua": {
+   "n": "Tábua",
+   "emoji": "🪵",
+   "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "carvao": {
+   "n": "Carvão",
+   "emoji": "🪨",
+   "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "lingote": {
+   "n": "Lingote de ferro",
+   "emoji": "🔩",
+   "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "couro_curtido": {
+   "n": "Couro curtido",
+   "emoji": "🟫",
+   "status": "pendente",
    "fonte": "src/js/data/resources.js"
   }
  },
@@ -510,7 +534,7 @@
   "pen": {
    "n": "Cercado",
    "emoji": "🐑",
-      "status": "pendente",
+   "status": "pendente",
    "fonte": "src/js/data/buildings.js"
   }
  },

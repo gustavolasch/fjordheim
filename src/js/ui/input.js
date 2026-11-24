@@ -66,6 +66,7 @@ function tapBuilding(b,tx,ty){const d=BD[b.type];
   if(!b.done){order({type:'build',b:b.id});puff(b.x+b.w/2,b.y+b.h/2,'ring');sel={k:'b',id:b.id};openSheet('info');return true}
   if(b.type==='bridge')return false;
   if(d.store){openDepMenu(b);return true}
+  if(b.type==='runa'){sel=null;openSheet('era');return true}
   if(b.type==='farm'||b.type==='pen'){sel={k:'b',id:b.id};openSheet('info');return true}
   if(b.type==='dock'){let w=null;for(let dy=0;dy<b.h&&!w;dy++)for(let dx=0;dx<b.w;dx++)if(G.tiles[idx(b.x+dx,b.y+dy)]<=1){w=[b.x+dx,b.y+dy];break}if(w){order({type:'fish',x:w[0],y:w[1]})}return true}
   if(d.grp&&!d.gate)return false;

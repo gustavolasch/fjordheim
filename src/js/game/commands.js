@@ -18,10 +18,10 @@ CMDS.walk=(u,c)=>{const p=astar(...utile(u),(x,y)=>x===c.x&&y===c.y,c.x,c.y,pass
   if(!p)return cmdFail('Não dá para chegar lá','');setOrder(u,{type:'move'});u.path=p;return{ok:true}};
 
 // construção: a simulação confere o terreno, cobra e cria a obra
-CMDS.build=(u,c)=>{if(!BD[c.type])return cmdFail('','');if(u.ride!=null)return cmdFail('Saia da carroça para construir');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
+CMDS.build=(u,c)=>{if(!BD[c.type]||eraPredio(c.type)>G.era)return cmdFail(BD[c.type]?'Ainda não liberado nesta era':'','');if(u.ride!=null)return cmdFail('Saia da carroça para construir');const r=placeCheck(c.type,c.x,c.y);if(r!==true)return cmdFail(r);
   if(BD[c.type].mobile){if(G.carts.some(x=>Math.floor(x.x)===c.x&&Math.floor(x.y)===c.y))return cmdFail('Já tem um carrinho aqui');pay(BD[c.type].cost);sfx('place');cartPlace(c.x,c.y);return{ok:true}}
   const b=placeB(c.type,c.x,c.y);setOrder(u,{type:'build',b:b.id,auto:true});return{ok:true,b}};
-CMDS.line=(u,c)=>{if(!BD[c.type]||!c.a||!c.b)return cmdFail('','');let n=0,last='',first=null;
+CMDS.line=(u,c)=>{if(!BD[c.type]||!c.a||!c.b||eraPredio(c.type)>G.era)return cmdFail('','');let n=0,last='',first=null;
   for(const[x,y]of lineTiles(c.a,c.b)){const r=placeCheck(c.type,x,y);if(r===true){const b=placeB(c.type,x,y);first=first||b;n++}else last=r}
   if(!n)return cmdFail(last||'Nada pôde ser construído');setOrder(u,{type:'build',b:first.id,auto:true});return{ok:true}};
 
@@ -41,7 +41,7 @@ CMDS.decorOp=(u,c)=>{const d=G.decor.find(x=>x.id===c.id);if(!d)return cmdFail('
   return cmdFail('','')};
 
 // criar e forjar
-CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(MUNDO.lugares.ruina.receitas.includes(c.item)&&!G.receitas.includes(c.item))return cmdFail('Receita ainda não aprendida','');if(!afford(it.cost))return cmdFail('Faltam recursos');
+CMDS.craft=(u,c)=>{const it=ITEMS[c.item];if(!it)return cmdFail('','');if(eraItem(c.item)>G.era)return cmdFail('Ainda não liberado nesta era','');if(MUNDO.lugares.ruina.receitas.includes(c.item)&&!G.receitas.includes(c.item))return cmdFail('Receita ainda não aprendida','');if(!afford(it.cost))return cmdFail('Faltam recursos');
   if(it.hand){pay(it.cost);setOrder(u,{type:'craft',item:c.item,paid:it.cost});return{ok:true}}
   const sm=G.bld.find(x=>x.type==='smithy'&&x.done);if(!sm)return cmdFail('Construa uma Ferraria primeiro');
   pay(it.cost);setOrder(u,{type:'forge',b:sm.id,item:c.item,paid:it.cost});return{ok:true,toast:'Indo até a Ferraria…'}};
@@ -75,5 +75,5 @@ CMDS.qmode=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');b.mode=c.v;
 CMDS.repair=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');setOrder(u,{type:'repair',b:b.id});return{ok:true}};
 CMDS.sleep=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');setOrder(u,{type:'sleep',b:b.id});return{ok:true}};
 CMDS.ring=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');tocaSino(b);return{ok:true}};
-CMDS.demolish=(u,c)=>{const b=BMAP.get(c.b);if(!b)return cmdFail('','');refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);return{ok:true}};
+CMDS.demolish=(u,c)=>{const b=BMAP.get(c.b);if(!b||b.type==='runa')return cmdFail(b?'A pedra rúnica não se desmonta.':'','');refund(BD[b.type].cost,b.done?.5:.8);destroyB(b);return{ok:true}};
 CMDS.loot=(u,c)=>{const t=G.tombs.find(x=>x.id===c.id);if(!t)return cmdFail('','');lootTomb(t);return{ok:true}};

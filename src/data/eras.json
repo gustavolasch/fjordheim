@@ -1,0 +1,15 @@
+{
+  "_nota": "Eras (0.7). Equilibrar é editar números aqui. O build embute este arquivo como ERAS. 'metas[i]' são as metas para ir da era i+1 para a i+2. 'fim' é a meta da era 5 (coroação). 'predios' diz em qual era cada construção aparece (padrão 1).",
+  "nomes": ["Náufrago", "Clã", "Ferro", "Jarl", "Reino"],
+  "metas": [
+    [ { "tipo": "predio", "b": "shelter" }, { "tipo": "predio", "b": "bancada" }, { "tipo": "fogueira" }, { "tipo": "dias", "n": 3 } ],
+    [ { "tipo": "moradores", "n": 3 }, { "tipo": "predio", "b": "longhouse" }, { "tipo": "flag", "f": "colheita" } ],
+    [ { "tipo": "flag", "f": "lingote" }, { "tipo": "moradores", "n": 8 }, { "tipo": "invasoes", "n": 1 } ],
+    [ { "tipo": "moradores", "n": 20 }, { "tipo": "predio", "b": "salao" }, { "tipo": "flag", "f": "mercador" } ]
+  ],
+  "fim": [ { "tipo": "saga", "id": "coroa" } ],
+  "predios": {
+    "storage": 2, "cart": 2, "house": 2, "longhouse": 2, "pen": 2, "cavalete": 2, "curtume": 2, "tower": 2,
+    "smithy": 3, "fundicao": 3, "barracks": 3, "salao": 4
+  }
+}

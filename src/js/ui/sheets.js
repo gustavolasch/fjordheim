@@ -20,7 +20,7 @@ function renderSheet(){if(!sheetKind||!G)return;const h=sheetHTML();if(h==null){
 const head=(t,hint)=>`<div class="shead"><div><h2>${t}</h2>${hint?`<p class="hint">${hint}</p>`:''}</div><button class="x" data-a="close">✕</button></div>`;
 function sheetHTML(){
   switch(sheetKind){
-  case'build':{const cat=lastCat,cur=mode.type||mode.kind;const items=cat==='decor'?DECOR_ORDER:BUILD_ORDER.filter(k=>BD[k].cat===cat);
+  case'build':{const cat=lastCat,cur=mode.type||mode.kind;const items=cat==='decor'?DECOR_ORDER:BUILD_ORDER.filter(k=>BD[k].cat===cat&&eraPredio(k)<=G.era);
     return`<button class="grab" data-a="expand" aria-label="Expandir"></button><div class="cats">${CATS.map(([k,n])=>`<button class="cat ${k===cat?'on':''}" data-a="cat" data-v="${k}">${svg(k)}${n}</button>`).join('')}</div><div class="strip ${expanded?'grid':''}">${items.map(k=>{const isD=cat==='decor',def=isD?DECOR[k]:BD[k];return`<button class="pc ${k===cur?'sel':''} ${afford(def.cost)?'':'dis'}" data-a="${isD?'decor':'build'}" data-v="${k}"><img src="${isD?DTHUMB[k]:THUMB[k]}" alt=""><b>${def.n}</b><i>${costHTML(def.cost)}</i></button>`}).join('')}</div>`}
   case'edit':{const d=mode.sel;
     if(!d&&sel&&sel.k==='b'){const eb=BMAP.get(sel.id);if(eb){const ed=BD[eb.type];
@@ -28,8 +28,8 @@ function sheetHTML(){
     if(!d)return head('Editar objetos','Toque numa decoração ou construção para selecionar. Arraste decoração para mover. Remover apaga qualquer peça, inclusive cercas e muros.')+`<div class="row"><button class="sbtn" data-a="done">Sair do modo edição</button></div>`;
     return head(DECOR[d.k].n,'Arraste o objeto para movê-lo livremente.')+`<div class="row"><button class="sbtn" data-a="flip">↔ Virar</button><button class="sbtn" data-a="small">➖</button><button class="sbtn" data-a="big">➕</button><button class="sbtn" data-a="dup">⧉ Duplicar (${costHTML(DECOR[d.k].cost)})</button><button class="sbtn red" data-a="del">🗑 Remover</button><button class="gbtn" data-a="done">Pronto</button></div>`}
   case'craft':{const sm=G.bld.find(b=>b.type==='smithy'&&b.done);return head('Criar','Ferramentas de pedra se fazem à mão. Armas pedem uma Ferraria pronta.')+
-    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div><div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
-      tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS).filter(k=>!MUNDO.lugares.ruina.receitas.includes(k)||G.receitas.includes(k)),arm=ks.filter(k=>!tools.includes(k));
+    (()=>{const card=k=>{const it=ITEMS[k],can=it.hand||sm,ok=can&&afford(it.cost);return`<div class="item"><div class="top"><span class="ic">${itemIcon(k)}</span><b>${it.n}</b><span class="cnt">${G.items[k]}</span></div><div class="small">${it.use}</div>${isFerr(k)&&G.ferr&&G.ferr[k]&&G.ferr[k][0]?`<div class="small">${OFICIO.qualidade.efeito[G.ferr[k][0].q].n} · ${G.ferr[k][0].d}/${maxFerr(k,G.ferr[k][0].q)} usos</div>`:''}<div class="row" style="margin:2px 0 0"><span class="cost">${costHTML(it.cost)}</span><button class="sbtn" style="margin-left:auto;padding:5px 10px" data-a="craft" data-v="${k}" ${ok?'':'disabled'}>${it.hand?'Criar':sm?'Forjar':'🔒 Ferraria'}</button></div></div>`},
+      tools=[...new Set(Object.values(JOBTOOL))].filter(k=>ITEMS[k]),ks=Object.keys(ITEMS).filter(k=>(!MUNDO.lugares.ruina.receitas.includes(k)||G.receitas.includes(k))&&eraItem(k)<=G.era),arm=ks.filter(k=>!tools.includes(k));
       return`<h4>Ferramentas de trabalho</h4><div class="items">${tools.map(card).join('')}</div>`+(arm.length?`<h4>Armas e equipamentos</h4><div class="items">${arm.map(card).join('')}</div>`:'')})()}
   case'bag':{const w=bagW(),cap=storeCap();
     return head('Mochila',`Peso ${w}/${BAG}. Toras pesam 5 · pedra e ferro 2 · galho 1 · comida 0,5.`)+`<div class="row" style="margin-top:0"><div class="meter"><i style="width:${Math.min(100,w/BAG*100)}%;background:${w>=BAG?'#e2533f':'#f3c969'}"></i></div></div>`+
@@ -48,6 +48,7 @@ function sheetHTML(){
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
   case'saga':return sagaHTML();
+  case'era':return eraHTML();
   case'info':return infoHTML()}
   return null}
 /* Mochila: 8 espaços de equipamento e a lista de itens (toque para vestir) */
@@ -78,6 +79,7 @@ function infoHTML(){if(!sel)return null;
   if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?icon('interface','construindo')+' Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um '+icon('ferramentas','hammer')+' Martelo acelera.')}</p>`}
   else{
     if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
+    h+=estacaoHTML(b);
     if(b.type==='farm'){const r=farmoResumo(b),per=estacao().e,cult=Object.keys(CAMPO.culturas);
       h+=`<p class="hint">Vazios ${r.v} · Preparados ${r.pr} · Plantados ${r.pl} · Prontos ${r.pt}</p><div class="row">`+
         `<button class="sbtn" data-a="farmop" data-v="prep" ${r.v?'':'disabled'}>⛏️ Preparar terra</button>`+
@@ -108,6 +110,9 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
   case'trade':{const m=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(m){const r=sendCmd({t:'trade',id:m.id,i:+v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else sfx('craft')}break}
+  case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
+  case'reparaF':{if(b){const r=sendCmd({t:'reparaF',b:b.id,k:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
+  case'eraAvanca':{const r=sendCmd({t:'eraAvanca'});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else closeSheet();break}
   case'farmop':{if(b){const[op,cc]=String(v).split(':');const r=sendCmd({t:'farmOp',b:b.id,op,c:cc});if(!r.ok&&r.msg)toast(r.msg,'bad')}break}
   case'buyAnimal':{if(b){const r=sendCmd({t:'buyAnimal',b:b.id,sp:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else if(r.toast)toast(r.toast,'good')}break}
   case'setjob':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(a)sendCmd({t:'setjob',id:a.id,job:v||null});break}

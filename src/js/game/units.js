@@ -62,8 +62,9 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'mine':{const o=G.obj[a.i];if(o&&(o.t==='stone'||o.t==='ore')){const iron=o.t==='ore';o.amt--;u.carry++;u.carryT=iron?'iron':'stone';for(let k=0;k<3;k++)puff(a.i%N+.5,(a.i/N|0)+.5,'rockchip');if(o.amt<=0){G.obj[a.i]=null;u.tgt=null}}wearTool(u);break}
   case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
   case'plot':{const b=BMAP.get(a.b);if(b)applyPlot(b,a.q,a.op,a.c);wearTool(u);break}
+  case'proc':break;
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
-  case'forge':{if(w){G.items[a.item]++;floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
+  case'forge':{if(w){ferrAdd(a.item);floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
   }}
 function findObj(cx,cy,R,types,u){let best=null,bd=1e9;const x0=Math.max(0,Math.floor(cx-R)),x1=Math.min(N-1,Math.ceil(cx+R)),y0=Math.max(0,Math.floor(cy-R)),y1=Math.min(N-1,Math.ceil(cy+R));
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const o=G.obj[idx(x,y)];if(!o||!types.includes(o.t))continue;if(o.t==='tree'&&o.g<.7)continue;if(o.bad&&o.bad>G.t)continue;if(Math.hypot(x-cx,y-cy)>R)continue;

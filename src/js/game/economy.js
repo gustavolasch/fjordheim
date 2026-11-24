@@ -62,11 +62,11 @@ function workersOf(b){return G.units.filter(u=>u.work===b.id)}
 function assignWorker(b,silent){const d=BD[b.type];if(!d.jobs||!b.done)return;if(workersOf(b).length>=d.jobs)return;
   const idle=idleVillagers();if(!idle.length){if(!silent)toast('Ainda não há moradores. Eles serão encontrados pelo mundo em breve.','bad');return}
   const cx=b.x+b.w/2,cy=b.y+b.h/2;idle.sort((a,c)=>Math.hypot(a.x-cx,a.y-cy)-Math.hypot(c.x-cx,c.y-cy));
-  const u=idle[0];if(u.tool){G.items[u.tool]++;u.tool=null}u.job=d.job;u.work=b.id;u.path=null;u.act=null;u.tgt=null;takeTool(u)}
-function unassign(u){if(u.tool){G.items[u.tool]++;u.tool=null}u.job=null;u.work=null;u.path=null;u.act=null;u.carry=0;u.tgt=null}
-function takeTool(u){const t=JOBTOOL[u.job||'builder'];if(!u.tool&&G.items[t]>0){G.items[t]--;u.tool=t}}
-function toolF(u){if(u.kind==='player')return G.items.hammer>0?.62:1.25;const base=u.tool&&u.tool===JOBTOOL[u.job||'builder']?.62:1.25;return u.kind==='villager'?base/velocidadeMorador(u):base}
-function wearTool(u){if(u.tool&&Math.random()<.008){toast(`💥 ${itemMark(u.tool)} ${ITEMS[u.tool].n} de ${u.name} quebrou`);u.tool=null;takeTool(u)}}
+  const u=idle[0];if(u.tool){ferrDevolve(u.tool,u.toolInst);u.tool=null;u.toolInst=null}u.job=d.job;u.work=b.id;u.path=null;u.act=null;u.tgt=null;takeTool(u)}
+function unassign(u){if(u.tool){ferrDevolve(u.tool,u.toolInst);u.tool=null;u.toolInst=null}u.job=null;u.work=null;u.path=null;u.act=null;u.carry=0;u.tgt=null}
+function takeTool(u){const t=JOBTOOL[u.job||'builder'];if(!u.tool&&G.items[t]>0){u.toolInst=ferrPega(t);u.tool=t}}
+function toolF(u){if(u.kind=='player'){const h=G.ferr&&G.ferr.hammer&&G.ferr.hammer[0];return G.items.hammer>0?.62/velQual(h):1.25}const match=u.tool&&u.tool===JOBTOOL[u.job||'builder'];const base=match?.62:1.25;return u.kind=='villager'?base/velocidadeMorador(u)/(match?velQual(u.toolInst):1):base}
+
 
 /* ================= Natural objects ================= */
 function chopHit(i,ob){ob.hp=(ob.hp==null?5:ob.hp)-1;ob.shake=.35;const x=i%N+.5,y=(i/N|0)+.5;

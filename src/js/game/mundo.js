@@ -61,7 +61,7 @@ function condOk(c){
     case'casa_fogueira':return G.bld.some(b=>b.done&&b.type==='shelter')&&G.decor.some(d=>d.k==='campfire');
     case'moradores':return aldeoes>=c.n;
     case'sem_perdas_inverno':return (G.perdas||0)===0&&aldeoes>0&&foodStock()>=c.comida;
-    case'ferro_invasao':return have('iron')>=1&&(G.invasoesRepelidas||0)>=1;
+    case'ferro_invasao':return have('lingote')>=1&&(G.invasoesRepelidas||0)>=1;
     case'moradores_mercador':return aldeoes>=c.n&&!!G.flags.mercador;
     case'predio':return G.bld.some(b=>b.done&&b.type===c.b)}
   return false}
@@ -72,7 +72,7 @@ function sagasTick(){G.sagas=G.sagas||{};
     toast(`📜 Saga concluída: ${s.n}`,'good')}}
 
 // tick do mundo (roda em update)
-function mundoTick(dt){if(!G.lugares)return;
+function mundoTick(dt){if(!G.lugares)return;for(const k of FERR_KEYS())garantiaFerr(k);
   const pl=PL();if(pl)for(const p of G.lugares)if(!p.visitado&&Math.hypot(p.x+.5-pl.x,p.y+.5-pl.y)<=3)p.visitado=true;
   if(!G.demo&&!G.raidOn){if(G.evT==null)G.evT=novoEvento();G.evT-=dt;if(G.evT<=0){G.evT=novoEvento();disparaEvento()}}
   for(const p of G.lugares){if(p.k!=='acampamento'||p.feito)continue;

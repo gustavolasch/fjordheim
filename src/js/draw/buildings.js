@@ -172,7 +172,7 @@ function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
     case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
-  ({salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
+  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
 
 
 /* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */
@@ -183,3 +183,11 @@ function dBell(b){const x=b.x+.5,y=b.y+.5,q=P(x,y);ell(q[0],q[1]+1,8,3.5,'rgba(0
   ln([q[0],q[1]],[q[0],q[1]-30],C.woodD,2.4);ln([q[0]-6,q[1]-26],[q[0]+6,q[1]-26],C.woodD,2);
   const w=(b.cd||0)>(G?G.t:0)?Math.sin(perfT*18)*.25:0;
   pp([[q[0]-6,q[1]-24],[q[0]+6,q[1]-24],[q[0]+4+w,q[1]-14],[q[0]-4+w,q[1]-14]],'#c9a24a');ell(q[0],q[1]-13,3.6,1.5,'#8a6a2a')}
+// oficinas (bancada, cavalete, curtume, fundição): casa baixa com uma marca de cada ofício
+function dOficina(b){const x=b.x+.3,y=b.y+.25,w=b.w-.6,h=b.h-.5;box(x,y,w,h,0,12,null,shade(C.wood,-.3),C.wood);
+  roofY(x,y,w,h,12,15,roofCol(),false);
+  const q=P(b.x+b.w/2,b.y+b.h-.4,0);
+  if(b.type==='bancada'){ell(q[0],q[1],6,2.5,'#8a6a45');ln([q[0]-5,q[1]-4],[q[0]+5,q[1]-4],C.woodL,2)}
+  else if(b.type==='cavalete'){ln([q[0]-6,q[1]],[q[0]+6,q[1]-4],C.woodD,2.4);ln([q[0]-6,q[1]-4],[q[0]+6,q[1]],C.woodD,2.4)}
+  else if(b.type==='curtume'){ell(q[0],q[1],6,2.5,'#7a4e2a');ell(q[0]+4,q[1]-2,3,1.5,'#9a6a40')}
+  else{const f=P(b.x+.6,b.y+.6,0);ell(f[0],f[1]-2,5,4,'#ff8a2a');box(b.x+1.5,b.y+1.2,.7,.7,0,14,null,shade(C.stone,-.3),C.stone)}}
