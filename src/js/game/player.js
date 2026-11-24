@@ -31,7 +31,7 @@ function updPlayer(u,dt){
   case'deposit':{const b=BMAP.get(o.b);if(!b){u.order=null;return}if(!isNear(u,b)){stepTo(u,o,b.x,b.y,b.w,b.h);return}o.tries=0;deposit(b);u.order=null;return}
   case'fish':{const{x,y}=o;if(!G.items.rod){toast('Precisa de uma [[ferramentas.rod]] Vara de pesca (Criar).','bad');u.order=null;return}
     const[tx,ty]=utile(u);const onSpot=adjT(u,x,y)&&passV(tx,ty);if(!onSpot){stepTo(u,o,x,y,1,1);return}
-    if(!canCarry('food')){bagFull();u.order=null;return}o.tries=0;faceTo(u,x+.5,y+.5);u.act={type:'fish',t:0,dur:4,fx:x+.5,fy:y+.5};return}
+    if(!canCarry('food')){bagFull();u.order=null;return}o.tries=0;faceTo(u,x+.5,y+.5);u.act={type:'fish',t:0,dur:4/velQual(G.ferr&&G.ferr.rod&&G.ferr.rod[0]),fx:x+.5,fy:y+.5};return}
   case'farmop':{const b=BMAP.get(o.b);if(!b||!b.done){u.order=null;return}const[tx,ty]=utile(u);
     if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;
     const q=farmoNext(b,o.op,o.c);
@@ -54,13 +54,13 @@ function startObj(u,o,ob){
   switch(ob.t){
   case'tree':if(ob.g<.7){toast('Árvore jovem demais. Deixe crescer.');u.order=null;return}
     if(!hasTool('axe')){toast('Precisa de um [[itens.axe]] Machado de pedra (Criar).','bad');showHint('craft',true);u.order=null;return}
-    u.act={type:'chop',i:o.i,t:0,dur:.85};return;
+    u.act={type:'chop',i:o.i,t:0,dur:.85/velQual(G.ferr&&G.ferr.axe&&G.ferr.axe[0])};return;
   case'falling':u.act={type:'wait',t:0,dur:.25};return;
   case'log':if(!canCarry('wood')){bagFull('wood');u.order=null;return}u.act={type:'takelog',i:o.i,t:0,dur:1.1};return;
   case'branch':if(!canCarry('stick')){bagFull('stick');u.order=null;return}u.act={type:'pickup',i:o.i,t:0,dur:.45,k:'stick'};return;
   case'pebble':if(!canCarry('stone')){bagFull('stone');u.order=null;return}u.act={type:'pickup',i:o.i,t:0,dur:.45,k:'stone'};return;
   case'stone':case'ore':{if(!G.items.pick){toast('Rocha grande demais para levar. Precisa de [[ferramentas.pick]] Picareta.','bad');showHint('pick',true);u.order=null;return}
-    const k=ob.t==='ore'?'iron':'stone';if(!canCarry(k)){bagFull(k);u.order=null;return}u.act={type:'mine',i:o.i,t:0,dur:1.5,k};return}
+    const k=ob.t==='ore'?'iron':'stone';if(!canCarry(k)){bagFull(k);u.order=null;return}u.act={type:'mine',i:o.i,t:0,dur:1.5/velQual(G.ferr&&G.ferr.pick&&G.ferr.pick[0]),k};return}
   case'bush':if(!(ob.b>0)){if(!o.cont)toast('Sem frutinhas agora. Elas voltam com o tempo.');u.order=null;return}if(!canCarry('food')){bagFull('food');u.order=null;return}u.act={type:'berry',i:o.i,t:0,dur:.7};return;
   case'stump':if(!o.cont)toast('Um toco. A árvore volta a crescer com o tempo.');u.order=null;return;
   default:u.order=null}}

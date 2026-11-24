@@ -49,7 +49,7 @@ function needWarn(u){
 function killPlayer(u){
   if(u.guest){toast('💀 Seu amigo caiu e voltou ao abrigo.','bad');respawnPlayer(u);return} // a mochila é do anfitrião: não vai para o túmulo
   if(!settings.calm){
-    G.tombs.push({id:G.idc++,x:u.x,y:u.y,inv:{...G.inv},items:{...G.items}});
+    G.tombs.push({id:G.idc++,x:u.x,y:u.y,inv:{...G.inv},items:{...G.items},ferr:G.ferr||{}});G.ferr={};
     for(const k in G.inv)G.inv[k]=0;
     for(const k in G.items)G.items[k]=0;
     toast('💀 Você morreu. Sua mochila ficou no túmulo.','bad');
@@ -68,7 +68,7 @@ function respawnPlayer(u){
 function tombAt(wx,wy){for(const t of G.tombs)if(Math.hypot(wx-t.x,wy-t.y)<.7)return t;return null}
 function lootTomb(t){
   for(const k in t.inv)G.inv[k]=(G.inv[k]||0)+t.inv[k];
-  for(const k in t.items)G.items[k]=(G.items[k]||0)+t.items[k];
+  for(const k in t.items){G.items[k]=(G.items[k]||0)+t.items[k];if(isFerr(k)){G.ferr[k]=(G.ferr[k]||[]).concat((t.ferr&&t.ferr[k])||[]);garantiaFerr(k)}}
   G.tombs=G.tombs.filter(x=>x!==t);
   toast('[[interface.mochila]] Você pegou sua mochila de volta','good');
 }

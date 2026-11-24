@@ -23,7 +23,7 @@
   },
   "estraga": {
     "itens": ["food", "cevada", "nabo", "ovo"],
-    "mochila_dia": 0.04,
+    "mochila_dia": 0.02,
     "deposito_dia": 0.01,
     "inverno_fator": 0
   }

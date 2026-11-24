@@ -11,7 +11,7 @@ function cartPlace(x,y){const c={id:G.idc++,x:x+.5,y:y+.5,hp:CARRINHO.vida,max:C
 // tudo o que cabe (até a capacidade da mochila) vai para o carrinho; o resto fica na mochila
 function cartStow(c){let sobra=false;
   for(const k in G.inv){const n=G.inv[k];if(n<=0)continue;const room=Math.max(0,Math.floor((BAG-cartW(c))/WEIGHT[k]+1e-6));const m=Math.min(n,room);if(m>0){G.inv[k]-=m;c.inv[k]=(c.inv[k]||0)+m}if(G.inv[k]>0)sobra=true}
-  for(const k in G.items){const n=G.items[k];if(!n)continue;const w=ITEMS[k]?.peso||0;const room=w>0?Math.max(0,Math.floor((BAG-cartW(c))/w+1e-6)):n;const m=Math.min(n,room);if(m>0){G.items[k]-=m;c.items[k]=(c.items[k]||0)+m}if(G.items[k]>0)sobra=true}
+  for(const k in G.items){garantiaFerr(k);const n=G.items[k];if(!n)continue;const w=ITEMS[k]?.peso||0;const room=w>0?Math.max(0,Math.floor((BAG-cartW(c))/w+1e-6)):n;const m=Math.min(n,room);if(m>0){G.items[k]-=m;c.items[k]=(c.items[k]||0)+m;if(isFerr(k)){c.ferr=c.ferr||{};c.ferr[k]=(c.ferr[k]||[]).concat(G.ferr[k].splice(0,m));G.items[k]=G.ferr[k].length}}if(G.items[k]>0)sobra=true}
   if(sobra)return{ok:true,msg:'Carrinho cheio. O resto ficou na mochila.',kind:'bad'};
   return{ok:true,msg:'🛒 Mochila guardada no carrinho',kind:'good'}}
 // descarrega no depósito mais próximo do carrinho (precisa estar encostado no depósito)
@@ -19,7 +19,7 @@ function cartUnload(c){const b=G.bld.find(x=>x.done&&BD[x.type].store&&isNear(c,
   if(!b)return{ok:false,msg:'Leve o carrinho até um depósito',kind:'bad'};
   const cap=storeCap();let left=0;
   for(const k in c.inv){const m=Math.min(c.inv[k],Math.max(0,cap-G.res[k]));G.res[k]+=m;c.inv[k]-=m;left+=c.inv[k]}
-  for(const k in c.items){G.items[k]=(G.items[k]||0)+c.items[k];c.items[k]=0}
+  for(const k in c.items){G.items[k]=(G.items[k]||0)+c.items[k];if(isFerr(k)){G.ferr[k]=(G.ferr[k]||[]).concat((c.ferr&&c.ferr[k])||[]);if(c.ferr)c.ferr[k]=[];garantiaFerr(k)}c.items[k]=0}
   if(left>0)return{ok:true,msg:'Depósito cheio para alguns itens. Construa outro.',kind:'bad'};
   return{ok:true,msg:'📦 Carrinho descarregado no depósito',kind:'good'}}
 function cartExec(c,op){return op==='stow'?cartStow(c):cartUnload(c)}
@@ -35,7 +35,7 @@ function cartTick(dt){
       continue}
     // parado e sem ninguém por perto: invasor rouba, animal quebra
     if(G.units.some(u=>u.kind==='player'&&Math.hypot(u.x-c.x,u.y-c.y)<5))continue;
-    if(G.units.some(u=>u.kind==='raider'&&Math.hypot(u.x-c.x,u.y-c.y)<1.2)&&cartW(c)>0){c.inv={};c.items={};toast('🛒 Invasores roubaram o carrinho sem ninguém por perto','bad')}
+    if(G.units.some(u=>u.kind==='raider'&&Math.hypot(u.x-c.x,u.y-c.y)<1.2)&&cartW(c)>0){c.inv={};c.items={};c.ferr={};toast('🛒 Invasores roubaram o carrinho sem ninguém por perto','bad')}
     if(G.units.some(u=>u.kind==='animal'&&Math.hypot(u.x-c.x,u.y-c.y)<1.2)){c.hp-=dt*6;if(c.hp<=0){G.carts=G.carts.filter(x=>x!==c);puff(c.x,c.y,'debris');toast('🛒 O carrinho quebrou sem ninguém por perto','bad')}}
   }
 }

@@ -1,6 +1,6 @@
 /* ================= Update ================= */
 function update(dt){G.t+=dt;
-  const pop=popCount();G.foodAcc=(G.foodAcc||0)+pop*dt/32;while(G.foodAcc>=1){G.foodAcc--;if(G.res.food>0)G.res.food--}
+  const pop=popCount();
   // raids only once there is a real village to defend (Casa Comunal + inhabitants)
   if(settings.raids&&!G.demo&&longhouse()&&pop>0){if(!G.raidOn&&!G.raidWarned&&G.t>=G.nextRaid-25){G.raidWarned=true;toast('🔭 Invasores avistados! Chegam em 25 segundos.','bad')}
     if(G.t>=G.nextRaid&&!G.raidOn){G.raidWarned=false;G.nextRaid=G.t+260+Math.random()*90;spawnRaid()}}

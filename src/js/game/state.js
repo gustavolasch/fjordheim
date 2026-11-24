@@ -42,7 +42,7 @@ function genMap(){
     if(t===3&&fr>.55&&r()<.45)G.obj[i]=newTree(r);
     else if(nearRock&&r()<.07)G.obj[i]=ROCK(r,'ore');
     else if(r()<.006||(G.biome==='forest'&&nearW&&r()<.1))G.obj[i]=ROCK(r,'stone');
-    else if(r()<.0025)G.obj[i]=ROCK(r,'ore');
+    else if(r()<.006)G.obj[i]=ROCK(r,'ore');
     else if(t===3&&r()<.012)G.obj[i]={t:'bush',s:.8+r()*.4,c:r(),b:3};
     else if(r()<.011)G.obj[i]=PEBBLE(r)}
   for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=idx(x,y);if(G.obj[i]||!landT(G.tiles[i]))continue;let nt=false;
