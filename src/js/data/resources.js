@@ -1,2 +1,2 @@
-const RES={stick:['Galhos'],wood:['Toras'],stone:['Pedra'],food:['Comida'],iron:['Ferro'],hide:['Couro'],bone:['Osso'],fibra:['Fibra']};
-const WEIGHT={stick:1,wood:5,stone:2,food:.5,iron:2,hide:1.5,bone:1,fibra:.2};
+const RES={stick:['Galhos'],wood:['Toras'],stone:['Pedra'],food:['Comida'],iron:['Ferro'],hide:['Couro'],bone:['Osso'],fibra:['Fibra'],cevada:['Cevada'],nabo:['Nabo'],linho:['Linho'],ovo:['Ovo'],la:['Lã'],semente_cevada:['Semente de cevada'],semente_nabo:['Semente de nabo'],semente_linho:['Semente de linho']};
+const WEIGHT={stick:1,wood:5,stone:2,food:.5,iron:2,hide:1.5,bone:1,fibra:.2,cevada:.5,nabo:.5,linho:.2,ovo:.2,la:.3,semente_cevada:.1,semente_nabo:.1,semente_linho:.1};

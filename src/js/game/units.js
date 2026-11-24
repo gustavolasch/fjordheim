@@ -61,7 +61,7 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'takelog':{const o=G.obj[a.i];if(o&&o.t==='log'){o.amt--;u.carry++;u.carryT='wood';if(o.amt<=0){toStump(a.i,o);u.tgt=null}}break}
   case'mine':{const o=G.obj[a.i];if(o&&(o.t==='stone'||o.t==='ore')){const iron=o.t==='ore';o.amt--;u.carry++;u.carryT=iron?'iron':'stone';for(let k=0;k<3;k++)puff(a.i%N+.5,(a.i/N|0)+.5,'rockchip');if(o.amt<=0){G.obj[a.i]=null;u.tgt=null}}wearTool(u);break}
   case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
-  case'farm':{if(w){w.grow+=.12;if(w.grow>=1){w.grow=0;addRes('food',4,w.x+1.5,w.y+1.5)}}wearTool(u);break}
+  case'plot':{const b=BMAP.get(a.b);if(b)applyPlot(b,a.q,a.op,a.c);wearTool(u);break}
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
   case'forge':{if(w){G.items[a.item]++;floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
   }}
@@ -90,7 +90,10 @@ function think(u){
     if(Math.abs(Math.floor(u.x)-x)<=1&&Math.abs(Math.floor(u.y)-y)<=1){u.face=(x+.5-u.x)-(y+.5-u.y)>0?1:-1;u.act=ob.t==='log'?{type:'takelog',i:ti,t:0,dur:1.6*toolF(u)}:ob.t==='tree'?{type:'chop',i:ti,t:0,dur:1.6*toolF(u)}:(ob.t==='branch'||ob.t==='pebble')?{type:'pick',i:ti,t:0,dur:1}:{type:'mine',i:ti,t:0,dur:1.6*toolF(u)}}
     else if(!goRect(u,x,y,1,1)){G.obj[ti].bad=G.t+25;u.tgt=null}
     return}
-  if(u.job==='farmer'){const[x,y]=utile(u);if(x>=w.x&&y>=w.y&&x<w.x+3&&y<w.y+3&&Math.random()<.7){u.act={type:'farm',t:0,dur:3.6*toolF(u)}}else{const tx=w.x+((Math.random()*3)|0),ty=w.y+((Math.random()*3)|0);const p=astar(x,y,(a,b)=>a===tx&&b===ty,tx,ty,passV);if(p)u.path=p;else u.act={type:'idle',t:0,dur:2}}return}
+  if(u.job==='farmer'){const e=farmoEscolhe(w);if(!e){u.act={type:'idle',t:0,dur:3};return}
+    const tx=w.x+(e.q%3),ty=w.y+((e.q/3)|0),[cx,cy]=utile(u);
+    if(Math.abs(cx-tx)<=1&&Math.abs(cy-ty)<=1){u.act={type:'plot',t:0,dur:CAMPO.tempo_seg[e.op]*toolF(u)/1.25,b:w.id,q:e.q,op:e.op,c:e.c};return}
+    if(!goRect(u,tx,ty,1,1))u.act={type:'idle',t:0,dur:2};return}
   if(u.job==='fisher'){let spot=null;for(let dy=0;dy<w.h;dy++)for(let dx=0;dx<w.w;dx++){const i=idx(w.x+dx,w.y+dy);if(G.tiles[i]<=1){const busy=G.units.some(v=>v!==u&&v.work===w.id&&v.spot===i);if(!busy||!spot)spot=[w.x+dx,w.y+dy,i]}}
     if(!spot){u.act={type:'idle',t:0,dur:3};return}u.spot=spot[2];const[x,y]=utile(u);
     if(x===spot[0]&&y===spot[1]){u.act={type:'fish',t:0,dur:4.5*toolF(u),fx:spot[0]+1.5,fy:spot[1]+.5}}

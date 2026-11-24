@@ -32,8 +32,11 @@ function updPlayer(u,dt){
   case'fish':{const{x,y}=o;if(!G.items.rod){toast('Precisa de uma [[ferramentas.rod]] Vara de pesca (Criar).','bad');u.order=null;return}
     const[tx,ty]=utile(u);const onSpot=adjT(u,x,y)&&passV(tx,ty);if(!onSpot){stepTo(u,o,x,y,1,1);return}
     if(!canCarry('food')){bagFull();u.order=null;return}o.tries=0;faceTo(u,x+.5,y+.5);u.act={type:'fish',t:0,dur:4,fx:x+.5,fy:y+.5};return}
-  case'farm':{const b=BMAP.get(o.b);if(!b||!b.done){u.order=null;return}const[tx,ty]=utile(u);
-    if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;u.act={type:'farm',t:0,dur:3*(G.items.sickle>0?.62:1.25),b:b.id};return}
+  case'farmop':{const b=BMAP.get(o.b);if(!b||!b.done){u.order=null;return}const[tx,ty]=utile(u);
+    if(!(tx>=b.x&&ty>=b.y&&tx<b.x+3&&ty<b.y+3)){stepTo(u,o,b.x,b.y,3,3,true);return}o.tries=0;
+    const q=farmoNext(b,o.op,o.c);
+    if(q<0){if(o.n>0)toast(`${o.op==='harvest'?'🌾 Colheita':'🌱 Lavoura'}: ${o.n} canteiro(s) cuidado(s)`,'good');u.order=null;return}
+    u.act={type:'plot',t:0,dur:CAMPO.tempo_seg[o.op]*(G.items.sickle>0?.62:1.25)/1.25,b:b.id,q,op:o.op,c:o.c};return}
   case'ride':{const ct=G.carts.find(x=>x.id===o.c);if(!ct||ct.rider!=null){u.order=null;return}
     if(!cartNear(u,ct)){stepTo(u,o,Math.floor(ct.x),Math.floor(ct.y),1,1);return}
     ct.rider=u.id;u.ride=ct.id;u.heading=Math.atan2(u.y-ct.y,u.x-ct.x);u.act=null;u.path=null;u.order=null;toast('🛒 Você está conduzindo o carrinho. Toque em Sair da carroça para descer.');return}
@@ -66,9 +69,9 @@ function finishP(u,a){const o=u.order;if(o&&o.type==='obj')o.cont=true;const ob=
   case'takelog':if(ob&&ob.t==='log'&&canCarry('wood')){ob.amt--;addInv('wood',1,ox+.6,oy);sfx('pick');if(ob.amt<=0)toStump(a.i,ob);completeHint('log')}break;
   case'pickup':if(ob){G.obj[a.i]=null;addInv(a.k,1,ox,oy);sfx('pick');for(let k=0;k<3;k++)puff(ox,oy,'pop');completeHint('walk')}break;
   case'mine':if(ob&&(ob.t==='stone'||ob.t==='ore')){ob.amt--;addInv(a.k,1,ox,oy);sfx('mine');for(let k=0;k<3;k++)puff(ox,oy,'rockchip');if(ob.amt<=0){G.obj[a.i]=null;for(let k=0;k<5;k++)puff(ox,oy,'dust')}ptool('pick')}break;
-  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
+  case'berry':if(ob&&ob.t==='bush'&&ob.b>0){ob.b--;addInv('food',1,ox,oy);sfx('pick');puff(ox,oy,'pop');if(ob.b===0)addInv('fibra',1,ox,oy);if(Math.random()<CAMPO.semente_chance_frutinha)addInv('semente_cevada',1,ox,oy);if(!ob.tr){ob.tr=1;G.regrow.push(a.i)}}break;
   case'repair':toast('🔧 Reparado','good');u.order=null;break;
   case'fish':if(Math.random()<.65){addInv('food',1,a.fx,a.fy);fishJump(a.fx,a.fy);sfx('splash')}ptool('rod');if(!canCarry('food')){u.order=null;bagFull()}break;
-  case'farm':{const b=BMAP.get(a.b);if(b){b.grow+=.15;for(let k=0;k<2;k++)puff(b.x+Math.random()*3,b.y+Math.random()*3,'dust');if(b.grow>=1){b.grow=0;const n=Math.min(4,Math.floor((BAG-bagW())/WEIGHT.food+1e-6));if(n>0){addInv('food',n,b.x+1.5,b.y+1.5);sfx('store')}else{bagFull();u.order=null}}}break}
+  case'plot':{const b=BMAP.get(a.b);if(b&&applyPlot(b,a.q,a.op,a.c)){if(o&&o.type==='farmop')o.n=(o.n||0)+1;puff(b.x+.5+a.q%3,b.y+.5+((a.q/3)|0),'dust');sfx('store')}break}
   case'craft':case'forge':G.items[a.item]++;floater(u.x,u.y,`+1 ${itemMark(a.item)}`);sfx('craft');if(o)o.done=true;u.order=null;if(a.item==='axe')completeHint('craft');if(a.item==='pick')completeHint('pick');break}}
 

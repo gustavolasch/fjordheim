@@ -7,6 +7,7 @@ const BD={
  longhouse:{n:'Casa Comunal',cat:'struct',w:3,h:3,cost:{wood:24,stone:12,stick:6},hp:800,house:6,store:100,work:30,wallH:18,desc:'Coração da vila. Guarda 100 de cada recurso.'},
  lumber:{n:'Lenhador',cat:'struct',w:2,h:2,cost:{wood:6,stick:4},hp:200,jobs:2,job:'lumber',work:12,wallH:10,desc:'Posto de trabalho para lenhadores (futuros moradores).'},
  quarry:{n:'Pedreira',cat:'struct',w:2,h:2,cost:{wood:6,stone:2},hp:220,jobs:2,job:'miner',work:12,wallH:10,desc:'Posto de trabalho para mineiros (futuros moradores).'},
+ pen:{n:'Cercado',cat:'struct',w:3,h:3,cost:{stick:8,wood:2},hp:120,work:8,pass:true,desc:'Cercado para galinhas e ovelhas. Elas comem ração e dão ovos e lã.'},
  farm:{n:'Fazenda',cat:'struct',w:3,h:3,cost:{stick:6,wood:2},hp:150,jobs:2,job:'farmer',work:10,pass:true,flat:true,desc:'Toque na lavoura para cuidar dela. A colheita dá comida.'},
  dock:{n:'Cais de Pesca',cat:'struct',w:2,h:2,cost:{wood:8},hp:200,jobs:2,job:'fisher',work:12,pass:true,water:true,desc:'Na beira d’água. Toque para pescar daqui.'},
  smithy:{n:'Ferraria',cat:'struct',w:2,h:2,cost:{wood:10,stone:10},hp:300,jobs:1,job:'smith',work:18,wallH:12,desc:'Permite forjar armas com madeira e ferro.'},

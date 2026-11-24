@@ -57,6 +57,8 @@ function bagItemsHTML(){return`<div class="inv">${Object.keys(ITEMS).map(k=>{con
 function infoHTML(){if(!sel)return null;
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
     if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
+    if(u.kind==='domestic'){const A=CAMPO.animais[u.sp];if(!A)return null;
+      return head(u.name,A.n)+`<p class="hint">${A.emoji} ${u.fed===false?'Sem ração: não produz hoje.':'Comeu ração hoje.'}</p><p class="small">Produz 1 ${A.produz==='ovo'?'ovo':'lã'} a cada ${A.dias_producao} dia(s).</p>`}
     if(u.kind==='raider')return head('Invasor','Saqueador inimigo.')+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%;background:#e2533f"></i></div></div>`;
     if(u.kind==='villager'){const semVaga=DEPOT_JOBS.includes(u.job)&&!depotNear(u);const st=u.dormindo?'Dormindo':!u.job?'Sem trabalho':semVaga?'Sem vaga':(u.status||'Trabalhando');
       const btn=(k,n)=>`<button class="sbtn ${u.job===k?'on':''}" data-a="setjob" data-v="${k}">${n}</button>`;
@@ -73,6 +75,15 @@ function infoHTML(){if(!sel)return null;
   if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?icon('interface','construindo')+' Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um '+icon('ferramentas','hammer')+' Martelo acelera.')}</p>`}
   else{
     if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
+    if(b.type==='farm'){const r=farmoResumo(b),per=estacao().e,cult=Object.keys(CAMPO.culturas);
+      h+=`<p class="hint">Vazios ${r.v} · Preparados ${r.pr} · Plantados ${r.pl} · Prontos ${r.pt}</p><div class="row">`+
+        `<button class="sbtn" data-a="farmop" data-v="prep" ${r.v?'':'disabled'}>⛏️ Preparar terra</button>`+
+        cult.map(k=>{const K=CAMPO.culturas[k],ok=r.pr&&per.plantar&&have(K.semente)>0;return`<button class="sbtn" data-a="farmop" data-v="plant:${k}" ${ok?'':'disabled'}>${K.emoji} Plantar ${K.n} (${have(K.semente)})</button>`}).join('')+
+        `<button class="sbtn" data-a="farmop" data-v="harvest" ${r.pt?'':'disabled'}>🌾 Colher prontos (${r.pt})</button></div>`+
+        `<p class="small">${per.emoji} ${per.n}: ${per.plantar?'as plantas crescem':'nada cresce ao ar livre'}. Sementes vêm de frutinhas e da colheita.</p>`}
+    if(b.type==='pen'){const n=penCount(b),cap=CAMPO.cercado.capacidade;
+      h+=`<p class="hint">Animais: ${n} de ${cap}. Comem ração (cevada ou nabo) todo dia.</p><div class="row">`+
+        Object.keys(CAMPO.animais).map(k=>{const A=CAMPO.animais[k],ok=n<cap&&afford(A.custo);return`<button class="sbtn" data-a="buyAnimal" data-v="${k}" ${ok?'':'disabled'}>${A.emoji} ${A.n} ${costHTML(A.custo)}</button>`}).join('')+`</div>`}
     if(d.jobs)h+=`<p class="hint">👥 Posto para ${d.jobs} trabalhador(es). Moradores poderão ser encontrados no futuro.</p>`;
     if(b.type==='quarry')h+=`<div class="row"><b>Extrair:</b><button class="sbtn ${b.mode==='stone'?'on':''}" data-a="qmode" data-v="stone">${icon('recursos','stone')} Pedra</button><button class="sbtn ${b.mode==='iron'?'on':''}" data-a="qmode" data-v="iron">${icon('recursos','iron')} Ferro</button></div>`;
     if(b.type==='smithy')h+=`<p class="hint">Abra Criar para forjar armas. Você caminha até a ferraria para trabalhar.</p>`;
@@ -93,6 +104,8 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'qmode':if(b)sendCmd({t:'qmode',b:b.id,v});break;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
+  case'farmop':{if(b){const[op,cc]=String(v).split(':');const r=sendCmd({t:'farmOp',b:b.id,op,c:cc});if(!r.ok&&r.msg)toast(r.msg,'bad')}break}
+  case'buyAnimal':{if(b){const r=sendCmd({t:'buyAnimal',b:b.id,sp:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else if(r.toast)toast(r.toast,'good')}break}
   case'setjob':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(a)sendCmd({t:'setjob',id:a.id,job:v||null});break}
   case'recruit':{const a=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(!a)break;const r=sendCmd({t:'recruit',id:a.id});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast,'good');closeSheet();sel=null;break}
   case'equip':sendCmd({t:'equip',item:v});break;

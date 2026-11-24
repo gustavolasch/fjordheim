@@ -56,6 +56,54 @@
    "icone": "1_recursos/fibra",
    "status": "ok",
    "fonte": "src/js/data/resources.js"
+  },
+  "cevada": {
+   "n": "Cevada",
+   "emoji": "🌾",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "nabo": {
+   "n": "Nabo",
+   "emoji": "🥕",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "linho": {
+   "n": "Linho",
+   "emoji": "🧵",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "ovo": {
+   "n": "Ovo",
+   "emoji": "🥚",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "la": {
+   "n": "Lã",
+   "emoji": "🧶",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "semente_cevada": {
+   "n": "Semente de cevada",
+   "emoji": "🌱",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "semente_nabo": {
+   "n": "Semente de nabo",
+   "emoji": "🌱",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
+  },
+  "semente_linho": {
+   "n": "Semente de linho",
+   "emoji": "🌱",
+      "status": "pendente",
+   "fonte": "src/js/data/resources.js"
   }
  },
  "ferramentas": {
@@ -458,6 +506,12 @@
    "icone": "9_construcoes_extra/armadilha_estacas",
    "status": "ok",
    "fonte": "src/data/combate.json"
+  },
+  "pen": {
+   "n": "Cercado",
+   "emoji": "🐑",
+      "status": "pendente",
+   "fonte": "src/js/data/buildings.js"
   }
  },
  "interface": {

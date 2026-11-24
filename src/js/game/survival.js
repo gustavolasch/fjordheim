@@ -14,7 +14,7 @@ function isHeatNear(u){
   return false}
 function nearWater(u){const x=Math.floor(u.x),y=Math.floor(u.y);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(inb(x+dx,y+dy)&&G.tiles[idx(x+dx,y+dy)]<=1)return true;return false}
 // frio: noite (se o ciclo dia/noite estiver ligado), Costa Gelada e água por perto
-function coldLevel(u){let c=0;if(settings.daynight&&nightDark(G.t)>0)c=1;else if(BIO.snowy)c=.6;if(BIO.snowy&&settings.daynight&&nightDark(G.t)>0)c=1;if(nearWater(u))c+=.3;return Math.min(1,c)}
+function coldLevel(u){let c=0;if(ehInverno())c+=CAMPO.inverno_frio;if(settings.daynight&&nightDark(G.t)>0)c=1;else if(BIO.snowy)c=.6;if(BIO.snowy&&settings.daynight&&nightDark(G.t)>0)c=1;if(nearWater(u))c+=.3;return Math.min(1,c)}
 // velocidade cai com energia ou calor zerados
 function survivalSpeed(u){return(u.energy<20?.7:1)*(u.warm<=0?.8:1)}
 

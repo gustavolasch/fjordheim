@@ -33,6 +33,7 @@ function placeB(type,x,y,done){const d=BD[type];if(DEV.instant)done=true;if(!don
   const b={id:G.idc++,type,x,y,w:d.w,h:d.h,done:!!done,prog:done?d.work:0,work:d.work,hp:done?d.hp:Math.round(d.hp*.3),max:d.hp,queue:[],mode:'stone',grow:Math.random()*.5,cd:0,smokeT:Math.random()*3,pop:.35};
   for(let dy=0;dy<d.h;dy++)for(let dx=0;dx<d.w;dx++){const i=idx(x+dx,y+dy);const o=G.obj[i];
     if(o){if(o.t==='branch')G.inv.stick++;else if(o.t==='pebble')G.inv.stone++;G.obj[i]=null}G.occ[i]=b.id}
+  if(type==='farm')b.canteiros=novosCanteiros();
   G.bld.push(b);BMAP.set(b.id,b);
   if(!d.pass&&!(d.gate&&done))for(const u of G.units){const tx=Math.floor(u.x),ty=Math.floor(u.y);if(tx>=x&&ty>=y&&tx<x+d.w&&ty<y+d.h){const p=freeNear(x+(d.w>>1),y+d.h,4)||freeNear(x-1,y-1,4);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null}}
   if(!done)for(let k=0;k<6;k++)puff(x+Math.random()*d.w,y+Math.random()*d.h,'dust');

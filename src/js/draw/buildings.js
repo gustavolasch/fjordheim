@@ -39,10 +39,21 @@ function dQuarry(b){const x=b.x,y=b.y,st=BIO.snowy?'#a9aaa8':C.stone;
   ln(ap,P(x+.6,y+1.05,30),C.woodD,2);ln(P(x+.6,y+1.05,30),P(x+.6,y+1.05,14),'#3a2a1a',1);box(x+.5,y+.95,.2,.2,10,4,shade(st,.2),shade(st,-.3),st)}
 function dFarmFlat(b,p){const x=b.x+.08,y=b.y+.08,w=b.w-.16,h=b.h-.16,soil=BIO.snowy?'#8a7562':'#7b5a35';const hh=h*Math.min(1,p);
   pp([P(x,y),P(x+w,y),P(x+w,y+hh),P(x,y+hh)],soil);for(let t=.25;t<hh;t+=.28)ln(P(x+.05,y+t),P(x+w-.05,y+t),shade(soil,-.25),1.3)}
-function dFarm(b,p){if(p<1)return;const g=b.grow;const col=BIO.crop;
-  for(let j=0;j<9;j++)for(let i=0;i<9;i++){const q=P(b.x+.25+i*.315,b.y+.22+j*.315,0);const hgt=1.5+g*7+hash2(i,j)*1.5;ln(q,[q[0]+Math.sin(perfT*2+i)*.6*windStrength(),q[1]-hgt],g>.7?col:shade('#6b9a3a',(g-.5)*.4),1.6);if(g>.75)ell(q[0],q[1]-hgt,1.1,1.6,shade(col,.2))}
+function dFarm(b,p){if(p<1)return;
+  for(let q=0;q<9;q++){const pl=b.canteiros&&b.canteiros[q];const x=b.x+q%3,y=b.y+((q/3)|0);
+    const soil=!pl||pl.st===0?'#7b5a35':pl.st===1?'#5e4125':'#6a4a2b';
+    pp([P(x+.06,y+.06),P(x+.94,y+.06),P(x+.94,y+.94),P(x+.06,y+.94)],soil);
+    if(pl&&pl.st===1)for(let t=.2;t<1;t+=.27)ln(P(x+.1,y+t),P(x+.9,y+t),'rgba(30,18,8,.45)',1.2);
+    if(pl&&pl.st===2){const K=CAMPO.culturas[pl.c],pr=pl.g>=1,col=pr?'#e0b84a':shade(K.emoji==='🥕'?'#5f8f3a':'#6b9a3a',(pl.g-.5)*.3);
+      for(let k=0;k<5;k++){const sx=x+.2+k*.15,sy=y+.3+(k%2)*.4;const h=1+pl.g*7+hash2(q,k)*1.2;const q0=P(sx,sy,0);ln(q0,[q0[0],q0[1]-h],col,1.5);if(pr)ell(q0[0],q0[1]-h,1.1,1.6,shade(col,.2))}}}
   const s=P(b.x+1.5,b.y+1.5,0);ln(s,[s[0],s[1]-20],C.woodD,1.8);ln([s[0]-6,s[1]-15],[s[0]+6,s[1]-15],C.woodD,1.6);ctx.fillStyle='#8c6d3f';ctx.fillRect(s[0]-2.5,s[1]-17,5,7);ell(s[0],s[1]-19,2.4,2.4,'#d9b44a');pp([[s[0]-4,s[1]-20],[s[0]+4,s[1]-20],[s[0],s[1]-25]],'#5a3a22');
   for(const[cx,cy]of[[b.x,b.y],[b.x+3,b.y],[b.x,b.y+3],[b.x+3,b.y+3]])stake(P(cx,cy,0),8,C.woodL)}
+// cercado: chão, estacas em volta e um monte de feno
+function dPen(b,p){if(p<1)return;const x=b.x,y=b.y;
+  pp([P(x+.05,y+.05),P(x+2.95,y+.05),P(x+2.95,y+2.95),P(x+.05,y+2.95)],'#8a7a4a');
+  for(const[a,c]of[[P(x,y,7),P(x+3,y,7)],[P(x+3,y,7),P(x+3,y+3,7)],[P(x+3,y+3,7),P(x,y+3,7)],[P(x,y+3,7),P(x,y,7)]])ln(a,c,C.woodL,2);
+  for(let t=0;t<=3;t+=1)for(const[cx,cy]of[[x+t,y],[x+t,y+3],[x,y+t],[x+3,y+t]])stake(P(cx,cy,0),9,C.woodL);
+  const f=P(x+2.4,y+2.4,0);ell(f[0],f[1]-1,6,2.5,'#d9b44a');ell(f[0],f[1]-3,4,1.6,'#e8c96a')}
 function dDock(b,p){const x=b.x+.1,y=b.y+.1,w=1.8,h=1.8;
   for(const[px,py]of[[x,y],[x+w,y],[x,y+h],[x+w,y+h],[x+w/2,y+h],[x+w,y+h/2]])ln(P(px,py,-5),P(px,py,6),C.woodD,2.6);
   if(p>.35){const hh=h*Math.min(1,(p-.35)/.65);box(x,y,w,hh,2,2.5,C.plank,shade(C.plank,-.35),shade(C.plank,-.18));for(let t=.18;t<w;t+=.18)ln(P(x+t,y,4.5),P(x+t,y+hh,4.5),'rgba(60,35,15,.35)',1)}
@@ -159,7 +170,7 @@ function drawFlatB(b){const p=b.done?1:b.prog/b.work;switch(b.type){case'farm':r
   const d=BD[b.type];if(b.done&&!d.water&&!d.line&&!d.gate)pp([P(b.x+.15,b.y+.05),P(b.x+b.w+.35,b.y+.05),P(b.x+b.w+.35,b.y+b.h+.1),P(b.x+.15,b.y+b.h+.1)],'rgba(0,0,0,.13)')}
 function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
-    case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
+    case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
   ({longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
 

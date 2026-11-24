@@ -64,6 +64,10 @@ CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=nul
 // morador: trabalho em volta do depósito (job null = sem trabalho)
 CMDS.setjob=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='villager')return cmdFail('','');if(c.job&&!DEPOT_JOBS.includes(c.job))return cmdFail('','');setJob(a,c.job||null);return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
+// lavoura: o jogador vai até a fazenda e cuida dos canteiros (preparar, plantar, colher)
+CMDS.farmOp=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||b.type!=='farm')return cmdFail('','');const m=farmoMsg(b,c.op,c.c);if(m)return cmdFail(m);setOrder(u,{type:'farmop',b:b.id,op:c.op,c:c.c,n:0});return{ok:true}};
+// cercado: compra galinha ou ovelha
+CMDS.buyAnimal=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||b.type!=='pen')return cmdFail('','');return compraAnimal(b,c.sp)};
 CMDS.unequip=(u,c)=>{unequip(c.slot);return{ok:true}};
 
 // edifícios: modo da pedreira, reparo, sino, dormir, desmontar, saquear túmulo

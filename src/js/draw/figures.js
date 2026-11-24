@@ -49,7 +49,7 @@ function drawUnit(u){const[bx,by]=P(u.x+u.ox,u.y+u.oy,0);
   if(u.kind==='player'){ctx.strokeStyle='rgba(243,201,105,.75)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(bx,by,9,4.4,0,0,6.283);ctx.stroke();
     if(cam.z<.7){const k=1/cam.z;ctx.fillStyle='#f3c969';pp([[bx,by-24-8*k],[bx-4*k,by-24-14*k],[bx+4*k,by-24-14*k]],'#f3c969')}
     if(u.down){ctx.globalAlpha=.5}}
-  if(u.kind==='animal')drawAnimal(bx,by,u);else if(!(u.kind==='player'&&drawPlayerSprite(bx,by,u)))drawFigure(bx,by,u,u.kind==='villager'||u.kind==='player'?1:1.08);ctx.globalAlpha=1;
+  if(u.kind==='animal'||u.kind==='domestic')drawAnimal(bx,by,u);else if(!(u.kind==='player'&&drawPlayerSprite(bx,by,u)))drawFigure(bx,by,u,u.kind==='villager'||u.kind==='player'?1:1.08);ctx.globalAlpha=1;
   if(u.kind==='villager'&&u.name&&cam.z>=.7){ctx.font='800 10px Nunito, sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(20,14,8,.8)';ctx.strokeText(u.name,bx,by-30);ctx.fillStyle='#fff3d6';ctx.fillText(u.name,bx,by-30)}
   if(u.hp<u.max&&u.kind!=='player'||u.kind==='player'&&u.hp<u.max*.98){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx-7,by-26,14,2.5);ctx.fillStyle=u.kind==='raider'?'#e2533f':'#6fd35b';ctx.fillRect(bx-7,by-26,14*Math.max(0,u.hp/u.max),2.5)}
   if(u.act&&u.kind==='player'&&u.act.dur>.6&&u.act.type!=='wait'&&u.act.type!=='build'){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(bx-8,by-30,16,2.4);ctx.fillStyle='#f3c969';ctx.fillRect(bx-8,by-30,16*clamp(u.act.t/u.act.dur,0,1),2.4)}
@@ -57,7 +57,7 @@ function drawUnit(u){const[bx,by]=P(u.x+u.ox,u.y+u.oy,0);
 
 
 /* animais: desenho simples por espécie (presa pequena, urso grande) */
-const ANIMAL_LOOK={cervo:{c:'#9a6a3e',s:1.05,chifre:1},lebre:{c:'#c8b79a',s:.6,orelha:1},javali:{c:'#4e3d30',s:.95,presa:1},lobo:{c:'#77736e',s:.95},urso:{c:'#4a3121',s:1.45}};
+const ANIMAL_LOOK={galinha:{c:'#f2eee2',s:.5},ovelha:{c:'#ece7dc',s:.75},cervo:{c:'#9a6a3e',s:1.05,chifre:1},lebre:{c:'#c8b79a',s:.6,orelha:1},javali:{c:'#4e3d30',s:.95,presa:1},lobo:{c:'#77736e',s:.95},urso:{c:'#4a3121',s:1.45}};
 function drawAnimal(bx,by,u){const L=ANIMAL_LOOK[u.sp]||{c:'#888',s:1},s=L.s,f=u.face||1,mv=u.moving?Math.sin(u.anim)*1.6:0;
   ell(bx,by+1,6.5*s,2.5*s,'rgba(0,0,0,.25)');
   ln([bx-3*s,by-3*s],[bx-3*s+mv,by],L.c,1.5*s);ln([bx+2*s,by-3*s],[bx+2*s-mv,by],L.c,1.5*s);

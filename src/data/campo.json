@@ -1,0 +1,30 @@
+{
+  "_nota": "Campo e estações (0.8). Equilibrar é editar números aqui. O build embute este arquivo como CAMPO. Dia = dia_segundos de pessoas.json. Crescimento: 'dias' de jogo para ficar pronto a 1x.",
+  "dias_por_estacao": 4,
+  "estacoes": [
+    { "id": "primavera", "n": "Primavera", "emoji": "🌱", "crescimento": 1,   "plantar": true },
+    { "id": "verao",     "n": "Verão",     "emoji": "☀️", "crescimento": 1.5, "plantar": true },
+    { "id": "outono",    "n": "Outono",    "emoji": "🍂", "crescimento": 1,   "plantar": true },
+    { "id": "inverno",   "n": "Inverno",   "emoji": "❄️", "crescimento": 0,   "plantar": false }
+  ],
+  "inverno_frio": 0.6,
+  "semente_chance_frutinha": 0.25,
+  "tempo_seg": { "prep": 2, "plant": 1.5, "harvest": 1.5 },
+  "culturas": {
+    "cevada": { "n": "Cevada", "emoji": "🌾", "semente": "semente_cevada", "dias": 2,   "colheita": { "cevada": 3, "semente_cevada": 1 } },
+    "nabo":   { "n": "Nabo",   "emoji": "🥕", "semente": "semente_nabo",   "dias": 1.5, "colheita": { "nabo": 3,   "semente_nabo": 1 } },
+    "linho":  { "n": "Linho",  "emoji": "🧵", "semente": "semente_linho",  "dias": 2.5, "colheita": { "linho": 2,  "semente_linho": 1 } }
+  },
+  "cercado": { "capacidade": 6 },
+  "racao": ["cevada", "nabo"],
+  "animais": {
+    "galinha": { "n": "Galinha", "emoji": "🐔", "custo": { "cevada": 2, "stick": 2 }, "produz": "ovo", "dias_producao": 1, "racao": 1 },
+    "ovelha":  { "n": "Ovelha",  "emoji": "🐑", "custo": { "cevada": 3, "nabo": 1 },  "produz": "la",  "dias_producao": 2, "racao": 1 }
+  },
+  "estraga": {
+    "itens": ["food", "cevada", "nabo", "ovo"],
+    "mochila_dia": 0.04,
+    "deposito_dia": 0.01,
+    "inverno_fator": 0
+  }
+}
