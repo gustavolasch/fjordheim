@@ -70,7 +70,7 @@ function infoHTML(){if(!sel)return null;
       const nv=u.job&&DEPOT_JOBS.includes(u.job)?nivelHab(u,u.job):0,cama=camaDo(u);
       const tr=(u.tracos||[]).map(k=>PESSOAS.tracos[k]).filter(Boolean);
       return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">😊 <div class="meter"><i style="width:${mt}%;background:${cor}"></i></div><span class="small">Moral ${mt}</span></div>`+
-        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${PESSOAS.habilidade.nivel_max} (${JOBNAME[u.job]})`:'—'}</td></tr><tr><td>Cama</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr></table>`+
+        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${PESSOAS.habilidade.nivel_max} (${JOBNAME[u.job]})`:'—'}</td></tr><tr><td>Cama</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
         `<div class="small">${tr.map(t=>`<div><b style="color:${t.tipo==='bom'?'#7fd46a':'#e2533f'}">${t.nome}</b> · ${t.desc}</div>`).join('')}</div>`+
         `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}

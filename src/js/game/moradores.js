@@ -64,7 +64,7 @@ function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
 // moradores: moral, aviso, saída e camas (roda a cada quadro, barato)
 function moradoresTick(dt){
   diaTick();
-  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;acertaCamas()}
+  for(const u of G.units)if(u.kind==='villager'&&u.fala){u.fala.t-=dt;if(u.fala.t<=0)u.fala=null}
   const M=PESSOAS.moral;
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
     moralTick(u,dt);
@@ -93,3 +93,21 @@ function migraV6(){
     u.moral??=PESSOAS.moral.inicial;u.comeu??=false;u.fome??=false;u.dormindo=false;u.indo=false;
     u.hab??={lumber:0,miner:0,collector:0};u.tracos??=sorteiaTracos()}
   acertaCamas()}
+
+// vida na vila (morador sem trabalho): passeia pela vila, senta perto de fogo e conversa com outro sem trabalho
+function fogosDaVila(){const f=G.decor.filter(d=>d.k==='campfire').map(d=>[d.x,d.y]);
+  for(const b of G.bld)if(b.done&&['shelter','house','longhouse','smithy'].includes(b.type))f.push([b.x+b.w/2,b.y+b.h/2]);return f}
+function centroVila(){const L=longhouse();return L?[L.x+L.w/2,L.y+L.h/2]:G.start}
+function fraseVila(){const F=PESSOAS.vila.frases;return F[(Math.random()*F.length)|0]}
+function vidaVila(u){const V=PESSOAS.vila;
+  if(u.dest&&Math.hypot(u.x-u.dest[0],u.y-u.dest[1])<=1.2){u.dest=null;
+    const conv=G.units.find(v=>v!==u&&v.kind==='villager'&&!v.job&&!v.dormindo&&!v.fala&&Math.hypot(v.x-u.x,v.y-u.y)<=V.conversa_raio);
+    if(conv){u.fala={txt:fraseVila(),t:V.conversa_seg};conv.fala={txt:fraseVila(),t:V.conversa_seg};u.act={type:'idle',t:0,dur:V.conversa_seg}}
+    else u.act={type:'idle',t:0,dur:V.espera_seg[0]+Math.random()*(V.espera_seg[1]-V.espera_seg[0])};
+    return}
+  const fogos=fogosDaVila();let tx,ty;
+  if(fogos.length&&Math.random()<V.chance_fogueira){const f=fogos[(Math.random()*fogos.length)|0];tx=Math.round(f[0]+(Math.random()*2-1)*1.5);ty=Math.round(f[1]+(Math.random()*2-1)*1.5)}
+  else{const c=centroVila();tx=Math.round(c[0]+(Math.random()*2-1)*V.raio_passeio);ty=Math.round(c[1]+(Math.random()*2-1)*V.raio_passeio)}
+  if(!inb(tx,ty)||!passV(tx,ty)){u.act={type:'idle',t:0,dur:1};return}
+  const p=astar(...utile(u),(x,y)=>x===tx&&y===ty,tx,ty,passV,600);
+  if(p&&p.length){u.dest=[tx+.5,ty+.5];u.path=p}else u.act={type:'idle',t:0,dur:2}}

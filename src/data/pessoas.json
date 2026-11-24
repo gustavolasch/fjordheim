@@ -17,7 +17,7 @@
     "inicial": 60,
     "por_dia": {
       "cama": 20,
-      "sem_cama": -20,
+      "sem_cama": -35,
       "comida": 10,
       "fome": -25,
       "fogueira": 10,
@@ -39,11 +39,74 @@
     "bonus_por_nivel": 0.1
   },
   "tracos": {
-    "forte":      { "nome": "Forte",      "tipo": "bom",   "efeito": { "velocidade": 0.15 },  "desc": "Trabalha 15% mais rápido." },
-    "bom_de_mao": { "nome": "Bom de mão", "tipo": "bom",   "efeito": { "xp": 0.5 },           "desc": "Aprende 50% mais depressa." },
-    "madrugador": { "nome": "Madrugador", "tipo": "bom",   "efeito": { "moral_dia": 5 },      "desc": "Acorda cedo e de bom humor: +5 de moral por dia." },
-    "guloso":     { "nome": "Guloso",     "tipo": "ruim",  "efeito": { "comida_dia": 1 },     "desc": "Come 1 a mais por dia." },
-    "preguicoso": { "nome": "Preguiçoso", "tipo": "ruim",  "efeito": { "velocidade": -0.15 }, "desc": "Trabalha 15% mais devagar." },
-    "medroso":    { "nome": "Medroso",    "tipo": "ruim",  "efeito": { "moral_dia": -8 },     "desc": "Vive com medo: -8 de moral por dia." }
+    "forte": {
+      "nome": "Forte",
+      "tipo": "bom",
+      "efeito": {
+        "velocidade": 0.15
+      },
+      "desc": "Trabalha 15% mais rápido."
+    },
+    "bom_de_mao": {
+      "nome": "Bom de mão",
+      "tipo": "bom",
+      "efeito": {
+        "xp": 0.5
+      },
+      "desc": "Aprende 50% mais depressa."
+    },
+    "madrugador": {
+      "nome": "Madrugador",
+      "tipo": "bom",
+      "efeito": {
+        "moral_dia": 5
+      },
+      "desc": "Acorda cedo e de bom humor: +5 de moral por dia."
+    },
+    "guloso": {
+      "nome": "Guloso",
+      "tipo": "ruim",
+      "efeito": {
+        "comida_dia": 1
+      },
+      "desc": "Come 1 a mais por dia."
+    },
+    "preguicoso": {
+      "nome": "Preguiçoso",
+      "tipo": "ruim",
+      "efeito": {
+        "velocidade": -0.15
+      },
+      "desc": "Trabalha 15% mais devagar."
+    },
+    "medroso": {
+      "nome": "Medroso",
+      "tipo": "ruim",
+      "efeito": {
+        "moral_dia": -8
+      },
+      "desc": "Vive com medo: -8 de moral por dia."
+    }
+  },
+  "vila": {
+    "_nota": "Vida na vila (morador sem trabalho). Passeia, senta perto de fogo e conversa.",
+    "raio_passeio": 8,
+    "espera_seg": [
+      3,
+      6
+    ],
+    "chance_fogueira": 0.5,
+    "conversa_raio": 2.5,
+    "conversa_seg": 4,
+    "frases": [
+      "Bom dia!",
+      "Vai chover logo?",
+      "A caça foi boa?",
+      "Que frio!",
+      "Cuidado com os lobos.",
+      "Esse fogo aquece.",
+      "A colheita vem aí.",
+      "Esse machado corta bem."
+    ]
   }
 }

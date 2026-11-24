@@ -1,31 +1,104 @@
 {
   "_nota": "Ofício (0.7): estações, receitas, durabilidade e qualidade das ferramentas. Equilibrar é editar números aqui. O build embute este arquivo como OFICIO. 'tempo' em segundos de jogo. 'usos' = golpes/ações até quebrar, a 100%.",
   "ferramentas": {
-    "axe":    { "usos": 80 },
-    "pick":   { "usos": 60 },
-    "hammer": { "usos": 80 },
-    "rod":    { "usos": 50 },
-    "sickle": { "usos": 60 }
+    "axe": {
+      "usos": 80
+    },
+    "pick": {
+      "usos": 60
+    },
+    "hammer": {
+      "usos": 80
+    },
+    "rod": {
+      "usos": 50
+    },
+    "sickle": {
+      "usos": 60
+    }
   },
   "qualidade": {
-    "chance": { "comum": 0.6, "bom": 0.3, "excelente": 0.1 },
+    "chance": {
+      "comum": 0.6,
+      "bom": 0.3,
+      "excelente": 0.1
+    },
     "efeito": {
-      "comum":     { "n": "Comum",     "usos": 1,    "vel": 1 },
-      "bom":       { "n": "Bom",       "usos": 1.25, "vel": 1.1 },
-      "excelente": { "n": "Excelente", "usos": 1.5,  "vel": 1.2 }
+      "comum": {
+        "n": "Comum",
+        "usos": 1,
+        "vel": 1
+      },
+      "bom": {
+        "n": "Bom",
+        "usos": 1.25,
+        "vel": 1.1
+      },
+      "excelente": {
+        "n": "Excelente",
+        "usos": 1.5,
+        "vel": 1.2
+      }
     }
   },
-  "reparo": { "fracao_material": 0.5, "tempo": 3 },
+  "reparo": {
+    "fracao_material": 0.5,
+    "tempo": 3
+  },
   "estacoes": {
     "cavalete": {
-      "tabua":  { "n": "Tábua",  "entrada": { "wood": 2 }, "saida": { "tabua": 1 },  "tempo": 3 },
-      "carvao": { "n": "Carvão", "entrada": { "wood": 3 }, "saida": { "carvao": 1 }, "tempo": 4 }
+      "tabua": {
+        "n": "Tábua",
+        "entrada": {
+          "wood": 2
+        },
+        "saida": {
+          "tabua": 1
+        },
+        "tempo": 3
+      },
+      "carvao": {
+        "n": "Carvão",
+        "entrada": {
+          "wood": 3
+        },
+        "saida": {
+          "carvao": 1
+        },
+        "tempo": 4
+      }
     },
     "curtume": {
-      "couro_curtido": { "n": "Couro curtido", "entrada": { "hide": 2 }, "saida": { "couro_curtido": 1 }, "tempo": 3 }
+      "couro_curtido": {
+        "n": "Couro curtido",
+        "entrada": {
+          "hide": 2
+        },
+        "saida": {
+          "couro_curtido": 1
+        },
+        "tempo": 3
+      }
     },
     "fundicao": {
-      "lingote": { "n": "Lingote de ferro", "entrada": { "iron": 1, "carvao": 1 }, "saida": { "lingote": 1 }, "tempo": 4 }
+      "lingote": {
+        "n": "Lingote de ferro",
+        "entrada": {
+          "iron": 1,
+          "carvao": 1
+        },
+        "saida": {
+          "lingote": 1
+        },
+        "tempo": 4
+      }
     }
+  },
+  "faltaFerramenta": {
+    "axe": "Precisa de machado.",
+    "pick": "Precisa de picareta.",
+    "sickle": "Precisa de foice.",
+    "rod": "Precisa de vara de pesca.",
+    "hammer": "Precisa de martelo."
   }
 }

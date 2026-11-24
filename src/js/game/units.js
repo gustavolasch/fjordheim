@@ -73,12 +73,13 @@ function think(u){
   if(!u.job){
     const site=nearestSite(u,5);
     if(site){u.tb=site.id;if(!u.tool)takeTool(u);if(isNear(u,site)){u.act={type:'build',b:site.id,t:0,dur:3}}else if(!goRect(u,site.x,site.y,site.w,site.h)){site.unr=G.t+8;u.tb=null}return}
-    u.tb=null;u.act={type:'idle',t:0,dur:1.5+Math.random()*2.5};return}
+    u.tb=null;vidaVila(u);return}
   const depot=DEPOT_JOBS.includes(u.job);
   const w=depot?depotNear(u):BMAP.get(u.work);
   if(depot){if(!w){u.status='Sem vaga';u.act={type:'idle',t:0,dur:3};return}}
   else if(!w||!w.done){unassign(u);return}
   if(!u.tool)takeTool(u);
+  const tf=JOBTOOL[u.job];if(tf&&!u.tool){u.status=OFICIO.faltaFerramenta[tf]||'Precisa de ferramenta.';u.act={type:'idle',t:0,dur:3};return}
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
   if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){
     // coletor: leva um tipo por vez (galho ou pedrinha)
