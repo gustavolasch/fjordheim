@@ -1,14 +1,10 @@
 /* ================= Mundo vivo (0.9): névoa, lugares, eventos, mercador e sagas =================
-   Névoa: G.visto (Uint8Array N*N), 1 = visitado. Lugares: G.lugares [{id,k:'ruina'|'naufragio'|'acampamento',x,y,feito}].
+   Lugares: G.lugares [{id,k:'ruina'|'naufragio'|'acampamento',x,y,feito,visitado}]. Sem névoa: o mapa inteiro aparece; 'visitado' some o '?'.
    Saqueadores de acampamento: units kind 'raider' com camp = id do lugar (não entram em invasão).
    Receitas aprendidas: G.receitas. Sagas concluídas: G.sagas {id:true}. Números em data/mundo.json (MUNDO). */
-const FOG_COR='#1c2a2e';
-function visto(i){return !G.visto||!!G.visto[i]}
 function lugarPorId(id){return(G.lugares||[]).find(p=>p.id===id)}
 function lugarEm(x,y){return(G.lugares||[]).find(p=>p.x===x&&p.y===y)||null}
 function nearAgua(x,y){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(inb(x+dx,y+dy)&&G.tiles[idx(x+dx,y+dy)]<=1)return true;return false}
-function revelaEm(cx,cy,r){const x0=Math.max(0,cx-r),x1=Math.min(N-1,cx+r),y0=Math.max(0,cy-r),y1=Math.min(N-1,cy+r);
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r+r)G.visto[idx(x,y)]=1}
 function sorteiaLugares(){const r=mulberry32((G.seed^0x5a17)>>>0),L=MUNDO.lugares,out=[];
   for(const k of ['ruina','naufragio','acampamento']){
     for(let j=0;j<L[k].quantidade;j++){let spot=null;
@@ -77,8 +73,7 @@ function sagasTick(){G.sagas=G.sagas||{};
 
 // tick do mundo (roda em update)
 function mundoTick(dt){if(!G.lugares)return;
-  G.revT=(G.revT||0)-dt;if(G.revT<=0){G.revT=.5;const pl=PL();if(pl)revelaEm(Math.floor(pl.x),Math.floor(pl.y),MUNDO.revela_raio);
-    for(const b of G.bld)if(b.done&&b.type==='tower')revelaEm(b.x,b.y,MUNDO.torre_raio)}
+  const pl=PL();if(pl)for(const p of G.lugares)if(!p.visitado&&Math.hypot(p.x+.5-pl.x,p.y+.5-pl.y)<=3)p.visitado=true;
   if(!G.demo&&!G.raidOn){if(G.evT==null)G.evT=novoEvento();G.evT-=dt;if(G.evT<=0){G.evT=novoEvento();disparaEvento()}}
   for(const p of G.lugares){if(p.k!=='acampamento'||p.feito)continue;
     if(!G.units.some(u=>u.kind==='raider'&&u.camp===p.id)){p.feito=true;ganhaSaque(MUNDO.lugares.acampamento.loot);
@@ -88,7 +83,7 @@ function mundoTick(dt){if(!G.lugares)return;
   G.sagaT=(G.sagaT||0)-dt;if(G.sagaT<=0){G.sagaT=2;sagasTick()}}
 
 // ---- o que o jogador faz ao chegar num lugar ----
-CMDS.poi=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.feito||p.k==='acampamento'||!visto(idx(p.x,p.y)))return cmdFail('','');setOrder(u,{type:'poi',id:p.id});return{ok:true}};
+CMDS.poi=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.feito||p.k==='acampamento')return cmdFail('','');setOrder(u,{type:'poi',id:p.id});return{ok:true}};
 function aprendeReceita(){const R=MUNDO.lugares.ruina.receitas.filter(k=>!G.receitas.includes(k));if(!R.length)return null;G.receitas.push(R[0]);return R[0]}
 function poiChegou(u,o){const p=lugarPorId(o.id);if(!p||p.feito){u.order=null;return}
   if(!(Math.hypot(p.x+.5-u.x,p.y+.5-u.y)<=1.6)){stepTo(u,o,p.x,p.y,1,1);return}
@@ -102,7 +97,9 @@ function drawLugar(p){const x=p.x,y=p.y,q=P(x+.5,y+.5,0),a=p.feito?.4:1;ctx.save
   if(p.k==='ruina'){ell(q[0],q[1],9,4,'rgba(0,0,0,.2)');for(const dx of[-5,0,5])ln([q[0]+dx,q[1]],[q[0]+dx,q[1]-14],'#c9c2b0',3.2);ln([q[0]-8,q[1]-14],[q[0]+6,q[1]-14],'#b0a894',2.4)}
   else if(p.k==='naufragio'){ell(q[0],q[1],10,3,'rgba(0,0,0,.2)');pp([[q[0]-8,q[1]],[q[0]+8,q[1]-3],[q[0]+6,q[1]+2]],'#7a4e2a');ln([q[0],q[1]],[q[0]+2,q[1]-22],'#5a3a22',1.6);pp([[q[0]+2,q[1]-22],[q[0]+9,q[1]-10],[q[0]+2,q[1]-8]],'#eee6d2')}
   else{ell(q[0],q[1],10,4,'rgba(0,0,0,.2)');pp([[q[0]-9,q[1]],[q[0],q[1]-16],[q[0]+9,q[1]]],'#8a5a3a');pp([[q[0]-3,q[1]],[q[0],q[1]-8],[q[0]+3,q[1]]],'#3a2414');ell(q[0]+12,q[1]-1,2.2,1.4,'#ff8a2a')}
-  ctx.restore()}
+  ctx.restore();
+  if(!p.visitado){ctx.save();ctx.font='900 15px Nunito, sans-serif';ctx.textAlign='center';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(20,14,8,.85)';ctx.fillStyle='#ffd34a';const qy=P(x+.5,y+.5,46);ctx.strokeText('?',qy[0],qy[1]);ctx.fillText('?',qy[0],qy[1]);ctx.restore()}
+}
 
 // ---- painéis: lugar, mercador e sagas ----
 function poiTap(p){if(p.k==='acampamento'||p.feito){sel={k:'p',id:p.id};openSheet('info');return}sendCmd({t:'poi',id:p.id});puff(p.x+.5,p.y+.5,'ring')}
@@ -116,10 +113,8 @@ function sagaHTML(){const done=G.sagas||{};
   return head('Sagas','Missões da vila. A recompensa vai para o depósito.')+MUNDO.sagas.map(s=>{const R=Object.keys(s.recompensa.res||{}).map(k=>`${icon('recursos',k)}${s.recompensa.res[k]}`).join(' ');
     return `<div class="item"><div class="top"><b>${done[s.id]?'✅':'⬜'} ${s.n}</b></div><div class="small">${s.desc}</div><div class="small">Recompensa: ${R||'nada'}</div></div>`}).join('')}
 // migração v8: mundo vivo para saves antigos (névoa começa com o que já foi visitado)
-function migraV8(){if(!G.visto||G.visto.length!==N*N)G.visto=new Uint8Array(N*N);
-  if(!G.lugares)G.lugares=sorteiaLugares();
+function migraV8(){if(!G.lugares)G.lugares=sorteiaLugares();
   for(const p of G.lugares)if(p.k==='acampamento'&&!p.feito&&!G.units.some(u=>u.kind==='raider'&&u.camp===p.id))spawnCampo(p);
-  const pl=PL();if(pl)revelaEm(Math.floor(pl.x),Math.floor(pl.y),MUNDO.revela_raio);
   G.receitas=G.receitas||[];G.sagas=G.sagas||{};G.perdas=G.perdas||0;G.invasoesRepelidas=G.invasoesRepelidas||0}
 // troca com o mercador: paga a oferta e recebe os itens na mochila
 CMDS.trade=(u,c)=>{const m=UMAP.get(c.id);if(!m||m.kind!=='merchant')return cmdFail('','');

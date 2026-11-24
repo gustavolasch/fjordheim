@@ -1381,16 +1381,12 @@ function migraV7(){for(const k in RES){G.inv[k]??=0;G.res[k]??=0}
   for(const b of G.bld)if(b.type==='farm'&&!b.canteiros)b.canteiros=novosCanteiros();
   G.estAcc??={}}
 /* ================= Mundo vivo (0.9): névoa, lugares, eventos, mercador e sagas =================
-   Névoa: G.visto (Uint8Array N*N), 1 = visitado. Lugares: G.lugares [{id,k:'ruina'|'naufragio'|'acampamento',x,y,feito}].
+   Lugares: G.lugares [{id,k:'ruina'|'naufragio'|'acampamento',x,y,feito,visitado}]. Sem névoa: o mapa inteiro aparece; 'visitado' some o '?'.
    Saqueadores de acampamento: units kind 'raider' com camp = id do lugar (não entram em invasão).
    Receitas aprendidas: G.receitas. Sagas concluídas: G.sagas {id:true}. Números em data/mundo.json (MUNDO). */
-const FOG_COR='#1c2a2e';
-function visto(i){return !G.visto||!!G.visto[i]}
 function lugarPorId(id){return(G.lugares||[]).find(p=>p.id===id)}
 function lugarEm(x,y){return(G.lugares||[]).find(p=>p.x===x&&p.y===y)||null}
 function nearAgua(x,y){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(inb(x+dx,y+dy)&&G.tiles[idx(x+dx,y+dy)]<=1)return true;return false}
-function revelaEm(cx,cy,r){const x0=Math.max(0,cx-r),x1=Math.min(N-1,cx+r),y0=Math.max(0,cy-r),y1=Math.min(N-1,cy+r);
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r+r)G.visto[idx(x,y)]=1}
 function sorteiaLugares(){const r=mulberry32((G.seed^0x5a17)>>>0),L=MUNDO.lugares,out=[];
   for(const k of ['ruina','naufragio','acampamento']){
     for(let j=0;j<L[k].quantidade;j++){let spot=null;
@@ -1459,8 +1455,7 @@ function sagasTick(){G.sagas=G.sagas||{};
 
 // tick do mundo (roda em update)
 function mundoTick(dt){if(!G.lugares)return;
-  G.revT=(G.revT||0)-dt;if(G.revT<=0){G.revT=.5;const pl=PL();if(pl)revelaEm(Math.floor(pl.x),Math.floor(pl.y),MUNDO.revela_raio);
-    for(const b of G.bld)if(b.done&&b.type==='tower')revelaEm(b.x,b.y,MUNDO.torre_raio)}
+  const pl=PL();if(pl)for(const p of G.lugares)if(!p.visitado&&Math.hypot(p.x+.5-pl.x,p.y+.5-pl.y)<=3)p.visitado=true;
   if(!G.demo&&!G.raidOn){if(G.evT==null)G.evT=novoEvento();G.evT-=dt;if(G.evT<=0){G.evT=novoEvento();disparaEvento()}}
   for(const p of G.lugares){if(p.k!=='acampamento'||p.feito)continue;
     if(!G.units.some(u=>u.kind==='raider'&&u.camp===p.id)){p.feito=true;ganhaSaque(MUNDO.lugares.acampamento.loot);
@@ -1470,7 +1465,7 @@ function mundoTick(dt){if(!G.lugares)return;
   G.sagaT=(G.sagaT||0)-dt;if(G.sagaT<=0){G.sagaT=2;sagasTick()}}
 
 // ---- o que o jogador faz ao chegar num lugar ----
-CMDS.poi=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.feito||p.k==='acampamento'||!visto(idx(p.x,p.y)))return cmdFail('','');setOrder(u,{type:'poi',id:p.id});return{ok:true}};
+CMDS.poi=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.feito||p.k==='acampamento')return cmdFail('','');setOrder(u,{type:'poi',id:p.id});return{ok:true}};
 function aprendeReceita(){const R=MUNDO.lugares.ruina.receitas.filter(k=>!G.receitas.includes(k));if(!R.length)return null;G.receitas.push(R[0]);return R[0]}
 function poiChegou(u,o){const p=lugarPorId(o.id);if(!p||p.feito){u.order=null;return}
   if(!(Math.hypot(p.x+.5-u.x,p.y+.5-u.y)<=1.6)){stepTo(u,o,p.x,p.y,1,1);return}
@@ -1484,7 +1479,9 @@ function drawLugar(p){const x=p.x,y=p.y,q=P(x+.5,y+.5,0),a=p.feito?.4:1;ctx.save
   if(p.k==='ruina'){ell(q[0],q[1],9,4,'rgba(0,0,0,.2)');for(const dx of[-5,0,5])ln([q[0]+dx,q[1]],[q[0]+dx,q[1]-14],'#c9c2b0',3.2);ln([q[0]-8,q[1]-14],[q[0]+6,q[1]-14],'#b0a894',2.4)}
   else if(p.k==='naufragio'){ell(q[0],q[1],10,3,'rgba(0,0,0,.2)');pp([[q[0]-8,q[1]],[q[0]+8,q[1]-3],[q[0]+6,q[1]+2]],'#7a4e2a');ln([q[0],q[1]],[q[0]+2,q[1]-22],'#5a3a22',1.6);pp([[q[0]+2,q[1]-22],[q[0]+9,q[1]-10],[q[0]+2,q[1]-8]],'#eee6d2')}
   else{ell(q[0],q[1],10,4,'rgba(0,0,0,.2)');pp([[q[0]-9,q[1]],[q[0],q[1]-16],[q[0]+9,q[1]]],'#8a5a3a');pp([[q[0]-3,q[1]],[q[0],q[1]-8],[q[0]+3,q[1]]],'#3a2414');ell(q[0]+12,q[1]-1,2.2,1.4,'#ff8a2a')}
-  ctx.restore()}
+  ctx.restore();
+  if(!p.visitado){ctx.save();ctx.font='900 15px Nunito, sans-serif';ctx.textAlign='center';ctx.lineWidth=3.5;ctx.strokeStyle='rgba(20,14,8,.85)';ctx.fillStyle='#ffd34a';const qy=P(x+.5,y+.5,46);ctx.strokeText('?',qy[0],qy[1]);ctx.fillText('?',qy[0],qy[1]);ctx.restore()}
+}
 
 // ---- painéis: lugar, mercador e sagas ----
 function poiTap(p){if(p.k==='acampamento'||p.feito){sel={k:'p',id:p.id};openSheet('info');return}sendCmd({t:'poi',id:p.id});puff(p.x+.5,p.y+.5,'ring')}
@@ -1498,10 +1495,8 @@ function sagaHTML(){const done=G.sagas||{};
   return head('Sagas','Missões da vila. A recompensa vai para o depósito.')+MUNDO.sagas.map(s=>{const R=Object.keys(s.recompensa.res||{}).map(k=>`${icon('recursos',k)}${s.recompensa.res[k]}`).join(' ');
     return `<div class="item"><div class="top"><b>${done[s.id]?'✅':'⬜'} ${s.n}</b></div><div class="small">${s.desc}</div><div class="small">Recompensa: ${R||'nada'}</div></div>`}).join('')}
 // migração v8: mundo vivo para saves antigos (névoa começa com o que já foi visitado)
-function migraV8(){if(!G.visto||G.visto.length!==N*N)G.visto=new Uint8Array(N*N);
-  if(!G.lugares)G.lugares=sorteiaLugares();
+function migraV8(){if(!G.lugares)G.lugares=sorteiaLugares();
   for(const p of G.lugares)if(p.k==='acampamento'&&!p.feito&&!G.units.some(u=>u.kind==='raider'&&u.camp===p.id))spawnCampo(p);
-  const pl=PL();if(pl)revelaEm(Math.floor(pl.x),Math.floor(pl.y),MUNDO.revela_raio);
   G.receitas=G.receitas||[];G.sagas=G.sagas||{};G.perdas=G.perdas||0;G.invasoesRepelidas=G.invasoesRepelidas||0}
 // troca com o mercador: paga a oferta e recebe os itens na mochila
 CMDS.trade=(u,c)=>{const m=UMAP.get(c.id);if(!m||m.kind!=='merchant')return cmdFail('','');
@@ -1966,9 +1961,8 @@ function render(){
   const t=perfT,dk=hexRgb(BIO.deep),sh=hexRgb(BIO.shallow);
   for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){if(!vis(x+.5,y+.5))continue;const i=idx(x,y),tt=G.tiles[i];let c;
     if(tt<=1){const w=Math.sin(t*1.3+x*.7+y*.45)*7+Math.sin(t*.7-x*.3+y*.8)*5;const b=tt?sh:dk;c=rgbS(b[0]+w,b[1]+w,b[2]+w*1.2)}else c=G.tcs[i];
-    if(!visto(i))c=FOG_COR;
     const a=P(x,y),b2=P(x+1,y),c2=P(x+1,y+1),d=P(x,y+1);ctx.beginPath();ctx.moveTo(a[0],a[1]-.6);ctx.lineTo(b2[0]+.8,b2[1]);ctx.lineTo(c2[0],c2[1]+.6);ctx.lineTo(d[0]-.8,d[1]);ctx.closePath();ctx.fillStyle=c;ctx.fill()}
-  if(!LOD)for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||!vis(x+.5,y+.5)||!visto(i))continue;const al=.35+.25*Math.sin(t*2+x+y);const fc=`rgba(235,248,255,${al})`;
+  if(!LOD)for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||!vis(x+.5,y+.5))continue;const al=.35+.25*Math.sin(t*2+x+y);const fc=`rgba(235,248,255,${al})`;
     if(y>0&&G.tiles[idx(x,y-1)]>=2)ln(P(x,y),P(x+1,y),fc,2);if(x<N-1&&G.tiles[idx(x+1,y)]>=2)ln(P(x+1,y),P(x+1,y+1),fc,2);if(y<N-1&&G.tiles[idx(x,y+1)]>=2)ln(P(x,y+1),P(x+1,y+1),fc,2);if(x>0&&G.tiles[idx(x-1,y)]>=2)ln(P(x,y),P(x,y+1),fc,2);
     const sp=Math.sin(t*1.7+hash2(x,y)*30);if(sp>.93){const q=P(x+.5,y+.5);ln([q[0]-4,q[1]],[q[0]+4,q[1]],'rgba(255,255,255,.55)',1.2)}}
   if(z>.65){const wsw=windStrength();for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y),tf=TUFT[i];if(!tf||G.wear[i]>10||G.obj[i]||G.occ[i]||!vis(x+.5,y+.5))continue;const q=P(x+.5+tf[0],y+.5+tf[1]);
@@ -1979,10 +1973,10 @@ function render(){
   drawGhostFoot();
   // objects, depth-sorted
   const L=[];LIGHTS.length=0;
-  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5)||!visto(i))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
-  for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5)&&visto(idx(p.x,p.y)))L.push([p.x+p.y+1.5,7,p]);
+  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
+  for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5))L.push([p.x+p.y+1.5,7,p]);
   for(const b of G.bld){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')continue;const cx=b.x+b.w/2,cy=b.y+b.h/2;if(vis(cx,cy))L.push([cx+cy,2,b])}
-  for(const u of G.units)if(!u.hidden&&vis(u.x,u.y)&&(u.kind==='player'||visto(idx(Math.floor(u.x),Math.floor(u.y)))))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
+  for(const u of G.units)if(!u.hidden&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
   for(const c of G.carts)if(vis(c.x,c.y))L.push([c.x+c.y,6,c]);
@@ -2114,7 +2108,7 @@ function onTap(px,py,type,held){const[wx,wy]=s2w(px,py),tx=Math.floor(wx),ty=Mat
   let best=null,bd=20;for(const u of G.units){if(u.hidden||u.kind==='player')continue;const[sx,sy]=w2s(u.x+u.ox,u.y+u.oy,9);const d=Math.hypot(px-sx,py-sy)/Math.max(.8,cam.z);if(d<bd){bd=d;best=u}}
   if(best){if(best.kind==='animal'||best.kind==='raider'){ataqueAlvo(best,held>450);return}sel={k:'u',id:best.id};openSheet('info');return}
   // vários objetos no toque (construção, decoração, recurso, árvore na frente): lista para escolher
-  const pz=lugarEm(tx,ty);if(pz&&visto(idx(tx,ty))){poiTap(pz);return}
+  const pz=lugarEm(tx,ty);if(pz){poiTap(pz);return}
   const cands=tapCands(px,py,tx,ty);
   if(cands.length>1){closeSheet();sel=null;openPickMenu(cands,px,py,tx,ty);return}
   if(cands.length===1&&(cands[0].k!=='b'||cands[0].inter)){runCand(cands[0],tx,ty);return}
@@ -2401,9 +2395,9 @@ function audioTick(dt){if(!SND.ctx||!SND.wind)return;const w=windStrength(),on=s
 // snapState() é o estado do mundo como objeto simples. Serve ao save (neste aparelho)
 // e ao multijogador (o anfitrião manda ao amigo). Não leva a câmera nem nada que seja só deste aparelho.
 // applyState() é o caminho inverso: reconstrói G a partir dele.
-function snapState(){return{v:8,dia:G.dia,campoDia:G.campoDia,estAcc:G.estAcc,visto:Array.from(G.visto||[]),lugares:G.lugares,receitas:G.receitas,sagas:G.sagas,perdas:G.perdas,invasoesRepelidas:G.invasoesRepelidas,evT:G.evT,saqueT:G.saqueT,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
+function snapState(){return{v:8,dia:G.dia,campoDia:G.campoDia,estAcc:G.estAcc,lugares:G.lugares,receitas:G.receitas,sagas:G.sagas,perdas:G.perdas,invasoesRepelidas:G.invasoesRepelidas,evT:G.evT,saqueT:G.saqueT,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
 function applyState(s){
-  BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],carts:s.carts||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0,visto:s.visto?Uint8Array.from(s.visto):new Uint8Array(N*N),lugares:s.lugares||null,receitas:s.receitas||[],sagas:s.sagas||{},perdas:s.perdas||0,invasoesRepelidas:s.invasoesRepelidas||0,evT:s.evT,saqueT:s.saqueT};
+  BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],carts:s.carts||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0,lugares:s.lugares||null,receitas:s.receitas||[],sagas:s.sagas||{},perdas:s.perdas||0,invasoesRepelidas:s.invasoesRepelidas||0,evT:s.evT,saqueT:s.saqueT};
   BMAP=new Map();UMAP=new Map();for(const b of G.bld){BMAP.set(b.id,b);for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)G.occ[idx(b.x+dx,b.y+dy)]=b.id}
   for(const u of G.units)UMAP.set(u.id,u);if(!G.units.some(u=>u.kind==='raider'))G.raidOn=false;
   if(!PL()){const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id}
@@ -2564,7 +2558,7 @@ function devPanel(){
 const playerLook=()=>({name:'Você',tunic:'#2f5fa8',hair:'#d9a84e',skin:'#f1c9a0',fem:false,hp:100,max:100,speed:2,ox:0,oy:0});
 function newGame(biome,seed,demo){if(NET.role==='host')netLeave(true);BIO=BIOMES[biome];
   G={biome,seed:seed||((Math.random()*1e9)|0),tiles:new Uint8Array(N*N),wear:new Float32Array(N*N),h:new Float32Array(N*N),obj:new Array(N*N).fill(null),occ:new Int32Array(N*N),bld:[],units:[],decor:[],tombs:[],carts:[],
-    res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,visto:new Uint8Array(N*N),receitas:[],sagas:{},perdas:0,invasoesRepelidas:0,
+    res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,receitas:[],sagas:{},perdas:0,invasoesRepelidas:0,
     t:185,speed:1,idc:1,nextRaid:1e12,raidN:0,raidOn:false,regrow:[],fall:[],hints:{},flags:{},demo:!!demo};
   BMAP=new Map();UMAP=new Map();PT=[];AR=[];genMap();G.lugares=sorteiaLugares();
   const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;G.rs=(G.seed|0)^0x9e3779b9;spawnAnimais();G.lugares.filter(p=>p.k==='acampamento').forEach(spawnCampo);

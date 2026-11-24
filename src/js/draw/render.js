@@ -23,9 +23,8 @@ function render(){
   const t=perfT,dk=hexRgb(BIO.deep),sh=hexRgb(BIO.shallow);
   for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){if(!vis(x+.5,y+.5))continue;const i=idx(x,y),tt=G.tiles[i];let c;
     if(tt<=1){const w=Math.sin(t*1.3+x*.7+y*.45)*7+Math.sin(t*.7-x*.3+y*.8)*5;const b=tt?sh:dk;c=rgbS(b[0]+w,b[1]+w,b[2]+w*1.2)}else c=G.tcs[i];
-    if(!visto(i))c=FOG_COR;
     const a=P(x,y),b2=P(x+1,y),c2=P(x+1,y+1),d=P(x,y+1);ctx.beginPath();ctx.moveTo(a[0],a[1]-.6);ctx.lineTo(b2[0]+.8,b2[1]);ctx.lineTo(c2[0],c2[1]+.6);ctx.lineTo(d[0]-.8,d[1]);ctx.closePath();ctx.fillStyle=c;ctx.fill()}
-  if(!LOD)for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||!vis(x+.5,y+.5)||!visto(i))continue;const al=.35+.25*Math.sin(t*2+x+y);const fc=`rgba(235,248,255,${al})`;
+  if(!LOD)for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||!vis(x+.5,y+.5))continue;const al=.35+.25*Math.sin(t*2+x+y);const fc=`rgba(235,248,255,${al})`;
     if(y>0&&G.tiles[idx(x,y-1)]>=2)ln(P(x,y),P(x+1,y),fc,2);if(x<N-1&&G.tiles[idx(x+1,y)]>=2)ln(P(x+1,y),P(x+1,y+1),fc,2);if(y<N-1&&G.tiles[idx(x,y+1)]>=2)ln(P(x,y+1),P(x+1,y+1),fc,2);if(x>0&&G.tiles[idx(x-1,y)]>=2)ln(P(x,y),P(x,y+1),fc,2);
     const sp=Math.sin(t*1.7+hash2(x,y)*30);if(sp>.93){const q=P(x+.5,y+.5);ln([q[0]-4,q[1]],[q[0]+4,q[1]],'rgba(255,255,255,.55)',1.2)}}
   if(z>.65){const wsw=windStrength();for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y),tf=TUFT[i];if(!tf||G.wear[i]>10||G.obj[i]||G.occ[i]||!vis(x+.5,y+.5))continue;const q=P(x+.5+tf[0],y+.5+tf[1]);
@@ -36,10 +35,10 @@ function render(){
   drawGhostFoot();
   // objects, depth-sorted
   const L=[];LIGHTS.length=0;
-  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5)||!visto(i))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
-  for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5)&&visto(idx(p.x,p.y)))L.push([p.x+p.y+1.5,7,p]);
+  for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
+  for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5))L.push([p.x+p.y+1.5,7,p]);
   for(const b of G.bld){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')continue;const cx=b.x+b.w/2,cy=b.y+b.h/2;if(vis(cx,cy))L.push([cx+cy,2,b])}
-  for(const u of G.units)if(!u.hidden&&vis(u.x,u.y)&&(u.kind==='player'||visto(idx(Math.floor(u.x),Math.floor(u.y)))))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
+  for(const u of G.units)if(!u.hidden&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
   for(const c of G.carts)if(vis(c.x,c.y))L.push([c.x+c.y,6,c]);
