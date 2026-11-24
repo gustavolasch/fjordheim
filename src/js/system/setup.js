@@ -5,7 +5,7 @@ function newGame(biome,seed,demo){if(NET.role==='host')netLeave(true);BIO=BIOMES
     res:zerosRes(),inv:zerosRes(),items:zerosItems(),equip:emptyEquip(),animT:0,era:1,ferr:{},receitas:[],sagas:{},perdas:0,invasoesRepelidas:0,
     t:185,speed:1,idc:1,nextRaid:1e12,raidN:0,raidOn:false,regrow:[],fall:[],hints:{},flags:{},demo:!!demo};
   BMAP=new Map();UMAP=new Map();PT=[];AR=[];genMap();G.lugares=sorteiaLugares();
-  const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;G.rs=(G.seed|0)^0x9e3779b9;spawnAnimais();G.lugares.filter(p=>p.k==='acampamento').forEach(spawnCampo);
+  const p=spawnUnit('player',G.start[0]+.5,G.start[1]+.5,playerLook());G.pid=p.id;G.rs=(G.seed|0)^0x9e3779b9;spawnAnimais();G.lugares.filter(p=>p.k==='acampamento'||p.k==='templo').forEach(spawnCampo);
   colocaPedra();
   initTiles();bgGrad=null;initWeather();makeThumbs();cam.z=isTouch?1.2:1.3;centerCam()}
 function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$('#hud').classList.add('hidden');

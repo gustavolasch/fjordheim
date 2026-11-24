@@ -8,7 +8,7 @@ const NET_V=1,NET_HZ=5,NET_WORLD_EVERY=10,NET_DT=1/5,NET_PREFIX='fjordheim-',NET
 const netErr=e=>({'peer-unavailable':'Sala não encontrada. Confira o código.','network':'Sem conexão com o servidor de salas.','browser-incompatible':'Este navegador não suporta conexão entre aparelhos.'})[e&&e.type]||('Não foi possível conectar'+(e&&e.type?' ('+e.type+')':'')+'.');
 function netCode(){let s='';for(let i=0;i<5;i++)s+=NET_CHARS[(Math.random()*NET_CHARS.length)|0];return s}
 // estado rápido: tudo que muda com frequência (sem terreno, sem obj e sem wear, que vão no canal 'world')
-function netFast(){return{units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false})),bld:G.bld.map(b=>({...b,pop:0})),decor:G.decor,tombs:G.tombs,carts:G.carts,res:G.res,inv:G.inv,items:G.items,equip:G.equip,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,rs:G.rs,animT:G.animT}}
+function netFast(){return{units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false})),bld:G.bld.map(b=>({...b,pop:0})),decor:G.decor,tombs:G.tombs,carts:G.carts,res:G.res,inv:G.inv,items:G.items,equip:G.equip,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,lugares:G.lugares,era:G.era,ferr:G.ferr,receitas:G.receitas,sagas:G.sagas,bandeira:G.bandeira,start:G.start,rs:G.rs,animT:G.animT}}
 function netWorld(){return{obj:G.obj,wear:Array.from(G.wear,v=>Math.round(v*10)/10)}}
 function netStatus(){return NET.conn&&NET.conn.open?'amigo conectado':'aguardando amigo'}
 function rebuildIndex(){BMAP=new Map();UMAP=new Map();if(G.occ&&G.occ.length===N*N)G.occ.fill(0);else G.occ=new Int32Array(N*N);
@@ -73,7 +73,7 @@ function netApplyFast(s){
     u._gx=d.x;u._gy=d.y;u._t0=perfT;return u});
   G.bld=s.bld;G.decor=s.decor;G.tombs=s.tombs;G.carts=s.carts||[];G.res=s.res;G.inv=s.inv;G.items=s.items;G.equip=s.equip;
   G.t=s.t;G.speed=s.speed;G.raidOn=s.raidOn;G.nextRaid=s.nextRaid;G.raidN=s.raidN;G.regrow=s.regrow;G.fall=s.fall;
-  G.hints=s.hints;G.flags=s.flags;G.idc=s.idc;G.animT=s.animT;G.pid=s.pid;G.start=s.start;G.rs=s.rs;
+  G.hints=s.hints;G.flags=s.flags;G.lugares=s.lugares||[];G.era=s.era||1;G.ferr=s.ferr||{};G.receitas=s.receitas||[];G.sagas=s.sagas||{};G.bandeira=s.bandeira||null;G.idc=s.idc;G.animT=s.animT;G.pid=s.pid;G.start=s.start;G.rs=s.rs;
   rebuildIndex()}
 // chamado a cada quadro no amigo: posição entre o último snapshot e o novo
 function netInterp(){for(const u of G.units){if(u._t0==null)continue;const k=Math.min(1,Math.max(0,(perfT-u._t0)/NET_DT));u.x=u._fx+(u._gx-u._fx)*k;u.y=u._fy+(u._gy-u._fy)*k}}

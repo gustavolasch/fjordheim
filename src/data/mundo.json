@@ -35,6 +35,45 @@
         "food": 3,
         "semente_linho": 2
       }
+    },
+    "templo": {
+      "n": "Templo abandonado",
+      "emoji": "🛕",
+      "quantidade": 1,
+      "guardas": 2,
+      "chefe": {
+        "nome": "Chefe saqueador",
+        "hp_mult": 3,
+        "dano_mult": 1.6
+      },
+      "prisioneiros": {
+        "min": 1,
+        "max": 3
+      },
+      "libertar": {
+        "_nota": "Prisioneiros viram moradores se houver cama livre. Sem cama, o resto se perde."
+      },
+      "deixar": {
+        "moral_perda": 15,
+        "recompensas": [
+          {
+            "res": {
+              "lingote": 4
+            }
+          },
+          {
+            "res": {
+              "iron": 6
+            }
+          },
+          {
+            "item": "shield"
+          },
+          {
+            "item": "cota_malha"
+          }
+        ]
+      }
     }
   },
   "eventos": {

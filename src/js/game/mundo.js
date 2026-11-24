@@ -5,8 +5,8 @@
 function lugarPorId(id){return(G.lugares||[]).find(p=>p.id===id)}
 function lugarEm(x,y){return(G.lugares||[]).find(p=>p.x===x&&p.y===y)||null}
 function nearAgua(x,y){for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(inb(x+dx,y+dy)&&G.tiles[idx(x+dx,y+dy)]<=1)return true;return false}
-function sorteiaLugares(){const r=mulberry32((G.seed^0x5a17)>>>0),L=MUNDO.lugares,out=[];
-  for(const k of ['ruina','naufragio','acampamento']){
+function sorteiaLugares(kinds){const r=mulberry32((G.seed^0x5a17)>>>0),L=MUNDO.lugares,out=[];
+  for(const k of kinds||['ruina','naufragio','acampamento','templo']){
     for(let j=0;j<L[k].quantidade;j++){let spot=null;
       for(let t=0;t<4000&&!spot;t++){const x=(r()*N)|0,y=(r()*N)|0,i=idx(x,y);
         if(!landT(G.tiles[i])||G.obj[i]||G.occ[i])continue;
@@ -17,7 +17,13 @@ function sorteiaLugares(){const r=mulberry32((G.seed^0x5a17)>>>0),L=MUNDO.lugare
       if(spot)out.push({id:G.idc++,k,x:spot[0],y:spot[1],feito:false})}}
   return out}
 // acampamento: saqueadores paradinhos no lugar até alguém atacar
-function spawnCampo(p){const n=MUNDO.lugares.acampamento.saqueadores;
+function spawnCampo(p){
+  if(p.k==='templo'){const T=MUNDO.lugares.templo,n=T.guardas;
+    for(let k=0;k<n;k++){const u=spawnSaqueador(p.x+.5+(k%2)*1.2,p.y+.5+((k/2)|0)*1.2,0);u.camp=p.id}
+    const c=spawnSaqueador(p.x+.5,p.y+.5-1.2,0);c.hp*=T.chefe.hp_mult;c.max*=T.chefe.hp_mult;c.dmg*=T.chefe.dano_mult;c.name=T.chefe.nome;c.chefe=true;c.camp=p.id;
+    if(p.prisioneiros==null)p.prisioneiros=T.prisioneiros.min+((Math.random()*(T.prisioneiros.max-T.prisioneiros.min+1))|0);
+    return}
+  const n=MUNDO.lugares.acampamento.saqueadores;
   for(let k=0;k<n;k++){const u=spawnSaqueador(p.x+.5+(k%2)*1.2,p.y+.5+((k/2)|0)*1.2,0);u.camp=p.id}}
 function updCampRaider(u,dt){u.atkCd-=dt;u.thinkT-=dt;
   if(u.thinkT<=0){u.thinkT=.5+Math.random()*.3;
@@ -75,8 +81,10 @@ function sagasTick(){G.sagas=G.sagas||{};
 function mundoTick(dt){if(!G.lugares)return;for(const k of FERR_KEYS())garantiaFerr(k);
   const pl=PL();if(pl)for(const p of G.lugares)if(!p.visitado&&Math.hypot(p.x+.5-pl.x,p.y+.5-pl.y)<=3)p.visitado=true;
   if(!G.demo&&!G.raidOn){if(G.evT==null)G.evT=novoEvento();G.evT-=dt;if(G.evT<=0){G.evT=novoEvento();disparaEvento()}}
-  for(const p of G.lugares){if(p.k!=='acampamento'||p.feito)continue;
-    if(!G.units.some(u=>u.kind==='raider'&&u.camp===p.id)){p.feito=true;ganhaSaque(MUNDO.lugares.acampamento.loot);
+  for(const p of G.lugares){if(p.feito||p.aguarda||(p.k!=='acampamento'&&p.k!=='templo'))continue;
+    if(!G.units.some(u=>u.kind==='raider'&&u.camp===p.id)){
+      if(p.k==='templo'){p.aguarda=true;toast('🛕 O chefe caiu. Escolha: libertar os prisioneiros ou deixá-los.','good');continue}
+      p.feito=true;ganhaSaque(MUNDO.lugares.acampamento.loot);
       toast(`🏕️ Acampamento vencido! Saque: ${lootTexto(MUNDO.lugares.acampamento.loot)}`,'good')}}
   if(G.raidPrev&&!G.raidOn&&!(G.saqueT!=null&&G.t-G.saqueT<2))G.invasoesRepelidas=(G.invasoesRepelidas||0)+1;
   G.raidPrev=G.raidOn;
@@ -94,7 +102,8 @@ function poiChegou(u,o){const p=lugarPorId(o.id);if(!p||p.feito){u.order=null;re
 function poiSalvo(u,a){const p=lugarPorId(a.id);if(!p||p.feito)return;p.feito=true;ganhaSaque(MUNDO.lugares.naufragio.loot);
   toast(`⛵ Naufrágio revistado: ${lootTexto(MUNDO.lugares.naufragio.loot)}`,'good')}
 function drawLugar(p){const x=p.x,y=p.y,q=P(x+.5,y+.5,0),a=p.feito?.4:1;ctx.save();ctx.globalAlpha=a;
-  if(p.k==='ruina'){ell(q[0],q[1],9,4,'rgba(0,0,0,.2)');for(const dx of[-5,0,5])ln([q[0]+dx,q[1]],[q[0]+dx,q[1]-14],'#c9c2b0',3.2);ln([q[0]-8,q[1]-14],[q[0]+6,q[1]-14],'#b0a894',2.4)}
+  if(p.k==='templo'){ell(q[0],q[1],13,5,'rgba(0,0,0,.22)');pp([[q[0]-12,q[1]],[q[0]+12,q[1]],[q[0]+12,q[1]-3],[q[0]-12,q[1]-3]],'#9c9486');for(const dx of[-8,-3,2,7])ln([q[0]+dx,q[1]-3],[q[0]+dx,q[1]-20],'#d8d0bd',3);pp([[q[0]-11,q[1]-20],[q[0]+11,q[1]-20],[q[0]+7,q[1]-25],[q[0]-7,q[1]-25]],'#8a8272')}
+  else if(p.k==='ruina'){ell(q[0],q[1],9,4,'rgba(0,0,0,.2)');for(const dx of[-5,0,5])ln([q[0]+dx,q[1]],[q[0]+dx,q[1]-14],'#c9c2b0',3.2);ln([q[0]-8,q[1]-14],[q[0]+6,q[1]-14],'#b0a894',2.4)}
   else if(p.k==='naufragio'){ell(q[0],q[1],10,3,'rgba(0,0,0,.2)');pp([[q[0]-8,q[1]],[q[0]+8,q[1]-3],[q[0]+6,q[1]+2]],'#7a4e2a');ln([q[0],q[1]],[q[0]+2,q[1]-22],'#5a3a22',1.6);pp([[q[0]+2,q[1]-22],[q[0]+9,q[1]-10],[q[0]+2,q[1]-8]],'#eee6d2')}
   else{ell(q[0],q[1],10,4,'rgba(0,0,0,.2)');pp([[q[0]-9,q[1]],[q[0],q[1]-16],[q[0]+9,q[1]]],'#8a5a3a');pp([[q[0]-3,q[1]],[q[0],q[1]-8],[q[0]+3,q[1]]],'#3a2414');ell(q[0]+12,q[1]-1,2.2,1.4,'#ff8a2a')}
   ctx.restore();
@@ -102,8 +111,11 @@ function drawLugar(p){const x=p.x,y=p.y,q=P(x+.5,y+.5,0),a=p.feito?.4:1;ctx.save
 }
 
 // ---- painéis: lugar, mercador e sagas ----
-function poiTap(p){if(p.k==='acampamento'||p.feito){sel={k:'p',id:p.id};openSheet('info');return}sendCmd({t:'poi',id:p.id});puff(p.x+.5,p.y+.5,'ring')}
+function poiTap(p){if(p.k==='acampamento'||p.k==='templo'||p.feito){sel={k:'p',id:p.id};openSheet('info');return}sendCmd({t:'poi',id:p.id});puff(p.x+.5,p.y+.5,'ring')}
 function poiHTML(id){const p=lugarPorId(id);if(!p)return null;const L=MUNDO.lugares[p.k];
+  if(p.k==='templo'){const vivos=G.units.filter(u=>u.kind==='raider'&&u.camp===p.id).length;
+    if(p.aguarda)return head(L.n,'O chefe caiu. Os prisioneiros são seus.')+`<p class="hint">Prisioneiros: ${p.prisioneiros}. Vila precisa de cama para acolher.</p><div class="row"><button class="gbtn" data-a="templo" data-v="libertar">⛓️ Libertar</button><button class="sbtn" data-a="templo" data-v="deixar">💰 Deixá-los (recompensa, moral cai)</button></div>`;
+    return head(L.n,p.feito?'Já resolvido.':'Chefe e guardas defendem os prisioneiros.')+`<p class="hint">${p.feito?(p.escolha==='libertar'?'Você libertou os prisioneiros.':'Você deixou os prisioneiros.'):`Guardas e chefe vivos: ${vivos}. Vença todos para escolher.`}</p>`}
   if(p.k==='acampamento'){const n=G.units.filter(u=>u.kind==='raider'&&u.camp===p.id).length;
     return head(L.n,'Saqueadores acampados.')+`<p class="hint">${p.feito?'Acampamento vencido.':`Saqueadores vivos: ${n}. Ataque tocando neles. Vença todos para pegar o saque.`}</p><p class="small">Saque: ${lootTexto(L.loot)}</p>`}
   return head(L.n,p.feito?'Já visitado.':'Toque para visitar.')}
@@ -112,10 +124,27 @@ function merchantHTML(m){return head('Mercador','Trocas de barco. Só você deci
 function sagaHTML(){const done=G.sagas||{};
   return head('Sagas','Missões da vila. A recompensa vai para o depósito.')+MUNDO.sagas.map(s=>{const R=Object.keys(s.recompensa.res||{}).map(k=>`${icon('recursos',k)}${s.recompensa.res[k]}`).join(' ');
     return `<div class="item"><div class="top"><b>${done[s.id]?'✅':'⬜'} ${s.n}</b></div><div class="small">${s.desc}</div><div class="small">Recompensa: ${R||'nada'}</div></div>`}).join('')}
+// migração v11: saves antigos ganham um templo (com guardas e chefe)
+function migraV11(){if(!G.lugares)return;if(G.lugares.some(p=>p.k==='templo'))return;
+  const novo=sorteiaLugares(['templo']);for(const p of novo){G.lugares.push(p);spawnCampo(p)}}
 // migração v8: mundo vivo para saves antigos (névoa começa com o que já foi visitado)
 function migraV8(){if(!G.lugares)G.lugares=sorteiaLugares();
-  for(const p of G.lugares)if(p.k==='acampamento'&&!p.feito&&!G.units.some(u=>u.kind==='raider'&&u.camp===p.id))spawnCampo(p);
+  for(const p of G.lugares)if((p.k==='acampamento'||p.k==='templo')&&!p.feito&&!G.units.some(u=>u.kind==='raider'&&u.camp===p.id)&&!p.aguarda)spawnCampo(p);
   G.receitas=G.receitas||[];G.sagas=G.sagas||{};G.perdas=G.perdas||0;G.invasoesRepelidas=G.invasoesRepelidas||0}
+// templo: libertar (prisioneiros viram moradores com cama) ou deixar (recompensa e moral da vila caem)
+CMDS.temploEsc=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.k!=='templo'||!p.aguarda||p.feito)return cmdFail('','');
+  const T=MUNDO.lugares.templo;
+  if(c.c==='libertar'){let solto=0;const n=p.prisioneiros||0;
+    for(let k=0;k<n;k++){const cama=acharCama();if(!cama)break;
+      spawnUnit('villager',p.x+.5+(k%2)*.8,p.y+1.5,{vida:null,cool:0,path:null,act:null,hidden:false,cama:cama.id,moral:PESSOAS.moral.inicial,comeu:false,fome:false,hab:{lumber:0,miner:0,collector:0},tracos:sorteiaTracos(),dormindo:false,indo:false});solto++}
+    toast(`⛓️ ${solto} prisioneiro(s) viraram moradores.${solto<n?` Sem cama para ${n-solto}: eles se perderam.`:''}`,'good')}
+  else if(c.c==='deixar'){const R=T.deixar.recompensas[(Math.random()*T.deixar.recompensas.length)|0];
+    if(R.res)for(const k in R.res)ganhaEstoque(k,R.res[k]);
+    if(R.item){ferrAdd(R.item)}
+    for(const v of G.units)if(v.kind==='villager')v.moral=Math.max(0,(v.moral??PESSOAS.moral.inicial)-T.deixar.moral_perda);
+    toast(`🛕 Você deixou os prisioneiros. Recompensa: ${R.res?lootTexto(R.res):ITEMS[R.item].n}. A vila ficou inquieta.`,'good')}
+  else return cmdFail('','');
+  p.feito=true;p.aguarda=false;p.escolha=c.c;return{ok:true}};
 // troca com o mercador: paga a oferta e recebe os itens na mochila
 CMDS.trade=(u,c)=>{const m=UMAP.get(c.id);if(!m||m.kind!=='merchant')return cmdFail('','');
   const o=MUNDO.mercador.ofertas[c.i];if(!o)return cmdFail('','');

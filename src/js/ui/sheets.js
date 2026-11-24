@@ -113,6 +113,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
   case'trade':{const m=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(m){const r=sendCmd({t:'trade',id:m.id,i:+v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else sfx('craft')}break}
   case'bandeiraAbre':openSheet('bandeira');break;
+  case'templo':{if(sel&&sel.k==='p'){const r=sendCmd({t:'temploEsc',id:sel.id,c:v});if(!r.ok&&r.msg)toast(r.msg,'bad');else closeSheet()}break}
   case'bandeiraSet':{const i=String(v).indexOf(':');const r=sendCmd({t:'bandeiraSet',k:String(v).slice(0,i),v:String(v).slice(i+1)});if(!r.ok&&r.msg)toast(r.msg,'bad');break}
   case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'reparaF':{if(b){const r=sendCmd({t:'reparaF',b:b.id,k:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
