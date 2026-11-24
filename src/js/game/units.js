@@ -34,7 +34,7 @@ function moveUnit(u,dt){
   if(!u.path||!u.path.length){u.moving=false;return false}
   const[tx,ty]=u.path[0];
   if(u.kind==='raider'){const b=bAt(tx,ty);if(b&&(BD[b.type].wall||BD[b.type].gate)){u.attackB=b.id;u.moving=false;return true}}
-  else{const[cx,cy]=utile(u);if((cx!==tx||cy!==ty)&&!passV(tx,ty)){u.path=null;u.moving=false;return false}}
+  else{const[cx,cy]=utile(u);if((cx!==tx||cy!==ty)&&(!passV(tx,ty)||(u.kind==='animal'&&gateFechado(tx,ty)))){u.path=null;u.moving=false;return false}}
   const gx=tx+.5,gy=ty+.5,dx=gx-u.x,dy=gy-u.y,d=Math.hypot(dx,dy);
   if(d>.01)u.heading=Math.atan2(dy,dx); // direção de movimento no mundo do jogo (usada pelo sprite do jogador)
   let sp=u.speed*dt;if(u.kind==='player')sp*=survivalSpeed(u);if(u.kind==='villager'&&G.res.food<=0)sp*=.7;if(u.kind==='player'&&bagW()>BAG*.75)sp*=.85;

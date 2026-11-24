@@ -121,3 +121,52 @@ CMDS.trade=(u,c)=>{const m=UMAP.get(c.id);if(!m||m.kind!=='merchant')return cmdF
   const o=MUNDO.mercador.ofertas[c.i];if(!o)return cmdFail('','');
   if(!afford(o.dar))return cmdFail('Faltam recursos');
   pay(o.dar);for(const k in o.receber)addInv(k,o.receber[k]);return{ok:true}};
+
+// ---- portões: abrem sozinhos quando jogador, amigo ou morador chega perto; animais e inimigos não abrem ----
+function gateTick(dt){const Q=MUNDO.portoes;
+  for(const b of G.bld){if(!b.done||!BD[b.type].gate)continue;
+    const cx=b.x+.5,cy=b.y+.5;
+    const perto=G.units.some(u=>(u.kind==='player'||(u.kind==='villager'&&!u.hidden))&&Math.hypot(u.x-cx,u.y-cy)<=Q.raio_abre);
+    if(perto){b.aberto=true;b.fechaT=Q.fecha_depois_seg}
+    else if(b.aberto){b.fechaT=(b.fechaT??0)-dt;if(b.fechaT<=0)b.aberto=false}
+    const alvo=b.aberto?1:0,v=Q.tempo_abre_seg>0?dt/Q.tempo_abre_seg:1;
+    b.anim=(b.anim||0)+clamp(alvo-(b.anim||0),-v,v)}}
+// portão fechado bloqueia animais (inimigos já atacam portões)
+function gateFechado(x,y){const c=bAt(x,y);return!!c&&!!BD[c.type].gate&&c.done&&!c.aberto}
+
+// ---- Casa Comunal: aviso do primeiro assentamento e bandeira ----
+function bandeiraAtual(){return G.bandeira||{...MUNDO.bandeira.inicial}}
+// desenha o pano da bandeira (fundo, padrão na cor 1, símbolo com a cor 2)
+function desenhaBandeira(x,y,w,h,B){const D=MUNDO.bandeira;
+  pp([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],B.fundo);
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  ctx.fillStyle=B.cor1;ctx.strokeStyle=B.cor1;
+  if(B.padrao==='listras')ctx.fillRect(x,y+h*.4,w,h*.2);
+  else if(B.padrao==='cruz'){ctx.fillRect(x+w*.4,y,w*.2,h);ctx.fillRect(x,y+h*.4,w,h*.2)}
+  else if(B.padrao==='diagonal'){ctx.lineWidth=Math.max(1.2,h*.18);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y+h);ctx.stroke()}
+  ctx.restore();
+  ell(x+w/2,y+h/2,h*.4,h*.4,B.cor2);
+  ctx.save();ctx.font=`${Math.round(h*.6)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(D.simbolos[B.simbolo]||'',x+w/2,y+h/2+.5);ctx.restore()}
+// mastro e bandeira no alto da Casa Comunal
+function dBandeira(b){const z=BD.longhouse.wallH;const base=P(b.x+1.5,b.y+1.5,z+16),top=P(b.x+1.5,b.y+1.5,z+46);
+  ln(base,top,'#4a3420',1.6);desenhaBandeira(top[0]+1,top[1],13,10,bandeiraAtual())}
+function assentoHTML(){return head('Primeiro assentamento',MUNDO.assento.aviso)+`<div class="row"><button class="gbtn" data-a="bandeiraAbre">🏴 ${MUNDO.assento.botao}</button></div>`}
+// miniatura da bandeira no painel (mesmas regras do desenho)
+function svgBandeira(B){const D=MUNDO.bandeira;
+  let pad='';if(B.padrao==='listras')pad=`<rect x="0" y="${64*.4}" width="96" height="${64*.2}" fill="${B.cor1}"/>`;
+  else if(B.padrao==='cruz')pad=`<rect x="${96*.4}" y="0" width="${96*.2}" height="64" fill="${B.cor1}"/><rect x="0" y="${64*.4}" width="96" height="${64*.2}" fill="${B.cor1}"/>`;
+  else if(B.padrao==='diagonal')pad=`<line x1="0" y1="0" x2="96" y2="64" stroke="${B.cor1}" stroke-width="10"/>`;
+  return `<svg width="96" height="64" viewBox="0 0 96 64" style="border-radius:6px;background:${B.fundo}"><rect width="96" height="64" fill="${B.fundo}"/>${pad}<circle cx="48" cy="32" r="${64*.4}" fill="${B.cor2}"/><text x="48" y="34" font-size="36" text-anchor="middle" dominant-baseline="middle">${D.simbolos[B.simbolo]||''}</text></svg>`}
+function bandeiraHTML(){const B=bandeiraAtual(),D=MUNDO.bandeira;
+  const sw=(k,v,on)=>`<button class="sbtn" data-a="bandeiraSet" data-v="${k}:${v}" style="background:${v};width:34px;height:30px;padding:0;border:${on?'3px solid #f3c969':'1px solid #555'}"></button>`;
+  const bt=(k,v,label,on)=>`<button class="sbtn ${on?'on':''}" data-a="bandeiraSet" data-v="${k}:${v}">${label}</button>`;
+  return head('Sua bandeira','Escolha as cores, o padrão e o símbolo. Ela aparece na Casa Comunal.')+
+    `<div class="row" style="justify-content:center">${svgBandeira(B)}</div>`+
+    `<h4>Cor de fundo</h4><div class="row">${D.fundos.map(c=>sw('fundo',c,B.fundo===c)).join('')}</div>`+
+    `<h4>Padrão</h4><div class="row">${Object.keys(D.padroes).map(k=>bt('padrao',k,D.padroes[k],B.padrao===k)).join('')}</div>`+
+    `<h4>Símbolo</h4><div class="row">${Object.keys(D.simbolos).map(k=>bt('simbolo',k,D.simbolos[k],B.simbolo===k)).join('')}</div>`+
+    `<h4>Cor do padrão</h4><div class="row">${D.cores.map(c=>sw('cor1',c,B.cor1===c)).join('')}</div>`+
+    `<h4>Cor do símbolo</h4><div class="row">${D.cores.map(c=>sw('cor2',c,B.cor2===c)).join('')}</div>`}
+// só aceita valores da lista do JSON
+CMDS.bandeiraSet=(u,c)=>{const D=MUNDO.bandeira;const ok={fundo:D.fundos,padrao:Object.keys(D.padroes),simbolo:Object.keys(D.simbolos),cor1:D.cores,cor2:D.cores}[c.k];
+  if(!ok||!ok.includes(c.v))return cmdFail('','');G.bandeira={...bandeiraAtual(),[c.k]:c.v};return{ok:true}};

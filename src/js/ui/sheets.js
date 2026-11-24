@@ -48,6 +48,8 @@ function sheetHTML(){
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
   case'saga':return sagaHTML();
+  case'assento':return assentoHTML();
+  case'bandeira':return bandeiraHTML();
   case'era':return eraHTML();
   case'info':return infoHTML()}
   return null}
@@ -110,6 +112,8 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'craft':{const r=sendCmd({t:'craft',item:v});if(!r.ok){toast(r.msg,'bad');break}if(r.toast)toast(r.toast);closeSheet();break}
   case'godeposit':if(sendCmd({t:'godeposit'}).ok)closeSheet();break;
   case'trade':{const m=sel&&sel.k==='u'?UMAP.get(sel.id):null;if(m){const r=sendCmd({t:'trade',id:m.id,i:+v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else sfx('craft')}break}
+  case'bandeiraAbre':openSheet('bandeira');break;
+  case'bandeiraSet':{const i=String(v).indexOf(':');const r=sendCmd({t:'bandeiraSet',k:String(v).slice(0,i),v:String(v).slice(i+1)});if(!r.ok&&r.msg)toast(r.msg,'bad');break}
   case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'reparaF':{if(b){const r=sendCmd({t:'reparaF',b:b.id,k:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'eraAvanca':{const r=sendCmd({t:'eraAvanca'});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else closeSheet();break}

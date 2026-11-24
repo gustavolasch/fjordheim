@@ -4,31 +4,222 @@
   "revela_raio": 6,
   "torre_raio": 9,
   "lugares": {
-    "ruina":       { "n": "Ruína antiga",               "emoji": "🏛️", "quantidade": 3, "receitas": ["funda", "lanca_madeira"] },
-    "naufragio":   { "n": "Naufrágio",                  "emoji": "⛵", "quantidade": 2, "loot": { "wood": 3, "stick": 4, "fibra": 2, "stone": 1 } },
-    "acampamento": { "n": "Acampamento de saqueadores", "emoji": "⛺", "quantidade": 2, "saqueadores": 3, "loot": { "iron": 2, "wood": 4, "food": 3, "semente_linho": 2 } }
+    "ruina": {
+      "n": "Ruína antiga",
+      "emoji": "🏛️",
+      "quantidade": 3,
+      "receitas": [
+        "funda",
+        "lanca_madeira"
+      ]
+    },
+    "naufragio": {
+      "n": "Naufrágio",
+      "emoji": "⛵",
+      "quantidade": 2,
+      "loot": {
+        "wood": 3,
+        "stick": 4,
+        "fibra": 2,
+        "stone": 1
+      }
+    },
+    "acampamento": {
+      "n": "Acampamento de saqueadores",
+      "emoji": "⛺",
+      "quantidade": 2,
+      "saqueadores": 3,
+      "loot": {
+        "iron": 2,
+        "wood": 4,
+        "food": 3,
+        "semente_linho": 2
+      }
+    }
   },
   "eventos": {
     "intervalo_min": 150,
     "intervalo_max": 300,
-    "pesos": { "tempestade": 3, "mercador": 2, "lobos": 2 }
+    "pesos": {
+      "tempestade": 3,
+      "mercador": 2,
+      "lobos": 2
+    }
   },
-  "tempestade": { "arvores": 3 },
-  "lobos": { "quantidade": 3, "distancia_min": 9, "distancia_max": 12 },
+  "tempestade": {
+    "arvores": 3
+  },
+  "lobos": {
+    "quantidade": 3,
+    "distancia_min": 9,
+    "distancia_max": 12
+  },
   "mercador": {
     "segundos": 90,
     "ofertas": [
-      { "dar": { "food": 3 },        "receber": { "semente_nabo": 2 } },
-      { "dar": { "wood": 6 },        "receber": { "iron": 1 } },
-      { "dar": { "stone": 4, "stick": 4 }, "receber": { "la": 1 } }
+      {
+        "dar": {
+          "food": 3
+        },
+        "receber": {
+          "semente_nabo": 2
+        }
+      },
+      {
+        "dar": {
+          "wood": 6
+        },
+        "receber": {
+          "iron": 1
+        }
+      },
+      {
+        "dar": {
+          "stone": 4,
+          "stick": 4
+        },
+        "receber": {
+          "la": 1
+        }
+      }
     ]
   },
   "sagas": [
-    { "id": "naufrago",   "n": "O Náufrago",         "desc": "Sobreviver à primeira noite, fazer abrigo e fogueira.", "cond": { "tipo": "casa_fogueira", "dias": 1 }, "recompensa": { "res": { "stick": 5, "wood": 2 } } },
-    { "id": "maos",       "n": "As Primeiras Mãos",  "desc": "Encontrar e manter 3 moradores.",                       "cond": { "tipo": "moradores", "n": 3 }, "recompensa": { "res": { "food": 5 } } },
-    { "id": "inverno",    "n": "O Primeiro Inverno", "desc": "Estocar comida e passar o inverno sem perder ninguém.", "cond": { "tipo": "sem_perdas_inverno", "dias": 16, "comida": 10 }, "recompensa": { "res": { "cevada": 5, "semente_cevada": 3 } } },
-    { "id": "ferro",      "n": "Ferro e Fogo",       "desc": "Conseguir ferro e repelir uma invasão.",                "cond": { "tipo": "ferro_invasao" }, "recompensa": { "res": { "wood": 10 } } },
-    { "id": "jarl",       "n": "O Jarl",             "desc": "Fazer a vila crescer até 20 moradores e receber o mercador.", "cond": { "tipo": "moradores_mercador", "n": 20 }, "recompensa": { "res": { "iron": 3, "la": 2 } } },
-    { "id": "coroa",      "n": "A Coroa",            "desc": "Construir o Salão Real e ser coroado rei.",             "cond": { "tipo": "predio", "b": "salao" }, "recompensa": { "res": { "stone": 10 } } }
-  ]
+    {
+      "id": "naufrago",
+      "n": "O Náufrago",
+      "desc": "Sobreviver à primeira noite, fazer abrigo e fogueira.",
+      "cond": {
+        "tipo": "casa_fogueira",
+        "dias": 1
+      },
+      "recompensa": {
+        "res": {
+          "stick": 5,
+          "wood": 2
+        }
+      }
+    },
+    {
+      "id": "maos",
+      "n": "As Primeiras Mãos",
+      "desc": "Encontrar e manter 3 moradores.",
+      "cond": {
+        "tipo": "moradores",
+        "n": 3
+      },
+      "recompensa": {
+        "res": {
+          "food": 5
+        }
+      }
+    },
+    {
+      "id": "inverno",
+      "n": "O Primeiro Inverno",
+      "desc": "Estocar comida e passar o inverno sem perder ninguém.",
+      "cond": {
+        "tipo": "sem_perdas_inverno",
+        "dias": 16,
+        "comida": 10
+      },
+      "recompensa": {
+        "res": {
+          "cevada": 5,
+          "semente_cevada": 3
+        }
+      }
+    },
+    {
+      "id": "ferro",
+      "n": "Ferro e Fogo",
+      "desc": "Conseguir ferro e repelir uma invasão.",
+      "cond": {
+        "tipo": "ferro_invasao"
+      },
+      "recompensa": {
+        "res": {
+          "wood": 10
+        }
+      }
+    },
+    {
+      "id": "jarl",
+      "n": "O Jarl",
+      "desc": "Fazer a vila crescer até 20 moradores e receber o mercador.",
+      "cond": {
+        "tipo": "moradores_mercador",
+        "n": 20
+      },
+      "recompensa": {
+        "res": {
+          "iron": 3,
+          "la": 2
+        }
+      }
+    },
+    {
+      "id": "coroa",
+      "n": "A Coroa",
+      "desc": "Construir o Salão Real e ser coroado rei.",
+      "cond": {
+        "tipo": "predio",
+        "b": "salao"
+      },
+      "recompensa": {
+        "res": {
+          "stone": 10
+        }
+      }
+    }
+  ],
+  "portoes": {
+    "_nota": "Portões: abrem sozinhos quando alguém (jogador, amigo ou morador) chega perto. Animais e inimigos não abrem.",
+    "raio_abre": 1.2,
+    "tempo_abre_seg": 0.35,
+    "fecha_depois_seg": 2
+  },
+  "assento": {
+    "aviso": "Agora você tem seu primeiro assentamento. Saqueadores podem atacar: construa proteção.",
+    "botao": "Monte sua bandeira"
+  },
+  "bandeira": {
+    "_nota": "Bandeira da Casa Comunal (e do barco, quando existir). Escolhas fixas: a bandeira só aceita valores desta lista.",
+    "fundos": [
+      "#1f4e8c",
+      "#8c2a24",
+      "#2e6b3a",
+      "#2b2b2b",
+      "#e8dcc0",
+      "#c8a13a"
+    ],
+    "padroes": {
+      "liso": "Liso",
+      "listras": "Listras",
+      "cruz": "Cruz",
+      "diagonal": "Diagonal"
+    },
+    "simbolos": {
+      "machado": "🪓",
+      "lobo": "🐺",
+      "corvo": "🐦",
+      "arvore": "🌲",
+      "barco": "⛵"
+    },
+    "cores": [
+      "#e8dcc0",
+      "#f3c969",
+      "#1b1b1b",
+      "#c8243a",
+      "#3a7bd5",
+      "#ffffff"
+    ],
+    "inicial": {
+      "fundo": "#1f4e8c",
+      "padrao": "listras",
+      "simbolo": "lobo",
+      "cor1": "#e8dcc0",
+      "cor2": "#1b1b1b"
+    }
+  }
 }

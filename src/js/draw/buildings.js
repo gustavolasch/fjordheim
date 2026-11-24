@@ -131,21 +131,23 @@ function dRailFence(b,p){const cx=b.x+.5,cy=b.y+.5,segs=segsOf(b),post=P(cx,cy),
 function gateGeom(b){const cs=conns(b);let d=cs.length?cs[0]:[1,0];for(const c of cs)if(cs.some(e=>e[0]===-c[0]&&e[1]===-c[1])){d=c;break}
   const cx=b.x+.5,cy=b.y+.5,e0=[cx-d[0]*.5,cy-d[1]*.5],e1=[cx+d[0]*.5,cy+d[1]*.5];
   return(e0[0]+e0[1]<=e1[0]+e1[1])?{A:e0,B:e1}:{A:e1,B:e0}}
-function dGate(b,p){const{A,B}=gateGeom(b),qa=P(A[0],A[1]),qb=P(B[0],B[1]),f=Math.min(1,.3+p*.7),up=(q,z)=>[q[0],q[1]-z],mid=t=>lp(qa,qb,t),full=p>=1,leaf=p>.4;
+function dGate(b,p){const{A,B}=gateGeom(b),qa0=P(A[0],A[1]),qb0=P(B[0],B[1]),k=1-(b.anim||0),f=Math.min(1,.3+p*.7),up=(q,z)=>[q[0],q[1]-z],full=p>=1,leaf=p>.4;
+  // as folhas recolhem para o centro dos dois lados ao abrir (k=1 fechado, k=0 aberto)
+  const qa=lp(qa0,qb0,(1-k)/2),qb=lp(qa0,qb0,(1+k)/2),qa_=qa0,qb_=qb0,mid=t=>lp(qa,qb,t);
   if(b.type==='gate'){ // portão de paliçada: mesmas estacas e cor da paliçada
     if(leaf)for(const t of[.125,.25,.375,.5,.625,.75,.875])stake(mid(t),(17+hash2(Math.round(t*64),b.x*7+b.y)*5)*f,C.wood);
     if(leaf){ln(up(qa,12*f),up(qb,12*f),C.woodD,2.2);ln(up(qa,5*f),up(qb,5*f),C.woodD,1.8)}
     if(full)ln(up(mid(.5),0),up(mid(.5),17),'#3a2312',1.2);
-    stake(qa,24*f,C.woodD);stake(qb,24*f,C.woodD)}
+    stake(qa_,24*f,C.woodD);stake(qb_,24*f,C.woodD)}
   else if(b.type==='stonegate'){ // portão de pedra: pilares de pedra + grade de ferro
-    for(const q of[qa,qb]){pp([[q[0]-3.2,q[1]],[q[0]+3.2,q[1]],[q[0]+3.2,q[1]-22*f],[q[0]-3.2,q[1]-22*f]],shade(C.stone,-.12));ell(q[0],q[1]-22*f,3.6,1.9,C.stone)}
+    for(const q of[qa_,qb_]){pp([[q[0]-3.2,q[1]],[q[0]+3.2,q[1]],[q[0]+3.2,q[1]-22*f],[q[0]-3.2,q[1]-22*f]],shade(C.stone,-.12));ell(q[0],q[1]-22*f,3.6,1.9,C.stone)}
     if(leaf){for(let t=.2;t<=.81;t+=.15)ln(up(mid(t),1),up(mid(t),15*f),C.iron,1.3);ln(up(qa,15*f),up(qb,15*f),C.iron,2);ln(up(qa,1.5),up(qb,1.5),C.iron,1.6)}}
   else if(b.type==='railgate'){ // porteira de tábuas: tábuas verticais + diagonal + postes
     if(leaf){pp([up(qa,1),up(qb,1),up(qb,11*f),up(qa,11*f)],C.plank);for(const t of[.2,.4,.6,.8])ln(up(mid(t),1),up(mid(t),11*f),shade(C.plank,-.35),1);ln(up(qa,11*f),up(qb,11*f),C.woodD,1.8);ln(up(qa,1),up(qb,11*f),C.woodD,1.4)}
-    for(const q of[qa,qb]){ctx.fillStyle=C.woodD;ctx.fillRect(q[0]-1.8,q[1]-15*f,3.6,15*f);ctx.fillStyle=C.woodL;ctx.fillRect(q[0]-1.8,q[1]-15*f-1,3.6,1.6)}}
+    for(const q of[qa_,qb_]){ctx.fillStyle=C.woodD;ctx.fillRect(q[0]-1.8,q[1]-15*f,3.6,15*f);ctx.fillStyle=C.woodL;ctx.fillRect(q[0]-1.8,q[1]-15*f-1,3.6,1.6)}}
   else{ // fgate: porteira de galhos — treliça em X, travessa de topo e trinco
     if(leaf){panel(A,B,9*f,shade(C.twig,.1),true);ln(up(qa,0),up(qb,9*f),C.woodD,1.2);ln(up(qa,9*f),up(qb,0),C.woodD,1.2);ln(up(qa,9*f),up(qb,9*f),C.woodL,2.2);const lt=mid(.86);ell(lt[0],lt[1]-5*f,1.4,1.4,'#e0c070')}
-    for(const q of[qa,qb])ln(q,up(q,13*f),C.woodD,2.6)}}
+    for(const q of[qa_,qb_])ln(q,up(q,13*f),C.woodD,2.6)}}
 function dFloorFlat(b,p){ctx.globalAlpha=.45+.55*Math.min(1,p);box(b.x+.02,b.y+.02,.96,.96,0,1.6,C.plank,shade(C.plank,-.4),shade(C.plank,-.25));
   for(let t=.2;t<.98;t+=.2)ln(P(b.x+t,b.y+.03,1.6),P(b.x+t,b.y+.97,1.6),'rgba(60,35,15,.4)',1);ctx.globalAlpha=1}
 function dPathFlat(b,p){ctx.globalAlpha=.45+.55*Math.min(1,p);const d=BIO.dirt;pp([P(b.x,b.y),P(b.x+1,b.y),P(b.x+1,b.y+1),P(b.x,b.y+1)],shade(d,-.08));
@@ -172,7 +174,7 @@ function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
     case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
-  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b)}
+  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b);if(b.type==='longhouse'&&b.done)dBandeira(b)}
 
 
 /* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */

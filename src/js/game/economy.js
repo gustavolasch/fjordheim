@@ -39,6 +39,7 @@ function placeB(type,x,y,done){const d=BD[type];if(DEV.instant)done=true;if(!don
   if(!done)for(let k=0;k<6;k++)puff(x+Math.random()*d.w,y+Math.random()*d.h,'dust');
   return b}
 function completeB(b){const d=BD[b.type];b.done=true;b.hp=b.max;b.prog=b.work;b.pop=.3;sfx('place');
+  if(b.type==='longhouse'&&!G.flags.assento){G.flags.assento=true;openSheet('assento')}
   if(!d.line&&!d.gate)toast(`✅ Pronto: ${d.n}`,'good');
   if(b.type==='shelter')completeHint('shelter');completeHint('build');
   if(d.grp)showHint('fence');
