@@ -63,6 +63,7 @@ function dmgUnit(t,d,tipo,atq){
     if(A.comportamento==='foge'){t.fleeT=G.t+5;t.target=null}
     else if(atq&&atq.src&&atq.src.kind==='player')t.target=atq.src.id}
   t.hp-=v;for(let k=0;k<3;k++)puff(t.x,t.y,'blood');
+  if(t.kind==='player')t.hitT=.45; // o desenho mostra a reação ao golpe
   if(t.kind==='player'){if(t.hp<=0)killPlayer(t);return}
   if(t.hp<=0)killUnit(t)}
 function sangra(t){
@@ -201,7 +202,7 @@ function spawnSaqueador(x,y,onda){const S=CB.saqueador,tocha=onda>=S.tocha_a_par
     tunic:pick(['#7d2219','#5a1a14','#2e2a28','#6b2a1e']),hair:pick(['#2a1d14','#6b3d1f','#3b2a1d'])})}
 
 /* ---- tick de combate do jogador (chamado a cada quadro antes de agir) ---- */
-function combateTick(u,dt){folTick(u,dt);u.atkCd=Math.max(0,(u.atkCd||0)-dt)}
+function combateTick(u,dt){folTick(u,dt);u.hitT=Math.max(0,(u.hitT||0)-dt);u.atkCd=Math.max(0,(u.atkCd||0)-dt)}
 
 /* save da versão 3 para a 4: recursos e itens novos começam em zero; animais são espalhados */
 function migraV4(){for(const k in RES){G.inv[k]??=0;G.res[k]??=0}for(const k in ITEMS)G.items[k]??=0;

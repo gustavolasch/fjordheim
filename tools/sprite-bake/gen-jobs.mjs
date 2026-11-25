@@ -31,7 +31,6 @@ for (let c = 0; c < 6; c++) {
 for (let i = 0; i < 3; i++) jobs.push({ name: `Rock_Medium_${i + 1}`, targetH: 14, out: `rock_${i}` });
 for (let i = 0; i < 5; i++) jobs.push({ name: `Pebble_Round_${i + 1}`, targetH: 5, out: `pebble_${i}` });
 jobs.push({ name: 'Flower_3_Group', targetH: 16, out: 'flower_0' });
-jobs.push({ type: 'character', targetH: 21 });
-jobs.push({ type: 'export' });
+// O jogador (pl_*) sai de run-viking.mjs.
 fs.writeFileSync(path.join(HERE, 'jobs.json'), JSON.stringify(jobs, null, 1));
 console.log('jobs:', jobs.length);

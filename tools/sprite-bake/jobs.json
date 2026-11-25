@@ -586,12 +586,5 @@
   "name": "Flower_3_Group",
   "targetH": 16,
   "out": "flower_0"
- },
- {
-  "type": "character",
-  "targetH": 21
- },
- {
-  "type": "export"
  }
 ]

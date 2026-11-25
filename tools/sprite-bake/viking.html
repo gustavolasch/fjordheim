@@ -1,0 +1,159 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:transparent">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+// Viking do jogador: KayKit Barbarian com as mudanças de tools/receita_viking (variação "Loiro · túnica azul").
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const loader = new GLTFLoader();
+const load = u => new Promise((res, rej) => loader.load(u, res, undefined, rej));
+const SKIN = [[240, 192, 156], [216, 168, 132], [240, 180, 144], [240, 168, 132]];
+const GREY = [[156, 144, 144], [156, 144, 132], [156, 156, 144], [144, 144, 132]];
+const TUNIC = [60, 80, 110], BEARD = [200, 160, 80];
+const METAL = [150, 156, 162], DARK = [95, 100, 108];
+const near = (c, list, t = 26) => list.some(x => Math.abs(c[0] - x[0]) + Math.abs(c[1] - x[1]) + Math.abs(c[2] - x[2]) < t);
+const mul = (c, f) => c.map(v => v * f);
+const flat = () => new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide });
+
+// Uma cor por triângulo, tirada do meio do UV (como em render.py), com as trocas de viking.py.
+function paint(mesh, tag) {
+  const img = mesh.material.map.image;
+  const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+  const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+  const px = g.getImageData(0, 0, cv.width, cv.height).data;
+  const geo = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
+  const pos = geo.attributes.position, uv = geo.attributes.uv, out = new Float32Array(pos.count * 3), col = new THREE.Color();
+  const frac = v => ((v % 1) + 1) % 1;
+  for (let i = 0; i < pos.count; i += 3) {
+    const u = (uv.getX(i) + uv.getX(i + 1) + uv.getX(i + 2)) / 3, v = (uv.getY(i) + uv.getY(i + 1) + uv.getY(i + 2)) / 3;
+    const o = (Math.floor(frac(v) * (cv.height - 1)) * cv.width + Math.floor(frac(u) * (cv.width - 1))) * 4;
+    let c = [px[o], px[o + 1], px[o + 2]];
+    const k = c.map(n => Math.floor(n / 12) * 12);
+    const cx = (pos.getX(i) + pos.getX(i + 1) + pos.getX(i + 2)) / 3, cy = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3, cz = (pos.getZ(i) + pos.getZ(i + 1) + pos.getZ(i + 2)) / 3;
+    if (tag === 'Barbarian_Body' && near(k, SKIN)) c = TUNIC;
+    else if (tag.startsWith('Barbarian_Arm') && near(k, SKIN) && Math.abs(cx) < .62) c = mul(TUNIC, .9);
+    else if (tag === 'Barbarian_Head' && near(k, GREY, 30)) c = cy < 1.62 ? BEARD : mul(BEARD, .85);
+    if (tag === 'Barbarian_Head' && near(k, SKIN) && cz < -.12 && cy > 1.45) c = mul(BEARD, .9);
+    col.setRGB(c[0] / 255, c[1] / 255, c[2] / 255, THREE.SRGBColorSpace);
+    for (let n = 0; n < 3; n++) col.toArray(out, (i + n) * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(out, 3));
+  mesh.geometry = geo; mesh.material = flat();
+}
+
+// Elmo, aro, crista e protetor de nariz (mesmas medidas de viking.py, no espaço de repouso).
+function helmet() {
+  const verts = [], cols = [], col = new THREE.Color();
+  const tri = (a, b, c, rgb) => { col.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace); for (const p of [a, b, c]) { verts.push(...p); cols.push(col.r, col.g, col.b); } };
+  const quad = (q, rgb) => { tri(q[0], q[1], q[2], rgb); tri(q[0], q[2], q[3], rgb); };
+  const C = [0, 1.80, .03], rx = .585, ry = .50, rz = .585, nu = 20, nv = 8;
+  const P = (a, b) => [C[0] + rx * Math.cos(b) * Math.sin(a), C[1] + ry * Math.sin(b), C[2] + rz * Math.cos(b) * Math.cos(a)];
+  for (let u = 0; u < nu; u++) for (let v = 0; v < nv; v++) {
+    const a0 = 2 * Math.PI * u / nu, a1 = 2 * Math.PI * (u + 1) / nu, b0 = Math.PI / 2 * v / nv, b1 = Math.PI / 2 * (v + 1) / nv;
+    quad([P(a0, b0), P(a1, b0), P(a1, b1), P(a0, b1)], u % 5 ? METAL : DARK);
+  }
+  for (let u = 0; u < nu; u++) {
+    const R = (a, y) => [C[0] + rx * 1.04 * Math.sin(a), y, C[2] + rz * 1.04 * Math.cos(a)];
+    const a0 = 2 * Math.PI * u / nu, a1 = 2 * Math.PI * (u + 1) / nu;
+    quad([R(a0, C[1] - .06), R(a1, C[1] - .06), R(a1, C[1] + .07), R(a0, C[1] + .07)], DARK);
+  }
+  for (let v = 0; v < nv; v++) for (const a of [0, Math.PI]) {
+    const p0 = P(a, Math.PI / 2 * v / nv), p1 = P(a, Math.PI / 2 * (v + 1) / nv);
+    const at = (p, s) => p.map((n, i) => n + (i ? 0 : s * .035) + (n - C[i]) * .04);
+    quad([at(p0, -1), at(p0, 1), at(p1, 1), at(p1, -1)], DARK);
+  }
+  const [x0, y0, z0, x1, y1, z1] = [-.045, 1.47, .60, .045, 1.80, .66];
+  const V = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]];
+  for (const f of [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]]) quad(f.map(i => V[i]), DARK);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  return new THREE.Mesh(g, flat());
+}
+
+async function buildViking() {
+  const base = '/kaykit/';
+  const [chr, axe, shield, gen, move] = await Promise.all(['Characters/gltf/Barbarian.glb', 'Assets/gltf/axe_1handed.gltf', 'Assets/gltf/shield_round_barbarian.gltf',
+    'Animations/gltf/Rig_Medium/Rig_Medium_General.glb', 'Animations/gltf/Rig_Medium/Rig_Medium_MovementBasic.glb'].map(u => load(base + u)));
+  const root = chr.scene; root.updateMatrixWorld(true);
+  const meshes = []; root.traverse(o => { if (o.isMesh) meshes.push(o); });
+  for (const m of meshes) {
+    const tag = [m.name, m.parent.name].find(n => /^Barbarian_/.test(n)) || m.name;
+    if (/BearHat/.test(tag)) m.removeFromParent(); else { paint(m, tag); m.frustumCulled = false; }
+  }
+  const bone = n => { const b = root.getObjectByName(THREE.PropertyBinding.sanitizeNodeName(n)); if (!b) throw new Error('osso ausente: ' + n); return b; };
+  const h = helmet(); root.add(h); root.updateMatrixWorld(true); bone('head').attach(h);
+  for (const [item, slot] of [[axe, 'handslot.r'], [shield, 'handslot.l']]) {
+    const list = []; item.scene.traverse(o => { if (o.isMesh) list.push(o); });
+    for (const m of list) paint(m, 'item');
+    bone(slot).add(item.scene);
+  }
+  const clips = Object.fromEntries([...gen.animations, ...move.animations].map(a => [a.name, a]));
+  return { root, clips };
+}
+
+const PITCH = Math.PI / 6, YAW = Math.PI / 4;
+// anims: [{key, clip, frames, loop}]. tall: altura na tela (unidades do jogo) do viking parado. ss: pixels por unidade.
+window.bakeViking = async function ({ anims, tall, ss }) {
+  const { root, clips } = await buildViking();
+  const holder = new THREE.Group(); holder.add(root);
+  const scene = new THREE.Scene(); scene.add(holder);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb0a090, 2.6));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(3, 6, 2); scene.add(sun);
+  const dir = new THREE.Vector3(Math.cos(PITCH) * Math.sin(YAW), Math.sin(PITCH), Math.cos(PITCH) * Math.cos(YAW));
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 1000);
+  cam.position.copy(dir).multiplyScalar(100); cam.lookAt(0, 0, 0); cam.updateMatrixWorld(true);
+  const mixer = new THREE.AnimationMixer(root);
+  const pose = (a, i, k) => {
+    const clip = clips[a.clip]; if (!clip) throw new Error('animação ausente: ' + a.clip);
+    mixer.stopAllAction(); mixer.clipAction(clip).reset().play();
+    mixer.setTime(clip.duration * (a.loop ? i / a.frames : (i + .5) / a.frames));
+    holder.rotation.y = Math.PI / 2 - k * Math.PI / 4;   // mesma convenção de direção do jogo
+    holder.updateMatrixWorld(true);
+  };
+  // caixa na tela (espaço da câmera) vértice a vértice, já com a pose
+  const v = new THREE.Vector3();
+  const bounds = box => holder.traverse(o => { if (!o.isMesh) return; for (let i = 0; i < o.geometry.attributes.position.count; i++) { o.getVertexPosition(i, v); v.applyMatrix4(o.matrixWorld).applyMatrix4(cam.matrixWorldInverse); box.expandByPoint(v); } });
+  const origin = new THREE.Vector3(0, 0, 0).applyMatrix4(cam.matrixWorldInverse);
+  const ref = new THREE.Box3(); pose(anims[0], 0, 1); bounds(ref);
+  // altura do corpo parado de frente, dos pés (origem) ao topo do elmo
+  const unit = (ref.max.y - origin.y) / tall;        // unidades do modelo por unidade do jogo
+  const all = new THREE.Box3(), list = [];
+  for (const a of anims) for (let i = 0; i < a.frames; i++) for (let k = 0; k < 8; k++) { list.push({ a, i, k }); pose(a, i, k); bounds(all); }
+  const upp = unit / ss, pxW = Math.ceil((all.max.x - all.min.x) / upp) + 4, pxH = Math.ceil((all.max.y - all.min.y) / upp) + 4;
+  cam.left = all.min.x - 2 * upp; cam.right = cam.left + pxW * upp; cam.top = all.max.y + 2 * upp; cam.bottom = cam.top - pxH * upp; cam.updateProjectionMatrix();
+  const ax = (origin.x - cam.left) / upp, ay = (cam.top - origin.y) / upp;
+  const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(pxW, pxH); r.setClearColor(0, 0);
+  const frames = list.map(({ a, i, k }) => { pose(a, i, k); r.render(scene, cam); return { name: `pl_${a.key}_${i}_d${k}`, data: r.domElement.toDataURL('image/png'), w: pxW, h: pxH, ax, ay }; });
+  r.dispose();
+  return frames;
+};
+
+// Folha de prévia: 8 direções por animação, todos os quadros de uma direção e comparação com o morador do jogo.
+window.sheet = async function ({ frames, anims, ss, villagerSrc }) {
+  const img = {};
+  await Promise.all(frames.map(async f => { const i = new Image(); i.src = f.data; await i.decode(); img[f.name] = i; }));
+  const f0 = frames[0], Z = 2, cw = f0.w * Z, ch = f0.h * Z, LEFT = 20;
+  const maxF = Math.max(...anims.map(a => a.frames)), cols = Math.max(8, maxF);
+  const cv = document.createElement('canvas'); cv.width = LEFT * 2 + cols * cw; const cmpH = 300;
+  cv.height = 90 + cmpH + anims.length * (ch * 2 + 80);
+  const g = cv.getContext('2d'); g.fillStyle = '#4b6b35'; g.fillRect(0, 0, cv.width, cv.height);
+  const text = (t, x, y, size = 20) => { g.font = `700 ${size}px sans-serif`; g.fillStyle = '#fff3d6'; g.fillText(t, x, y); };
+  text('Fjordheim — sprites do jogador (Loiro · túnica azul)', LEFT, 36, 26);
+  text('Tamanho no jogo, ampliado 6×: viking novo (esquerda) e moradores atuais (direita)', LEFT, 72);
+  const draw = new Function('g', villagerSrc);
+  const K = 6, gy = 90 + cmpH - 50;
+  [1, 3].forEach((d, n) => { g.drawImage(img[`pl_idle_0_d${d}`], 120 + n * 190 - f0.ax * K / ss, gy - f0.ay * K / ss, f0.w * K / ss, f0.h * K / ss); });
+  const vg = draw(g); vg(520, gy, K, '#7a4a2e', false); vg(660, gy, K, '#3f6b4a', true);
+  let y = 90 + cmpH;
+  for (const a of anims) {
+    text(`${a.titulo} (${a.clip}) — 8 direções`, LEFT, y + 24);
+    for (let k = 0; k < 8; k++) { const i = a.mostra ?? 0; g.drawImage(img[`pl_${a.key}_${i}_d${k}`], LEFT + k * cw, y + 34, cw, ch); text('d' + k, LEFT + k * cw + 8, y + 52, 14); }
+    text(`${a.frames} quadros (direção d1)`, LEFT, y + 34 + ch + 26, 16);
+    for (let i = 0; i < a.frames; i++) g.drawImage(img[`pl_${a.key}_${i}_d1`], LEFT + i * cw, y + 34 + ch + 36, cw, ch);
+    y += ch * 2 + 80;
+  }
+  return cv.toDataURL('image/png');
+};
+window.ready = true;
+</script></body></html>

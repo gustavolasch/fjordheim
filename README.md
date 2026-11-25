@@ -100,11 +100,10 @@ Regenerar: `npm run bake:sprites` (ver `tools/sprite-bake/README.md`).
 
 ## Personagem 3D (viking)
 
-- Modelo: `tools/character/viking-model.js` (three.js, construído por código). Cores iguais ao desenho 2D do jogador.
-- Poses: `idle`, `walk` (8 frames), `work` (4 frames, com machado).
-- Export de referência: `tools/character/viking.glb` (pose de repouso).
-- O jogo usa os frames `pl_*` em `src/assets/sprites`. Gerados por `npm run bake:sprites`.
-- Limitação: o machado é o único item na mão. Picareta, martelo e vara ainda aparecem como machado nas poses de trabalho.
+- Modelo: `Barbarian.glb` do KayKit (`src/assets/kaykit-adventurers`), variação "Loiro · túnica azul" de `tools/receita_viking`.
+- Sprites `pl_*` em 8 direções: parado (4 quadros), andar (8), cortar/coletar (6) e levar dano (4).
+- Gerar: `node tools/sprite-bake/run-viking.mjs --install` (precisa de `three` e `playwright`). A folha de prévia sai em `tools/receita_viking/folha_sprites.png`.
+- Limitação: o machado fica sempre na mão, em todas as ações.
 - NPCs (aldeões, invasores) continuam no desenho 2D.
 
 ## Alcance de interação

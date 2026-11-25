@@ -36,7 +36,9 @@ const p = await ctx.newPage();
 p.on('pageerror', e => console.log('[pageerror]', e.message));
 await p.goto('http://bake.local/bake.html');
 await p.waitForFunction(() => window.ready === true, null, { timeout: 60000 });
-const manifest = {};
+// Mantém os sprites do jogador (pl_*), que são gerados por run-viking.mjs.
+const OLD = path.join(OUT, 'manifest.json');
+const manifest = Object.fromEntries(Object.entries(fs.existsSync(OLD) ? JSON.parse(fs.readFileSync(OLD, 'utf8')) : {}).filter(([k]) => k.startsWith('pl_')));
 for (const job of JOBS) {
   if (job.type === 'character') {
     const frames = await p.evaluate(j => window.bakeCharacter(j), job);

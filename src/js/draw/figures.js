@@ -1,7 +1,5 @@
 /* ================= Drawing: figures ================= */
-const ACT_TOOL={chop:'axe',mine:'pick',fish:'rod',build:'hammer',farm:'sickle',forge:'hammer',craft:'hammer'};
 function drawHeld(u,sw){let t=u.kind==='warrior'?u.wc:u.kind==='raider'?'raxe':u.tool;
-  if(u.kind==='player'){t=u.act&&ACT_TOOL[u.act.type];if(t&&!G.items[t]&&t!=='axe'&&t!=='pick'&&t!=='rod')t=null}
   const a=-.6+(sw||0);const hx=3.5+Math.cos(a)*4,hy=-11+Math.sin(a)*4;ctx.lineCap='round';
   ln([2.4,-12],[hx,hy],u.skin,1.6);
   if(!t)return;const dir=[Math.cos(a-1.2),Math.sin(a-1.2)];
@@ -18,9 +16,6 @@ function drawHeld(u,sw){let t=u.kind==='warrior'?u.wc:u.kind==='raider'?'raxe':u
 function drawFigure(bx,by,u,sc){sc=sc||1;const mv=u.moving?Math.sin(u.anim)*2.2:0,f=u.face||1;
   ctx.save();ctx.translate(bx,by);ctx.scale(f*sc,sc);ctx.lineCap='round';
   ell(1,0,5,2.2,'rgba(0,0,0,.25)');
-  if(u.kind==='player'){const w=G.inv;if(w.wood>0){ctx.save();ctx.rotate(-.12);ln([-7,-15],[5,-16.5],'#5e3b1f',3.6);ell(5,-16.5,1.5,1.9,'#c9a16a');ctx.restore()}
-    if(w.stick+w.stone+w.food+w.iron>0){ell(-4.6,-10.5,3.2,3.6,'#7a5a34');ln([-4.6,-14],[-4.6,-13],'#4a2f1b',1)}
-    pp([[-2.6,-13],[-5.6,-3.5],[-.5,-4.5]],'#9a2f24')}
   ln([-1.5,-6],[-1.5+mv,0],'#3b2a1d',1.9);ln([1.5,-6],[1.5-mv,0],'#3b2a1d',1.9);
   if(u.carry>0){if(u.carryT==='wood'){ctx.fillStyle='#7a4a22';ctx.fillRect(-6,-15,3.5,8)}else ell(-4.5,-11,3,3,u.carryT==='iron'?'#6a5a52':'#9a968e')}
   const war=u.kind==='warrior'||u.kind==='raider';
@@ -35,25 +30,28 @@ function drawFigure(bx,by,u,sc){sc=sc||1;const mv=u.moving?Math.sin(u.anim)*2.2:
   drawHeld(u,sw);
   if((u.kind==='warrior'&&u.wc==='warrior')||u.kind==='raider'){ell(-3.2,-9.5,3.6,3.8,u.kind==='raider'?'#4a2a1e':'#b5352c');ell(-3.2,-9.5,1.1,1.1,'#d9c27a')}
   ctx.restore()}
-// Jogador: frame do personagem 3D (assets/sprites/pl_*). Retorna false se o sprite ainda não carregou.
+// Jogador: sprites do viking 3D (assets/sprites/pl_*, gerados por tools/sprite-bake/run-viking.mjs).
 const PL_WORK=['chop','mine','fish','farm','build','craft','forge','pickup','takelog','berry'];
-// 8 direções (k*45°, ângulo do heading no mundo do jogo) — sprites pl_<frame>_d<k>
+const PL_SS=3,PL_HIT=.45; // pixels do sprite por unidade do jogo; duração da animação de dano (igual a dmgUnit)
+// 8 direções (k*45°, ângulo do heading no mundo do jogo) — sprites pl_<anim>_<quadro>_d<k>
 function playerDir(u){return ((Math.round((u.heading||0)/(Math.PI/4))%8)+8)%8}
 function playerFrame(u){const d=playerDir(u);
-  if(u.act&&PL_WORK.includes(u.act.type))return 'pl_work_'+(Math.floor(u.act.t*5)%4)+'_d'+d;
+  if(u.hitT>0)return 'pl_hit_'+clamp(Math.floor((1-u.hitT/PL_HIT)*4),0,3)+'_d'+d;
+  if(u.act&&PL_WORK.includes(u.act.type))return 'pl_work_'+(Math.floor(u.act.t*7)%6)+'_d'+d;
   if(u.moving)return 'pl_walk_'+(Math.floor(u.anim*.7)%8)+'_d'+d;
-  return 'pl_idle_'+(Math.floor(perfT*1.6)%2)+'_d'+d}
-function drawPlayerSprite(bx,by,u){const s=sprFor(playerFrame(u));if(!s)return false;
-  ctx.save();ctx.translate(bx,by);ctx.drawImage(s.img,-s.ax*.5,-s.ay*.5,s.w*.5,s.h*.5);ctx.restore();return true}
+  return 'pl_idle_'+(Math.floor(perfT*3)%4)+'_d'+d}
+function drawPlayerSprite(bx,by,u){const s=sprFor(playerFrame(u));if(!s)return; // carrega no primeiro quadro (imagem embutida)
+  ell(bx,by+.5,5.5,2.4,'rgba(0,0,0,.25)');
+  ctx.drawImage(s.img,bx-s.ax/PL_SS,by-s.ay/PL_SS,s.w/PL_SS,s.h/PL_SS)}
 function drawUnit(u){const[bx,by]=P(u.x+u.ox,u.y+u.oy,0);
   if(u.kind==='player'){ctx.strokeStyle='rgba(243,201,105,.75)';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(bx,by,9,4.4,0,0,6.283);ctx.stroke();
     if(cam.z<.7){const k=1/cam.z;ctx.fillStyle='#f3c969';pp([[bx,by-24-8*k],[bx-4*k,by-24-14*k],[bx+4*k,by-24-14*k]],'#f3c969')}
     if(u.down){ctx.globalAlpha=.5}}
-  if(u.kind==='animal'||u.kind==='domestic')drawAnimal(bx,by,u);else if(u.kind==='merchant')drawFigure(bx,by,u,1);else if(!(u.kind==='player'&&drawPlayerSprite(bx,by,u)))drawFigure(bx,by,u,u.kind==='villager'||u.kind==='player'?1:1.08);ctx.globalAlpha=1;
+  if(u.kind==='animal'||u.kind==='domestic')drawAnimal(bx,by,u);else if(u.kind==='player')drawPlayerSprite(bx,by,u);else drawFigure(bx,by,u,u.kind==='villager'||u.kind==='merchant'?1:1.08);ctx.globalAlpha=1;
   if(u.kind==='villager'&&u.name&&cam.z>=.7){ctx.font='800 10px Nunito, sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(20,14,8,.8)';ctx.strokeText(u.name,bx,by-30);ctx.fillStyle='#fff3d6';ctx.fillText(u.name,bx,by-30)}
   if(u.kind==='villager'&&u.fala&&cam.z>=.7){ctx.font='700 10px Nunito, sans-serif';ctx.textAlign='center';const w=ctx.measureText(u.fala.txt).width+10;ctx.fillStyle='rgba(255,247,226,.95)';ctx.fillRect(bx-w/2,by-54,w,14);ctx.fillStyle='#3a2a18';ctx.fillText(u.fala.txt,bx,by-43)}
-  if(u.hp<u.max&&u.kind!=='player'||u.kind==='player'&&u.hp<u.max*.98){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx-7,by-26,14,2.5);ctx.fillStyle=u.kind==='raider'?'#e2533f':'#6fd35b';ctx.fillRect(bx-7,by-26,14*Math.max(0,u.hp/u.max),2.5)}
-  if(u.act&&u.kind==='player'&&u.act.dur>.6&&u.act.type!=='wait'&&u.act.type!=='build'){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(bx-8,by-30,16,2.4);ctx.fillStyle='#f3c969';ctx.fillRect(bx-8,by-30,16*clamp(u.act.t/u.act.dur,0,1),2.4)}
+  if(u.hp<u.max&&u.kind!=='player'||u.kind==='player'&&u.hp<u.max*.98){const hy=by-(u.kind==='player'?29:26);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(bx-7,hy,14,2.5);ctx.fillStyle=u.kind==='raider'?'#e2533f':'#6fd35b';ctx.fillRect(bx-7,hy,14*Math.max(0,u.hp/u.max),2.5)}
+  if(u.act&&u.kind==='player'&&u.act.dur>.6&&u.act.type!=='wait'&&u.act.type!=='build'){ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(bx-8,by-33,16,2.4);ctx.fillStyle='#f3c969';ctx.fillRect(bx-8,by-33,16*clamp(u.act.t/u.act.dur,0,1),2.4)}
   if(sel&&sel.k==='u'&&sel.id===u.id){ctx.strokeStyle='#f3c969';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(bx,by,8,4,0,0,6.283);ctx.stroke()}}
 
 
