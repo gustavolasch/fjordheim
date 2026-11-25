@@ -20,7 +20,6 @@ function bagFull(k){const w=bagW();toast(k&&w<BAG?`[[interface.mochila]] Sem esp
 /* ================= Buildings logic ================= */
 function bAt(x,y){if(!inb(x,y))return null;const id=G.occ[idx(x,y)];return id?BMAP.get(id):null}
 function longhouse(){return G.bld.find(b=>b.type==='longhouse')}
-function houseCap(){let c=0;for(const b of G.bld)if(b.done&&BD[b.type].house)c+=BD[b.type].house;return c}
 function popCount(){let c=0;for(const u of G.units)if(u.kind==='villager'||u.kind==='warrior')c++;return c}
 function placeCheck(type,x,y){const d=BD[type];let water=0,land=0;
   for(let dy=0;dy<d.h;dy++)for(let dx=0;dx<d.w;dx++){const X=x+dx,Y=y+dy;if(!inb(X,Y))return'Fora do mapa';const i=idx(X,Y);

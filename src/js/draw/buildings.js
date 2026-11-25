@@ -9,6 +9,17 @@ function dLonghouse(b){const x=b.x+.3,y=b.y+.45,w=2.4,h=2.1;
   for(const[t,c]of[[.45,'#b5352c'],[w-.45,'#2f5fa8']]){const q=P(x+t,y+h,10);ell(q[0],q[1],3.4,3.4,c);ell(q[0],q[1],1.1,1.1,'#d9c27a')}
   roofX(x,y,w,h,18,24,roofCol(),true);
   const pb=P(x+w+.35,y+h+.2,0),pt=P(x+w+.35,y+h+.2,40);ln(pb,pt,C.woodD,2);flag(pt[0]+1,pt[1]+1)}
+// Barraca: tenda de couro em duas águas, aberta na frente
+function dBarraca(b){const x=b.x+.25,y=b.y+.3,w=1.5,h=1.35,H=26,couro=BIO.snowy?'#cfc4b2':'#b08a5c';
+  const r0=P(x,y+h/2,H),r1=P(x+w,y+h/2,H);
+  pp([P(x,y),P(x+w,y),r1,r0],shade(couro,-.18));
+  pp([P(x+w,y),P(x+w,y+h),r1],shade(couro,-.28));
+  pp([P(x+w,y+h/2-.24),P(x+w,y+h/2+.24),P(x+w,y+h/2,H*.62)],'#2e1b0d');
+  pp([P(x,y+h),P(x+w,y+h),r1,r0],shade(couro,.1));
+  for(const t of[.25,.5,.75])ln(lp(P(x,y+h),P(x+w,y+h),t),lp(r0,r1,t),shade(couro,-.2),1);
+  ln(r0,r1,C.woodD,2.2);
+  for(const q of[r0,r1])for(const d of[-1,1])ln(q,[q[0]+d*4,q[1]-6],C.woodD,1.8);
+  for(const[px,py]of[[x,y+h],[x+w,y+h]]){const a=P(px,py),c=P(px,py+.18);ln(a,c,C.woodD,1.4)}}
 function dHouse(b){const x=b.x+.3,y=b.y+.3,w=1.4,h=1.4;
   box(x-.05,y-.05,w+.1,h+.1,0,2,null,shade(C.stone,-.3),shade(C.stone,-.1));
   box(x,y,w,h,2,12,null,shade(C.wood,-.3),C.wood);
@@ -183,7 +194,7 @@ function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
     case'bridge':return dBridge(b,p);case'farm':return;case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
-  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,cozinha:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b);if(b.type==='longhouse'&&b.done)dBandeira(b)}
+  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,cozinha:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,barraca:dBarraca,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b);if(b.type==='longhouse'&&b.done)dBandeira(b)}
 
 
 /* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */

@@ -10,13 +10,20 @@ const HAB_ACOES=['chop','takelog','mine','pick'];
 // noite: mesmo ciclo do dia e noite (independe da opção "dia e noite" estar ligada)
 function isNoite(){return nightDark(G.t)>0}
 
-// ---- camas: cada morador dorme num prédio com vaga (house) ----
+// ---- moradias: ajudantes dormem na Barraca (coletiva). Abrigo e Casa têm um só dono (house:1) e
+// são entregues por pedido de nível. O primeiro Abrigo fica reservado para o jogador. ----
 function ocupacao(b){let c=0;for(const u of G.units)if(u.kind==='villager'&&u.cama===b.id)c++;return c}
-function acharCama(){for(const b of G.bld){if(!b.done||!BD[b.type].house)continue;if(ocupacao(b)<BD[b.type].house)return b}return null}
+function acharCama(){for(const b of G.bld){if(!b.done||!BD[b.type].coletiva)continue;if(ocupacao(b)<BD[b.type].house)return b}return null}
+// vagas livres nas Barracas, descontando quem ainda espera uma
+function vagasBarraca(){let v=0;for(const b of G.bld)if(b.done&&BD[b.type].coletiva)v+=BD[b.type].house-ocupacao(b);
+  return v-G.units.filter(u=>u.kind==='villager'&&u.cama==null).length}
+function abrigoDoJogador(){let b=G.abrigoJogador!=null?BMAP.get(G.abrigoJogador):null;
+  if(!b){b=G.bld.find(x=>x.done&&x.type==='shelter'&&!ocupacao(x))||null;G.abrigoJogador=b?b.id:null}
+  return b}
 function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b:null}
 // tenta dar cama a quem não tem (ou perdeu a cama numa demolição)
 // dá cama a quem nunca teve uma (cama=null). Cama destruída fica com o id antigo e não é reatribuída.
-function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(u.cama==null){const b=acharCama();u.cama=b?b.id:null}}}
+function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(u.cama==null){const b=acharCama();u.cama=b?b.id:null;if(b)u.carenciaAte=0}}}
 
 // ---- traços: 1 bom e 1 ruim, sorteados da lista do JSON ----
 function sorteiaTracos(){
@@ -53,7 +60,7 @@ function diaTick(){const d=Math.floor(G.t/DIA());if(G.dia==null){G.dia=d;return}
 
 // moral muda devagar, por dia de jogo, conforme cama, comida, fogueira, frio e traços
 function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
-  d+=camaDo(u)?R.cama:R.sem_cama;
+  d+=camaDo(u)?R.cama:(u.carenciaAte>G.t?0:R.sem_cama); // carência: quem perdeu a cama na mudança das moradias
   if(u.comeu)d+=R.comida;
   if(u.fome)d+=R.fome;
   const perto=isHeatNear(u);
@@ -65,7 +72,7 @@ function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
 // moradores: moral, aviso, saída e camas (roda a cada quadro, barato)
 function moradoresTick(dt){
   diaTick();
-  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;acertaCamas()}
+  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;abrigoDoJogador();acertaCamas()}
   for(const u of G.units)if(u.kind==='villager'&&u.fala){u.fala.t-=dt;if(u.fala.t<=0)u.fala=null}
   const M=PESSOAS.moral;
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
@@ -105,9 +112,18 @@ function migraV6(){
     u.hab??={lumber:0,miner:0,collector:0};u.tracos??=sorteiaTracos()}
   acertaCamas()}
 
+// save antes da v14: só Barraca abriga ajudantes. Ninguém é removido; quem dormia em outro lugar
+// ganha PESSOAS.carencia_moradia_dias sem perder moral por falta de cama.
+function migraV14(){let n=0;
+  for(const u of G.units){if(u.kind!=='villager')continue;
+    const b=camaDo(u);if(b&&BD[b.type].coletiva)continue;
+    u.cama=null;u.carenciaAte=G.t+PESSOAS.carencia_moradia_dias*DIA();n++}
+  abrigoDoJogador();acertaCamas();
+  if(n)toast(`⛺ Agora os ajudantes dormem na Barraca (4 vagas). Construa em até ${PESSOAS.carencia_moradia_dias} dias.`,'bad')}
+
 // vida na vila (morador sem trabalho): passeia pela vila, senta perto de fogo e conversa com outro sem trabalho
 function fogosDaVila(){const f=G.decor.filter(d=>d.k==='campfire').map(d=>[d.x,d.y]);
-  for(const b of G.bld)if(b.done&&['shelter','house','longhouse','smithy'].includes(b.type))f.push([b.x+b.w/2,b.y+b.h/2]);return f}
+  for(const b of G.bld)if(b.done&&['shelter','barraca','house','longhouse','smithy'].includes(b.type))f.push([b.x+b.w/2,b.y+b.h/2]);return f}
 function centroVila(){const L=longhouse();return L?[L.x+L.w/2,L.y+L.h/2]:G.start}
 function fraseVila(){const F=PESSOAS.vila.frases;return F[(Math.random()*F.length)|0]}
 function vidaVila(u){const V=PESSOAS.vila;

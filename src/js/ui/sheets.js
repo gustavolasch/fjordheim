@@ -63,7 +63,7 @@ function bagItemsHTML(){return`<div class="inv">${Object.keys(ITEMS).map(k=>{con
 function infoHTML(){if(!sel)return null;
   if(sel.k==='p')return poiHTML(sel.id);
   if(sel.k==='u'){const u=UMAP.get(sel.id);if(!u)return null;
-    if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Camas livres: ${Math.max(0,camasLivres())}</p>`;
+    if(u.kind==='wanderer')return head(u.name,PESSOAS.andarilho.nome)+`<p class="hint">${PESSOAS.andarilho.chegada}</p><div class="row"><button class="gbtn" data-a="recruit">🏠 Convidar a ficar (${costHTML({food:PESSOAS.andarilho.custo_comida})})</button></div><p class="small">Vagas na Barraca: ${Math.max(0,camasLivres())}</p>`;
     if(u.kind==='merchant')return merchantHTML(u);
     if(u.kind==='domestic'){const A=CAMPO.animais[u.sp];if(!A)return null;
       return head(u.name,A.n)+`<p class="hint">${A.emoji} ${u.fed===false?'Sem ração: não produz hoje.':'Comeu ração hoje.'}</p><p class="small">Produz 1 ${A.produz==='ovo'?'ovo':'lã'} a cada ${A.dias_producao} dia(s).</p>`}

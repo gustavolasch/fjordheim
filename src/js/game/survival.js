@@ -10,7 +10,7 @@ function nightDark(t){const ph=(t/240)%1,n=.5-.5*Math.cos(ph*6.283);return clamp
 function foodStock(){return G.inv.food+G.res.food}
 function isHeatNear(u){
   for(const d of G.decor)if(d.k==='campfire'&&Math.hypot(d.x-u.x,d.y-u.y)<3)return true;
-  for(const b of G.bld){if(!b.done||!['house','longhouse','shelter','smithy'].includes(b.type))continue;if(Math.hypot(b.x+b.w/2-u.x,b.y+b.h/2-u.y)<3)return true}
+  for(const b of G.bld){if(!b.done||!['house','longhouse','shelter','barraca','smithy'].includes(b.type))continue;if(Math.hypot(b.x+b.w/2-u.x,b.y+b.h/2-u.y)<3)return true}
   return false}
 function nearWater(u){const x=Math.floor(u.x),y=Math.floor(u.y);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)if(inb(x+dx,y+dy)&&G.tiles[idx(x+dx,y+dy)]<=1)return true;return false}
 // frio: noite (se o ciclo dia/noite estiver ligado), Costa Gelada e água por perto

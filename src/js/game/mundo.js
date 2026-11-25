@@ -114,7 +114,7 @@ function drawLugar(p){const x=p.x,y=p.y,q=P(x+.5,y+.5,0),a=p.feito?.4:1;ctx.save
 function poiTap(p){if(p.k==='acampamento'||p.k==='templo'||p.feito){sel={k:'p',id:p.id};openSheet('info');return}sendCmd({t:'poi',id:p.id});puff(p.x+.5,p.y+.5,'ring')}
 function poiHTML(id){const p=lugarPorId(id);if(!p)return null;const L=MUNDO.lugares[p.k];
   if(p.k==='templo'){const vivos=G.units.filter(u=>u.kind==='raider'&&u.camp===p.id).length;
-    if(p.aguarda)return head(L.n,'O chefe caiu. Os prisioneiros são seus.')+`<p class="hint">Prisioneiros: ${p.prisioneiros}. Vila precisa de cama para acolher.</p><div class="row"><button class="gbtn" data-a="templo" data-v="libertar">⛓️ Libertar</button><button class="sbtn" data-a="templo" data-v="deixar">💰 Deixá-los (recompensa, moral cai)</button></div>`;
+    if(p.aguarda)return head(L.n,'O chefe caiu. Os prisioneiros são seus.')+`<p class="hint">Prisioneiros: ${p.prisioneiros}. Para acolher bem, a vila precisa de vaga na Barraca.</p><div class="row"><button class="gbtn" data-a="templo" data-v="libertar">⛓️ Libertar</button><button class="sbtn" data-a="templo" data-v="deixar">💰 Deixá-los (recompensa, moral cai)</button></div>`;
     return head(L.n,p.feito?'Já resolvido.':'Chefe e guardas defendem os prisioneiros.')+`<p class="hint">${p.feito?(p.escolha==='libertar'?'Você libertou os prisioneiros.':'Você deixou os prisioneiros.'):`Guardas e chefe vivos: ${vivos}. Vença todos para escolher.`}</p>`}
   if(p.k==='acampamento'){const n=G.units.filter(u=>u.kind==='raider'&&u.camp===p.id).length;
     return head(L.n,'Saqueadores acampados.')+`<p class="hint">${p.feito?'Acampamento vencido.':`Saqueadores vivos: ${n}. Ataque tocando neles. Vença todos para pegar o saque.`}</p><p class="small">Saque: ${lootTexto(L.loot)}</p>`}
@@ -138,7 +138,7 @@ CMDS.temploEsc=(u,c)=>{const p=lugarPorId(c.id);if(!p||p.k!=='templo'||!p.aguard
     let semCama=0;
     for(let k=0;k<n;k++){const cama=acharCama();if(!cama)semCama++;
       spawnUnit('villager',p.x+.5+(k%2)*.8,p.y+1.5,{vida:null,cool:0,path:null,act:null,hidden:false,cama:cama?cama.id:null,moral:cama?PESSOAS.moral.inicial:T.libertar.moral_sem_cama,comeu:false,fome:false,hab:{lumber:0,miner:0,collector:0},tracos:sorteiaTracos(),dormindo:false,indo:false});solto++}
-    toast(`⛓️ ${solto} prisioneiro(s) viraram moradores.${semCama?` ${semCama} sem cama: dormem perto da fogueira até ganharem uma.`:''}`,'good')}
+    toast(`⛓️ ${solto} prisioneiro(s) viraram moradores.${semCama?` ${semCama} sem vaga: dormem perto da fogueira até haver lugar na Barraca.`:''}`,'good')}
   else if(c.c==='deixar'){const R=T.deixar.recompensas[(Math.random()*T.deixar.recompensas.length)|0];
     if(R.res)for(const k in R.res)ganhaEstoque(k,R.res[k]);
     if(R.item){ferrAdd(R.item)}

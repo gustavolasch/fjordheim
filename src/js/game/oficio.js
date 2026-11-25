@@ -76,7 +76,9 @@ function oficioFim(u,a){const o=u.order;
   sfx('craft');if(o)o.done=true;u.order=null}
 // painel da estação (receitas e reparo)
 function estacaoHTML(b){let h='';const R=OFICIO.estacoes[b.type];
-  if(['house','shelter','longhouse'].includes(b.type)){const q=G.units.filter(u=>u.dentro===b.id).map(u=>u.name);
+  if(['house','shelter','barraca'].includes(b.type)){
+    if(b.type==='shelter'&&abrigoDoJogador()===b)h+=`<p class="hint">🏠 Este é o seu abrigo.</p>`;
+    if(BD[b.type].coletiva)h+=`<p class="hint">Vagas ocupadas: ${ocupacao(b)} de ${BD[b.type].house}.</p>`;const q=G.units.filter(u=>u.dentro===b.id).map(u=>u.name);
     h+=`<p class="hint">${q.length?'💤 Dormindo aqui: '+q.join(', '):'Ninguém dorme aqui agora.'}</p>`}
   if(R)h+=`<p class="hint">Estação de trabalho. Você leva o tempo da receita; ingredientes são pagos ao começar.</p><div class="row" style="flex-wrap:wrap">`+
     Object.keys(R).map(k=>{const X=R[k],ok=afford(X.entrada);return`<button class="sbtn" data-a="proc" data-v="${k}" ${ok?'':'disabled'}>${X.n}: ${costHTML(X.entrada)} → ${Object.keys(X.saida).map(s=>`${icon('recursos',s)}${X.saida[s]}`).join(' ')}</button>`}).join('')+`</div>`;

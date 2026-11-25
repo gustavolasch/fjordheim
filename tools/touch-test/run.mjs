@@ -171,17 +171,17 @@ try {
   ok('terminar a construção', true);
   await snap('03-construido');
 
-  // 5b. Recrutar (antes de guardar: o material ainda está na mochila): juntar material, construir um Abrigo (2 camas), esperar um andarilho e convidá-lo
-  // atalho de teste (só existe aqui, não no jogo): põe direto na mochila o material do abrigo e 2 de comida.
+  // 5b. Recrutar (antes de guardar: o material ainda está na mochila): juntar material, construir uma Barraca (4 vagas), esperar um andarilho e convidá-lo
+  // atalho de teste (só existe aqui, não no jogo): põe direto na mochila o material da barraca e 2 de comida.
   // A coleta já foi testada nos passos 2 e 4.
-  await page.evaluate(() => { G.inv.stick += 8; G.inv.wood += 2; G.inv.food += 2; });
+  await page.evaluate(() => { G.inv.stick += 10; G.inv.wood += 4; G.inv.food += 2; });
   await tapSel('#bar button[data-tab="build"]');
-  await tapSel('#sheet [data-a="cat"][data-v="struct"]'); // Abrigo fica em "Estruturas"
-  await waitSel('#sheet [data-a="build"][data-v="shelter"]', 10_000);
-  await tapSel('#sheet [data-a="build"][data-v="shelter"]');
+  await tapSel('#sheet [data-a="cat"][data-v="struct"]'); // Barraca fica em "Estruturas"
+  await waitSel('#sheet [data-a="build"][data-v="barraca"]', 10_000);
+  await tapSel('#sheet [data-a="build"][data-v="barraca"]');
   await waitSel('#place.open [data-p="ok"]:not([disabled])', 10_000);
   await tapSel('#place [data-p="ok"]');
-  await waitFor(() => G.bld.some(b => b.type === 'shelter' && b.done), null, STEP_TIMEOUT);
+  await waitFor(() => G.bld.some(b => b.type === 'barraca' && b.done), null, STEP_TIMEOUT);
   // espera o andarilho chegar (fica sozinho: ele passeia perto da praia)
   await waitFor(() => G.units.some(u => u.kind === 'wanderer'), null, STEP_TIMEOUT);
   let recruited = false;

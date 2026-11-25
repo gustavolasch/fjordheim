@@ -1,7 +1,7 @@
 /* ================= Pessoas (0.6): andarilhos chegam pela praia e podem ficar na vila =================
    Andarilho = kind 'wanderer': não conta como morador até ser convidado. Só chega se houver cama livre.
-   Cama = BD[tipo].house (abrigo 2, casa 4, casa comunal 6). Números em data/pessoas.json. */
-function camasLivres(){return houseCap()-popCount()}
+   Cama = vaga na Barraca (BD.barraca.house). Números em data/pessoas.json. */
+function camasLivres(){return vagasBarraca()}
 function andarilhos(){return G.units.filter(u=>u.kind==='wanderer')}
 function spawnAndarilho(){
   const borda=PESSOAS.andarilho.borda;
@@ -34,7 +34,7 @@ function updWanderer(u,dt){
 // convite: o andarilho vira morador e ocupa uma cama
 function recruitUnit(a){
   const cama=acharCama();
-  if(!cama)return cmdFail('Sem cama livre');
+  if(!cama)return cmdFail('Sem vaga na Barraca');
   const custo={food:PESSOAS.andarilho.custo_comida};
   if(!afford(custo))return cmdFail('Falta comida');
   pay(custo);
