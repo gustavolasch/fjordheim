@@ -107,4 +107,4 @@ function needsHUD(){const p=PL();if(!p||p.food==null)return;
   let el=document.getElementById('needs');
   if(!el){el=document.createElement('div');el.id='needs';document.body.appendChild(el)}
   if(el.dataset.sig===sig)return;el.dataset.sig=sig;
-  el.innerHTML=bars.map(([ic,k,v])=>`<div class="nb ${v<.25?'low':''}" title="${NEED_NAMES[k]}"><div class="trk"><i style="height:${Math.max(0,Math.min(100,v*100)).toFixed(0)}%"></i></div><span>${ic}</span></div>`).join('')}
+  el.innerHTML=bars.map(([ic,k,v])=>`<div class="nb ${v<.25?'low':''}" title="${NEED_NAMES[k]}"><span>${ic}</span><div class="trk"><i style="width:${Math.max(0,Math.min(100,v*100)).toFixed(0)}%"></i></div></div>`).join('')}
