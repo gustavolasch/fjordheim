@@ -6,7 +6,13 @@ const cv=$('#c');let ctx=cv.getContext('2d');
 const lc=document.createElement('canvas'),lctx=lc.getContext('2d');
 let W=0,H=0,DPR=1,bgGrad=null;
 const isTouch=matchMedia('(pointer:coarse)').matches;
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.ceil(W/2);lc.height=Math.ceil(H/2);bgGrad=null}
+// iOS em modo standalone (ícone da tela de início, black-translucent): innerHeight não conta a barra de status.
+// Na vertical usa screen.height; o canvas preenche a tela toda e a cor de fundo do body segue o bioma.
+const STANDALONE=!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;
+  if(STANDALONE&&screen.height>=screen.width)H=Math.max(H,screen.height);
+  try{document.body.style.background=BIO.bg[1]}catch(e){}
+cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.ceil(W/2);lc.height=Math.ceil(H/2);bgGrad=null}
 addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,300));if(window.visualViewport)visualViewport.addEventListener('resize',resize);resize();
 const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
