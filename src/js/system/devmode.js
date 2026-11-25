@@ -39,7 +39,7 @@ function devPanel(){
     if(a==='liberar'){G.era=5;for(const k of MUNDO.lugares.ruina.receitas)if(!G.receitas.includes(k))G.receitas.push(k);toast('Tudo liberado: eras, receitas e construções','good');return devPanel()}
     if(a==='res:all'){for(const k in RES)G.inv[k]+=100;toast('+100 de cada recurso','good');return devPanel()}
     if(a==='dia:manha'||a==='dia:noite'){const alvo=a==='dia:noite';let n=0;while(isNoite()!==alvo&&n<1000){G.t+=1;n++}toast(alvo?'🌙 Noite':'☀️ Manhã','good');return devPanel()}
-    if(a==='estacao'){const d=Math.floor(G.t/DIA());G.t=(Math.floor(d/CAMPO.dias_por_estacao)+1)*CAMPO.dias_por_estacao*DIA()+1;toast(`Estação: ${estacao().e.n}`,'good');return devPanel()}
+    if(a==='estacao'){const n=CAMPO.dias_por_estacao,dd=Math.floor(G.t/DIA())+(G.estOff||0);G.estOff=(G.estOff||0)+(n-dd%n);toast(`Estação: ${estacao().e.n}`,'good');return devPanel()}
     if(a.startsWith('i:'))return devGive('item',a.slice(2),1);
     if(a==='clear'){for(const k in G.inv)G.inv[k]=0;toast('Mochila esvaziada','good');devPanel()}
     if(a==='heal'){const p=PL();if(p){p.hp=p.max;p.down=0}toast('Curado','good')}

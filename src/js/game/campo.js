@@ -5,10 +5,13 @@
 const ESTADO_CANTEIRO=['vazio','preparado','plantado'];
 function novosCanteiros(){return Array.from({length:9},()=>({st:0,c:null,g:0}))}
 
-// ---- estações: 4 dias cada, começa na primavera ----
-function estacao(){const d=Math.floor(G.t/DIA());const n=CAMPO.dias_por_estacao;const i=Math.floor(d/n)%CAMPO.estacoes.length;return{i,e:CAMPO.estacoes[i],dia:d%n+1}}
+// ---- estações: dias_por_estacao cada (campo.json), começa na primavera. G.estOff = deslocamento em dias (save v12 mantém a estação de quem já joga) ----
+function estacao(){const n=CAMPO.dias_por_estacao,c=n*CAMPO.estacoes.length;const dd=(Math.floor(G.t/DIA())+(G.estOff||0))%c;const i=Math.floor(dd/n);return{i,e:CAMPO.estacoes[i],dia:dd%n+1}}
 function ehInverno(){return estacao().e.id==='inverno'}
-function updSeason(){const el=document.getElementById('season');if(!el)return;const s=estacao(),txt=`${s.e.emoji} ${s.e.n} · dia ${s.dia} de ${CAMPO.dias_por_estacao}`;if(el.textContent!==txt)el.textContent=txt}
+function updSeason(){const el=document.getElementById('season');if(!el)return;const s=estacao(),txt=`${s.e.emoji} ${s.dia}`;if(el.textContent!==txt){el.textContent=txt;el.title=`${s.e.n}, dia ${s.dia} de ${CAMPO.dias_por_estacao}`}}
+// save v11 -> v12: antes cada estação tinha 4 dias. Mantém a estação e o dia atuais e começa a contar os novos a partir daí.
+function migraV12(){const dAntigo=Math.floor(G.t/DIA()),nAntigo=4,c=10*4;
+  const i=Math.floor(dAntigo/nAntigo)%4,dia=dAntigo%nAntigo;const alvo=i*10+dia;G.estOff=((alvo-dAntigo)%c+c)%c}
 
 // ---- lavoura ----
 function farmoNext(b,op,c){const seed=c&&CAMPO.culturas[c]?CAMPO.culturas[c].semente:null;

@@ -1,6 +1,6 @@
 {
   "_nota": "Campo e estações (0.8). Equilibrar é editar números aqui. O build embute este arquivo como CAMPO. Dia = dia_segundos de pessoas.json. Crescimento: 'dias' de jogo para ficar pronto a 1x.",
-  "dias_por_estacao": 4,
+  "dias_por_estacao": 10,
   "estacoes": [
     {
       "id": "primavera",
