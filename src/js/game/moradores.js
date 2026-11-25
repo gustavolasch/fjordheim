@@ -26,6 +26,32 @@ function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b
 // dá cama a quem nunca teve uma (cama=null). Cama destruída fica com o id antigo e não é reatribuída.
 function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(u.cama==null){const b=acharCama();u.cama=b?b.id:null;if(b)u.carenciaAte=0}}}
 
+// ---- pedidos de moradia: u.pedido = {tipo:'abrigo'|'casa', desde:G.t} ----
+// o que o morador precisa e ainda não tem (ou null)
+function moradiaDevida(u){const P=PESSOAS.pedidos,n=maiorNivel(u),b=camaDo(u),t=b?b.type:null;
+  if(n>=P.casa.nivel&&t===P.abrigo.predio)return'casa';
+  if(n>=P.abrigo.nivel&&t!==P.abrigo.predio&&t!==P.casa.predio)return'abrigo';
+  return null}
+function moradiaLivre(tipo){const meu=abrigoDoJogador();return G.bld.find(b=>b.done&&b.type===tipo&&b!==meu&&!ocupacao(b))||null}
+function diasDoPedido(u){return u.pedido?Math.max(0,PESSOAS.pedidos.prazo_dias-(G.t-u.pedido.desde)/DIA()):0}
+function mudaPara(u,b){u.cama=b.id;u.carenciaAte=0;u.pedido=null;u.moral=clamp(u.moral+PESSOAS.pedidos.bonus_moral,0,100);
+  toast(`🏠 ${u.name} se mudou: ${BD[b.type].n}. A moral subiu.`,'good')}
+// entrega moradia livre a quem pediu; sem ela, abre o pedido. Retorna false se o morador foi embora.
+function pedidoTick(u){const P=PESSOAS.pedidos;
+  const tipo=moradiaDevida(u);
+  if(!tipo){u.pedido=null;return true}
+  // quem já está no nível da Casa e ainda mora na Barraca pode ir direto para uma Casa livre
+  const livre=(maiorNivel(u)>=P.casa.nivel&&moradiaLivre(P.casa.predio))||moradiaLivre(P[tipo].predio);
+  if(livre){mudaPara(u,livre);return true}
+  if(!u.pedido||u.pedido.tipo!==tipo){u.pedido={tipo,desde:G.t,dias:null};
+    toast(`🗣️ ${u.name} ${P[tipo].pede}. Prazo: ${P.prazo_dias} dias.`,'bad')}
+  const falta=diasDoPedido(u),d=Math.ceil(falta);
+  if(tipo==='abrigo'){
+    if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
+    if(d<P.prazo_dias&&u.pedido.dias!==d){u.pedido.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} sem um Abrigo.`,'bad')}}
+  if(!u.fala&&!u.dormindo&&G.t>=(u.balaoT||0)){u.balaoT=G.t+P.balao_intervalo;u.fala={txt:P[tipo].fala,t:P.balao_seg}}
+  return true}
+
 // ---- traços: 1 bom e 1 ruim, sorteados da lista do JSON ----
 function sorteiaTracos(){
   const bons=TRAIT_KEYS.filter(k=>PESSOAS.tracos[k].tipo==='bom'),ruins=TRAIT_KEYS.filter(k=>PESSOAS.tracos[k].tipo==='ruim');
@@ -71,12 +97,14 @@ function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
   if(perto)d+=R.fogueira;
   else if(coldLevel(u)>=PESSOAS.moral.frio_limite)d+=R.frio;
   d+=somaTraco(u,'moral_dia');
+  if(u.pedido&&u.pedido.tipo==='casa'&&diasDoPedido(u)<=0)d+=PESSOAS.pedidos.casa_penalidade_dia; // Casa não entregue no prazo
   u.moral=clamp((u.moral??PESSOAS.moral.inicial)+d*k,0,100)}
 
 // moradores: moral, aviso, saída e camas (roda a cada quadro, barato)
 function moradoresTick(dt){
   diaTick();
-  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;abrigoDoJogador();acertaCamas()}
+  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;abrigoDoJogador();acertaCamas();
+    for(const u of G.units.slice())if(u.kind==='villager')pedidoTick(u)}
   for(const u of G.units)if(u.kind==='villager'&&u.fala){u.fala.t-=dt;if(u.fala.t<=0)u.fala=null}
   const M=PESSOAS.moral;
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;

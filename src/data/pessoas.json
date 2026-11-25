@@ -2,6 +2,16 @@
   "_nota": "Tabela das pessoas (0.6). Equilibrar é editar números aqui. O build embute este arquivo como PESSOAS. Camas vêm de 'house' em buildings.js (ajudantes só na construção coletiva, a Barraca). Dia = dia_segundos (mesmo ciclo do dia e noite). Valores 'por_dia' são pontos de moral por dia de jogo.",
   "dia_segundos": 240,
   "carencia_moradia_dias": 3,
+  "pedidos": {
+    "_nota": "Quando qualquer trabalho chega ao nível, o morador pede moradia própria. Abrigo: sem ele, o morador vai embora no fim do prazo. Casa: depois do prazo a moral cai (pontos por dia). bonus_moral: ganho único ao se mudar.",
+    "prazo_dias": 3,
+    "bonus_moral": 20,
+    "casa_penalidade_dia": -50,
+    "balao_intervalo": 14,
+    "balao_seg": 5,
+    "abrigo": { "nivel": 25, "predio": "shelter", "fala": "Quero um abrigo!", "pede": "pede um Abrigo só seu" },
+    "casa": { "nivel": 50, "predio": "house", "fala": "Quero uma casa!", "pede": "pede uma Casa" }
+  },
   "andarilho": {
     "nome": "Andarilho",
     "intervalo_min": 45,

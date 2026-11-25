@@ -13,7 +13,7 @@ function mostraCampo(b){const q=P(b.x+b.w/2,b.y+b.h/2);camGo={x:W/2-q[0]*cam.z,y
 let setaOff=false,missaoVista='';
 function sagaEl(id,html){let el=document.getElementById(id);if(!el){el=document.createElement('div');el.id=id;if(html)el.innerHTML=html;document.getElementById('hud').appendChild(el)}return el}
 // muda quando há novidade: passo novo da colheita ou saga concluída
-function missaoSig(){const C=G.colheita;return(C?(C.fim?'fim':C.p):'-')+'|'+Object.keys(G.sagas||{}).length}
+function missaoSig(){const C=G.colheita;return(C?(C.fim?'fim':C.p):'-')+'|'+Object.keys(G.sagas||{}).length+G.units.filter(u=>u.pedido).map(u=>'|'+u.id+u.pedido.tipo).join('')}
 function livroHUD(){if(!G)return;const el=document.getElementById('bQuest');if(sheetKind==='missoes')missaoVista=missaoSig();
   el.classList.toggle('novo',missaoSig()!==missaoVista&&missaoSig()!=='-|0')}
 function colheitaHTML(){const C=G.colheita,S=CAMPO.textos.saga,fim=!!(C&&C.fim);
@@ -22,7 +22,11 @@ function colheitaHTML(){const C=G.colheita,S=CAMPO.textos.saga,fim=!!(C&&C.fim);
   if(C&&!fim)h+=`<ol class="passos">${S.passos.map((s,i)=>i<C.p?`<li class="ok">✅ ${s.n}</li>`:i===C.p?`<li class="atual">▶ ${s.n}<span>${preenche(s.dica,{meta:S.sementes_meta,tem:Math.min(have('semente_cevada'),S.sementes_meta)})}</span></li>`:`<li class="depois">⬜ ${s.n}</li>`).join('')}</ol><div class="row"><button class="sbtn" data-a="seta">👇 ${setaOff?'Mostrar seta':'Esconder seta'}</button></div>`;
   return h+`<div class="small">Recompensa: ${premio}</div></div>`}
 function eraMissoesHTML(){return`<h4>Metas da era ${G.era}: ${ERAS.nomes[G.era-1]}</h4><div class="item">${metasDaEra().map(c=>`<div class="small">${metaOk(c)?'✅':'⬜'} ${META_TXT[c.tipo](c)}</div>`).join('')}${G.era<5?'<div class="small">Com tudo pronto, toque na pedra rúnica para avançar.</div>':''}</div>`}
-function missoesHTML(){return head('📖 Livro de Missões','Todas as missões da vila.')+`<div class="livro"><h4>Aprendizado</h4>${colheitaHTML()}<h4>Sagas</h4><p class="small">A recompensa vai para o depósito.</p>${sagaHTML()}${eraMissoesHTML()}</div>`}
+function pedidosHTML(){const P=PESSOAS.pedidos,L=G.units.filter(u=>u.kind==='villager'&&u.pedido);if(!L.length)return'';
+  return`<h4>Pedidos de moradia</h4>`+L.map(u=>{const T=P[u.pedido.tipo],d=Math.ceil(diasDoPedido(u));
+    const fim=u.pedido.tipo==='abrigo'?`Vai embora em ${d} dia${d>1?'s':''}.`:d>0?`A moral começa a cair em ${d} dia${d>1?'s':''}.`:'A moral está caindo.';
+    return`<div class="item"><div class="top"><b>⬜ 🏠 ${u.name} ${T.pede}</b></div><div class="small">Construa: ${BD[T.predio].n}. ${fim}</div><div class="small">Ao se mudar: +${P.bonus_moral} de moral.</div></div>`}).join('')}
+function missoesHTML(){return head('📖 Livro de Missões','Todas as missões da vila.')+`<div class="livro">${pedidosHTML()}<h4>Aprendizado</h4>${colheitaHTML()}<h4>Sagas</h4><p class="small">A recompensa vai para o depósito.</p>${sagaHTML()}${eraMissoesHTML()}</div>`}
 $('#bQuest').addEventListener('click',()=>{sfx('tick');if(sheetKind==='missoes'){closeSheet();return}if(mode.t!=='none')cancelMode();sel=null;openSheet('missoes');livroHUD()});
 const noElemento=s=>{const e=document.querySelector(s);if(!e||e.disabled)return null;const r=e.getBoundingClientRect();return r.width&&r.right>0&&r.left<innerWidth?[r.left+r.width/2,r.top]:null};
 const noMapa=(x,y,z)=>w2s(x,y,z||0);
