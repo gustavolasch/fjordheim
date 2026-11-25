@@ -6,7 +6,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -73,12 +72,11 @@ const JS_ORDER = [
   'js/system/loop.js',
 ];
 
-// Versão mostrada no menu: versão do package.json + hash curto do Git (confirma qual build está no celular).
+// Versão mostrada no menu: a do package.json sem o ".0" final (2.1.0 -> v2.1).
+// A cada publicação, aumente o número: 2.1, 2.2, 2.3... É por ele que se confere qual versão está no celular.
 function buildVersion() {
-  let hash = 'local';
-  try { hash = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); } catch {}
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  return `v${pkg.version} · ${hash}`;
+  return `v${pkg.version.replace(/\.0$/, '')}`;
 }
 
 const read = (rel) => fs.readFileSync(path.join(SRC, rel), 'utf8');
