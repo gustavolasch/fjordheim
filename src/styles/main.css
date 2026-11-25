@@ -126,6 +126,10 @@ h3{font-family:'Cinzel',serif;color:#f3c969;font-size:15px;margin:18px 0 10px;le
 @keyframes needBlink{0%,100%{opacity:.35}50%{opacity:1}}
 /* botão de bloqueio (0.5): segurar = bloquear com o escudo */
 /* multijogador: código da sala e entrada por código (menu) */
+.transfer{margin-top:8px;font-size:13px}
+.transfer p{margin:8px 0 0;text-align:center}
+.transfer .sbtn:disabled{opacity:.4}
+.transfer textarea{width:100%;box-sizing:border-box;margin-top:8px;padding:8px;font-size:16px;border-radius:10px;border:1px solid #6a5a3a;background:#1b1712;color:#f3e7c9;resize:none;-webkit-user-select:text;user-select:text;touch-action:auto}
 .netinfo{width:100%;padding:8px 10px;border-radius:10px;background:rgba(243,201,105,.12);font-size:14px}
 .joinbox{display:flex;gap:8px;width:100%;margin-top:6px}
 .joinbox input{flex:1;min-width:0;padding:10px;font-size:18px;letter-spacing:4px;text-transform:uppercase;text-align:center;border-radius:10px;border:1px solid #6a5a3a;background:#1b1712;color:#f3e7c9}

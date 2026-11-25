@@ -62,6 +62,7 @@ const JS_ORDER = [
   'js/ui/hud.js',
   'js/system/audio.js',
   'js/system/save.js',
+  'js/system/transfer.js',
   'vendor/peerjs.min.js',
   'js/system/net.js',
   'js/system/devmode.js',

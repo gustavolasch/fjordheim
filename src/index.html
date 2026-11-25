@@ -41,6 +41,15 @@
     <p class="sub">Comece do nada. Construa tudo.</p>
     <div class="mrow" id="mTop"></div>
     <div class="joinbox hidden" id="joinBox"><input id="joinCode" maxlength="5" placeholder="Código" autocapitalize="characters" autocomplete="off"><button class="gbtn" id="joinGo">Entrar</button></div>
+    <div class="transfer hidden" id="transfer">
+      <p>Exportar este mundo</p>
+      <div class="mrow"><button class="sbtn" id="trFile">📤 Salvar arquivo</button><button class="sbtn" id="trCopy">📋 Copiar código</button></div>
+      <p>Importar um mundo</p>
+      <div class="mrow"><button class="sbtn" id="trPick">📥 Escolher arquivo</button><button class="sbtn" id="trPaste">Importar código</button></div>
+      <textarea id="trText" rows="3" placeholder="Cole aqui o código do mundo" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+      <input type="file" id="trInput" hidden>
+      <p id="trMsg" role="status"></p>
+    </div>
     <div id="newSec"><h3>Novo jogo · escolha o cenário</h3>
     <div class="bgrid" id="biomes"></div></div>
     <h3>Opções</h3>
