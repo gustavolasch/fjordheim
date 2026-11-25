@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -68,6 +69,14 @@ const JS_ORDER = [
   'js/system/loop.js',
 ];
 
+// Versão mostrada no menu: versão do package.json + hash curto do Git (confirma qual build está no celular).
+function buildVersion() {
+  let hash = 'local';
+  try { hash = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); } catch {}
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  return `v${pkg.version} · ${hash}`;
+}
+
 const read = (rel) => fs.readFileSync(path.join(SRC, rel), 'utf8');
 
 const template = read('index.html');
@@ -113,7 +122,8 @@ try {
 // Função como replacer: evita que "$&" etc. no código sejam interpretados.
 const html = template
   .replace('<!--@css-->\n', () => `<style>\n${css}</style>\n`)
-  .replace('<!--@js-->\n', () => `<script>\n${js}</script>\n`);
+  .replace('<!--@js-->\n', () => `<script>\n${js}</script>\n`)
+  .replace('__VER__', () => buildVersion());
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, html);

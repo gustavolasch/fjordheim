@@ -9,8 +9,8 @@ const isTouch=matchMedia('(pointer:coarse)').matches;
 // iOS em modo standalone (ícone da tela de início, black-translucent): innerHeight não conta a barra de status.
 // Na vertical usa screen.height; o canvas preenche a tela toda e a cor de fundo do body segue o bioma.
 const STANDALONE=!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
-function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;
-  if(STANDALONE&&screen.height>=screen.width)H=Math.max(H,screen.height);
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;
+  H=Math.max(innerHeight,visualViewport?visualViewport.height:0,document.documentElement.clientHeight,STANDALONE?screen.height:0);
   try{document.body.style.background=BIO.bg[1]}catch(e){}
 cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';lc.width=Math.ceil(W/2);lc.height=Math.ceil(H/2);bgGrad=null}
 addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,300));if(window.visualViewport)visualViewport.addEventListener('resize',resize);resize();
