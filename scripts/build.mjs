@@ -47,6 +47,7 @@ const JS_ORDER = [
   'js/game/colheita.js',
   'js/game/mundo.js',
   'js/game/oficio.js',
+  'js/game/cozinha.js',
   'js/game/carrinho.js',
   'js/draw/sprites.js',
   'js/draw/primitives.js',

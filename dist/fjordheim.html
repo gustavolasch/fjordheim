@@ -210,7 +210,7 @@ img.ico{width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain;disp
     <div class="bgrid" id="biomes"></div></div>
     <h3>Opções</h3>
     <div class="opts" id="opts"></div>
-    <p class="ver">v2.1</p>
+    <p class="ver">v2.2</p>
     <p class="help">Toque no chão para andar e nos objetos para coletar · arraste para mover a câmera · pinça ou roda do mouse para zoom</p>
   </div>
 </div>
@@ -363,7 +363,7 @@ const ITEMS={
 };
 Object.assign(ITEMS,CDATA.itens);
 const JOBTOOL={lumber:'axe',miner:'pick',farmer:'sickle',fisher:'rod',smith:'hammer',builder:'hammer'};
-const JOBNAME={lumber:'Lenhador',miner:'Minerador',collector:'Coletor',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',builder:'Construtor'};
+const JOBNAME={lumber:'Lenhador',miner:'Minerador',collector:'Coletor',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',cook:'Cozinheiro',builder:'Construtor'};
 const WC={
  warrior:{n:'Guerreiro',hp:130,dmg:12,range:1.2,rate:1,speed:1.8,needs:{sword:1,shield:1}},
  archer:{n:'Arqueiro',hp:70,dmg:9,range:5.5,rate:1.5,speed:1.9,ranged:true,needs:{bow:1}}
@@ -616,6 +616,7 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
   case'plot':{const b=BMAP.get(a.b);if(b)applyPlot(b,a.q,a.op,a.c);wearTool(u);break}
   case'proc':break;
+  case'cook':cozinhaPronto(u,a);break;
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
   case'forge':{if(w){ferrAdd(a.item);floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
   }}
@@ -632,6 +633,7 @@ function think(u){
   if(depot){if(!w){u.status='Sem vaga';u.act={type:'idle',t:0,dur:3};return}}
   else if(!w||!w.done){unassign(u);return}
   if(!u.tool)takeTool(u);
+  if(u.job==='cook'){pensaCozinheiro(u,w);return}
   const tf=JOBTOOL[u.job];if(tf&&!u.tool){u.status=OFICIO.faltaFerramenta[tf]||'Precisa de ferramenta.';u.act={type:'idle',t:0,dur:3};return}
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
   if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){
@@ -1214,7 +1216,10 @@ CMDS.cartOp=(u,c)=>{const ct=G.carts.find(x=>x.id===c.id);if(!ct)return cmdFail(
 // desce do carrinho: o carrinho fica onde está
 CMDS.dismount=(u)=>{const ct=cartOf(u);if(!ct)return cmdFail('','');ct.rider=null;u.ride=null;const p=freeNear(Math.floor(ct.x),Math.floor(ct.y),2);if(p){u.x=p[0]+.5;u.y=p[1]+.5}u.path=null;u.order=null;return{ok:true}};
 // morador: trabalho em volta do depósito (job null = sem trabalho)
-CMDS.setjob=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='villager')return cmdFail('','');const tj=c.job?JOBTOOL[c.job]:null;if(tj&&!(G.items[tj]>0)&&a.tool!==tj)return cmdFail(OFICIO.faltaFerramenta[tj]||'Precisa de ferramenta.');if(c.job&&!DEPOT_JOBS.includes(c.job))return cmdFail('','');setJob(a,c.job||null);return{ok:true}};
+CMDS.setjob=(u,c)=>{const a=UMAP.get(c.id);if(!a||a.kind!=='villager')return cmdFail('','');const tj=c.job?JOBTOOL[c.job]:null;if(tj&&!(G.items[tj]>0)&&a.tool!==tj)return cmdFail(OFICIO.faltaFerramenta[tj]||'Precisa de ferramenta.');if(c.job==='cook'){if(a.job==='cook')return{ok:true};const k=cozinhaLivre(a);
+    if(!k){const msg=G.bld.some(b=>b.done&&b.type==='cozinha')?'Todas as Cozinhas já têm cozinheiro.':'Construa uma Cozinha primeiro.';toast(msg,'bad');return cmdFail(msg)}
+    setJob(a,'cook');a.work=k.id;return{ok:true}}
+  if(c.job&&!DEPOT_JOBS.includes(c.job))return cmdFail('','');setJob(a,c.job||null);return{ok:true}};
 CMDS.equip=(u,c)=>{equipItem(c.item);return{ok:true}};
 // lavoura: o jogador vai até a fazenda e cuida dos canteiros (preparar, plantar, colher)
 CMDS.farmOp=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||b.type!=='farm')return cmdFail('','');const m=farmoMsg(b,c.op,c.c);if(m)return cmdFail(m);setOrder(u,{type:'farmop',b:b.id,op:c.op,c:c.c,n:0});return{ok:true}};
@@ -1939,6 +1944,46 @@ function updNovo(){const n=(G.novidades||[]).length;
 function novoHTML(){const L=NOVO_LISTA;if(!L.length)return head('Nada novo','Você já viu tudo que foi liberado.');
   return head('Liberado','Toque num item para ir até ele.')+`<div class="row" style="flex-wrap:wrap">`+
     L.map(n=>n.tipo==='build'?`<button class="sbtn" data-a="novoIr" data-v="build:${n.k}">🏗️ ${BD[n.k].n}</button>`:`<button class="sbtn" data-a="novoIr" data-v="item:${n.k}">🔨 ${ITEMS[n.k].n}</button>`).join('')+`</div>`}
+/* ================= Cozinheiro: tarefa na Cozinha =================
+   Um cozinheiro por Cozinha. O jogador define quanta cevada ele pode usar (b.tarefa.resta).
+   Os ingredientes saem só do depósito e só são gastos quando a receita fica pronta (interromper não perde nada).
+   A comida vai para o depósito. Cozinhar não dá experiência: 'cook' fica fora de HAB_TRABALHOS. */
+const COZ_RECEITA='pao';
+const receitaCoz=()=>OFICIO.estacoes.cozinha[COZ_RECEITA];
+const passoCoz=()=>receitaCoz().entrada.cevada;
+const COZ_MAX=998;
+function cozinheiroDe(b){return G.units.find(u=>u.kind==='villager'&&u.job==='cook'&&u.work===b.id)||null}
+function cozinhaLivre(u){return maisPerto(u,b=>b.type==='cozinha'&&!cozinheiroDe(b))}
+function restaDe(b){return(b.tarefa&&b.tarefa.resta)||0}
+// o que impede cozinhar agora: 'sem_tarefa' | 'falta' | 'cheio' | null
+function cozinhaImpede(b){const R=receitaCoz();
+  if(restaDe(b)<passoCoz())return'sem_tarefa';
+  for(const k in R.entrada)if((G.res[k]||0)<R.entrada[k])return'falta';
+  for(const k in R.saida)if((G.res[k]||0)+R.saida[k]>storeCap())return'cheio';
+  return null}
+const COZ_STATUS={sem_tarefa:'Sem tarefa. Defina a cevada no painel da Cozinha.',falta:'Falta cevada no depósito.',cheio:'Depósito cheio de comida.'};
+function pensaCozinheiro(u,b){
+  if(!isNear(u,b)){if(!goRect(u,b.x,b.y,b.w,b.h))u.act={type:'idle',t:0,dur:3};return}
+  const motivo=cozinhaImpede(b);
+  if(motivo){u.status=COZ_STATUS[motivo];
+    if(motivo!=='sem_tarefa'&&u.avisoCoz!==motivo)toast(`🍳 ${u.name}: ${COZ_STATUS[motivo]}`,'bad');
+    u.avisoCoz=motivo;u.act={type:'idle',t:0,dur:3};return}
+  u.status='Cozinhando';u.avisoCoz=null;faceTo(u,b.x+b.w/2,b.y+b.h/2);
+  u.act={type:'cook',b:b.id,t:0,dur:receitaCoz().tempo*toolF(u)}}
+function cozinhaPronto(u,a){const b=BMAP.get(a.b);if(!b||cozinhaImpede(b))return;const R=receitaCoz();
+  for(const k in R.entrada)G.res[k]-=R.entrada[k];
+  for(const k in R.saida)addRes(k,R.saida[k],b.x+b.w/2,b.y+b.h/2);
+  b.tarefa.resta-=passoCoz();if(G.colheita)G.colheita.pao=true;
+  if(restaDe(b)<passoCoz()){b.tarefa=null;toast(`✅ ${u.name} terminou a tarefa na Cozinha.`,'good')}}
+// quanto de cevada o cozinheiro pode usar: d = passos a somar (negativo diminui); d = 0 cancela
+CMDS.cozinhaQtd=(u,c)=>{const b=BMAP.get(c.b);if(!b||!b.done||b.type!=='cozinha')return cmdFail('','');
+  const n=c.d?clamp(restaDe(b)+c.d*passoCoz(),0,COZ_MAX):0;b.tarefa=n?{resta:n}:null;
+  const chef=cozinheiroDe(b);if(chef){chef.avisoCoz=null;if(chef.act&&chef.act.type==='idle')chef.act=null}
+  return{ok:true}};
+function cozinhaHTML(b){if(b.type!=='cozinha')return'';const chef=cozinheiroDe(b),n=restaDe(b),R=receitaCoz(),vezes=n/passoCoz();
+  return`<h4>Tarefa do cozinheiro</h4><p class="hint">${chef?`👨‍🍳 ${chef.name} · ${chef.dormindo?'Dormindo':chef.status||'A caminho'}`:'Sem cozinheiro. Toque num morador e escolha 🍳 Cozinheiro.'}</p>`+
+    `<div class="row"><span>Cevada que ele pode usar:</span><button class="sbtn" data-a="cozqtd" data-v="-1" aria-label="Menos cevada" ${n?'':'disabled'}>−</button><b>${icon('recursos','cevada')} ${n}</b><button class="sbtn" data-a="cozqtd" data-v="1" aria-label="Mais cevada">+</button>${n?'<button class="sbtn" data-a="cozqtd" data-v="0">Cancelar</button>':''}</div>`+
+    `<p class="small">${n?`Vai render ${icon('recursos','food')} ${vezes*R.saida.food}. `:''}No depósito: ${icon('recursos','cevada')} ${G.res.cevada||0}. A comida vai para o depósito. Cozinhar não dá experiência.</p>`}
 /* ================= Carrinho de mão ================= */
 // Carrinho: fica em G.carts (não é construção: não ocupa tile e não bloqueia passagem).
 // Parado = depósito portátil (guarda a mochila, descarrega no depósito).
@@ -2777,16 +2822,16 @@ function infoHTML(){if(!sel)return null;
       const outros=HAB_TRABALHOS.filter(j=>j!==u.job&&u.hab&&u.hab[j]>0).map(j=>`${JOBNAME[j]} ${nivelHab(u,j)}`).join(' · ');
       const tr=(u.tracos||[]).map(k=>PESSOAS.tracos[k]).filter(Boolean);
       return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">😊 <div class="meter"><i style="width:${mt}%;background:${cor}"></i></div><span class="small">Moral ${mt}</span></div>`+
-        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${H.nivel_max} (${JOBNAME[u.job]})${prox}`:'—'}</td></tr>${outros?`<tr><td>Outros níveis</td><td>${outros}</td></tr>`:''}<tr><td>Moradia</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Mochila</td><td>${Math.round((u.carry||0)*(WEIGHT[u.carryT]||0)*10)/10}/${PESSOAS.mochila.fracao_do_jogador*BAG}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
+        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${H.nivel_max} (${JOBNAME[u.job]})${prox}`:u.job==='cook'?'Cozinhar não dá experiência':'—'}</td></tr>${outros?`<tr><td>Outros níveis</td><td>${outros}</td></tr>`:''}<tr><td>Moradia</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Mochila</td><td>${Math.round((u.carry||0)*(WEIGHT[u.carryT]||0)*10)/10}/${PESSOAS.mochila.fracao_do_jogador*BAG}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
         `<div class="small">${tr.map(t=>`<div><b style="color:${t.tipo==='bom'?'#7fd46a':'#e2533f'}">${t.nome}</b> · ${t.desc}</div>`).join('')}</div>`+
-        `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
+        `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}${btn('cook','🍳 Cozinheiro')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;
   if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?icon('interface','construindo')+' Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um '+icon('ferramentas','hammer')+' Martelo acelera.')}</p>`}
   else{
     if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
-    h+=estacaoHTML(b);
+    h+=estacaoHTML(b);h+=cozinhaHTML(b);
     if(b.type==='farm')h+=campoHTML(b);
     if(b.type==='pen'){const n=penCount(b),cap=CAMPO.cercado.capacidade;
       h+=`<p class="hint">Animais: ${n} de ${cap}. Comem ração (cevada ou nabo) todo dia.</p><div class="row">`+
@@ -2817,6 +2862,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'locked':{const i=String(v).indexOf(':');BLOQ={tipo:String(v).slice(0,i)==='build'?'build':'item',k:String(v).slice(i+1)};openSheet('bloqueado');break}
   case'templo':{if(sel&&sel.k==='p'){const r=sendCmd({t:'temploEsc',id:sel.id,c:v});if(!r.ok&&r.msg)toast(r.msg,'bad');else closeSheet()}break}
   case'bandeiraSet':{const i=String(v).indexOf(':');const r=sendCmd({t:'bandeiraSet',k:String(v).slice(0,i),v:String(v).slice(i+1)});if(!r.ok&&r.msg)toast(r.msg,'bad');break}
+  case'cozqtd':{if(b)sendCmd({t:'cozinhaQtd',b:b.id,d:+v});break}
   case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'reparaF':{if(b){const r=sendCmd({t:'reparaF',b:b.id,k:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'eraAvanca':{const r=sendCmd({t:'eraAvanca'});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else closeSheet();break}
@@ -2965,7 +3011,7 @@ function audioTick(dt){if(!SND.ctx||!SND.wind)return;const w=windStrength(),on=s
 // snapState() é o estado do mundo como objeto simples. Serve ao save (neste aparelho)
 // e ao multijogador (o anfitrião manda ao amigo). Não leva a câmera nem nada que seja só deste aparelho.
 // applyState() é o caminho inverso: reconstrói G a partir dele.
-const SAVE_VER=14; // v14: moradias (Barraca para os ajudantes; G.abrigoJogador = abrigo reservado do jogador)
+const SAVE_VER=15; // v14: moradias (Barraca; G.abrigoJogador = abrigo do jogador). v15: tarefa da Cozinha (b.tarefa; ausente = sem tarefa)
 function snapState(){return{v:SAVE_VER,abrigoJogador:G.abrigoJogador??null,foramEmbora:G.foramEmbora||0,estOff:G.estOff||0,colheita:G.colheita||null,bandeira:G.bandeira,capimVolta:G.capimVolta,era:G.era,ferr:G.ferr,dia:G.dia,campoDia:G.campoDia,estAcc:G.estAcc,lugares:G.lugares,receitas:G.receitas,sagas:G.sagas,perdas:G.perdas,invasoesRepelidas:G.invasoesRepelidas,evT:G.evT,saqueT:G.saqueT,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
 function applyState(s){
   BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],carts:s.carts||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0,bandeira:s.bandeira||null,era:s.era||1,ferr:s.ferr||{},lugares:s.lugares||null,receitas:s.receitas||[],sagas:s.sagas||{},perdas:s.perdas||0,invasoesRepelidas:s.invasoesRepelidas||0,evT:s.evT,saqueT:s.saqueT};

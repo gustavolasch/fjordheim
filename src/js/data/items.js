@@ -7,7 +7,7 @@ const ITEMS={
 };
 Object.assign(ITEMS,CDATA.itens);
 const JOBTOOL={lumber:'axe',miner:'pick',farmer:'sickle',fisher:'rod',smith:'hammer',builder:'hammer'};
-const JOBNAME={lumber:'Lenhador',miner:'Minerador',collector:'Coletor',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',builder:'Construtor'};
+const JOBNAME={lumber:'Lenhador',miner:'Minerador',collector:'Coletor',farmer:'Fazendeiro',fisher:'Pescador',smith:'Ferreiro',cook:'Cozinheiro',builder:'Construtor'};
 const WC={
  warrior:{n:'Guerreiro',hp:130,dmg:12,range:1.2,rate:1,speed:1.8,needs:{sword:1,shield:1}},
  archer:{n:'Arqueiro',hp:70,dmg:9,range:5.5,rate:1.5,speed:1.9,ranged:true,needs:{bow:1}}

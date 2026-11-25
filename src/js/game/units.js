@@ -64,6 +64,7 @@ function finishAct(u,a){const w=BMAP.get(u.work);
   case'pick':{const o=G.obj[a.i];if(o&&(o.t==='branch'||o.t==='pebble')){G.obj[a.i]=null;u.carry++;u.carryT=o.t==='branch'?'stick':'stone';u.tgt=null}break}
   case'plot':{const b=BMAP.get(a.b);if(b)applyPlot(b,a.q,a.op,a.c);wearTool(u);break}
   case'proc':break;
+  case'cook':cozinhaPronto(u,a);break;
   case'fish':{if(w&&Math.random()<.7){addRes('food',1,a.fx,a.fy);fishJump(a.fx,a.fy)}wearTool(u);break}
   case'forge':{if(w){ferrAdd(a.item);floater(w.x+1,w.y+1,`+1 ${itemMark(a.item)}`);}wearTool(u);break}
   }}
@@ -80,6 +81,7 @@ function think(u){
   if(depot){if(!w){u.status='Sem vaga';u.act={type:'idle',t:0,dur:3};return}}
   else if(!w||!w.done){unassign(u);return}
   if(!u.tool)takeTool(u);
+  if(u.job==='cook'){pensaCozinheiro(u,w);return}
   const tf=JOBTOOL[u.job];if(tf&&!u.tool){u.status=OFICIO.faltaFerramenta[tf]||'Precisa de ferramenta.';u.act={type:'idle',t:0,dur:3};return}
   const cx=w.x+w.w/2,cy=w.y+w.h/2;
   if(u.job==='lumber'||u.job==='miner'||u.job==='collector'){

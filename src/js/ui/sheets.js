@@ -76,16 +76,16 @@ function infoHTML(){if(!sel)return null;
       const outros=HAB_TRABALHOS.filter(j=>j!==u.job&&u.hab&&u.hab[j]>0).map(j=>`${JOBNAME[j]} ${nivelHab(u,j)}`).join(' · ');
       const tr=(u.tracos||[]).map(k=>PESSOAS.tracos[k]).filter(Boolean);
       return head(u.name,u.job?JOBNAME[u.job]:'Sem trabalho')+`<div class="row">😊 <div class="meter"><i style="width:${mt}%;background:${cor}"></i></div><span class="small">Moral ${mt}</span></div>`+
-        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${H.nivel_max} (${JOBNAME[u.job]})${prox}`:'—'}</td></tr>${outros?`<tr><td>Outros níveis</td><td>${outros}</td></tr>`:''}<tr><td>Moradia</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Mochila</td><td>${Math.round((u.carry||0)*(WEIGHT[u.carryT]||0)*10)/10}/${PESSOAS.mochila.fracao_do_jogador*BAG}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
+        `<table class="tbl"><tr><td>Nível</td><td>${nv?`${nv} de ${H.nivel_max} (${JOBNAME[u.job]})${prox}`:u.job==='cook'?'Cozinhar não dá experiência':'—'}</td></tr>${outros?`<tr><td>Outros níveis</td><td>${outros}</td></tr>`:''}<tr><td>Moradia</td><td>${cama?BD[cama.type].n:'Sem cama'}</td></tr><tr><td>Mochila</td><td>${Math.round((u.carry||0)*(WEIGHT[u.carryT]||0)*10)/10}/${PESSOAS.mochila.fracao_do_jogador*BAG}</td></tr><tr><td>Ferramenta</td><td>${u.tool&&u.toolInst?`${ITEMS[u.tool].n} · ${OFICIO.qualidade.efeito[u.toolInst.q].n} · ${u.toolInst.d}/${maxFerr(u.tool,u.toolInst.q)}`:'Nenhuma'}</td></tr></table>`+
         `<div class="small">${tr.map(t=>`<div><b style="color:${t.tipo==='bom'?'#7fd46a':'#e2533f'}">${t.nome}</b> · ${t.desc}</div>`).join('')}</div>`+
-        `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
+        `<p class="hint"><b>${st}</b>${semVaga?' Construa um depósito (Pilha de recursos) para ter vaga.':''}</p><div class="row">${btn('lumber','🪓 Lenhador')}${btn('miner','⛏️ Minerador')}${btn('collector','🧺 Coletor')}${btn('cook','🍳 Cozinheiro')}<button class="sbtn ${!u.job?'on':''}" data-a="setjob" data-v="">Sem trabalho</button></div>`}
     const role=u.kind==='warrior'?WC[u.wc].n:(u.job?JOBNAME[u.job]:'Construtor');return head(u.name,role)+`<div class="row">❤️ <div class="meter"><i style="width:${u.hp/u.max*100}%"></i></div></div>`}
   const b=BMAP.get(sel.id);if(!b)return null;const d=BD[b.type];let h=head(d.n,d.desc);
   h+=`<div class="row">${b.done?'❤️':'🏗️'} <div class="meter"><i style="width:${(b.done?b.hp/b.max:b.prog/b.work)*100}%;${b.done?'':'background:#f3c969'}"></i></div><span class="small">${b.done?Math.round(b.hp)+'/'+b.max:Math.floor(b.prog/b.work*100)+'% construído'}</span></div>`;
   if(!b.done){const me=PL();h+=`<p class="hint">${me&&me.act&&me.act.type==='build'&&me.act.b===b.id?icon('interface','construindo')+' Você está construindo.':'Toque na obra para construir. '+(G.items.hammer?'':'Um '+icon('ferramentas','hammer')+' Martelo acelera.')}</p>`}
   else{
     if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
-    h+=estacaoHTML(b);
+    h+=estacaoHTML(b);h+=cozinhaHTML(b);
     if(b.type==='farm')h+=campoHTML(b);
     if(b.type==='pen'){const n=penCount(b),cap=CAMPO.cercado.capacidade;
       h+=`<p class="hint">Animais: ${n} de ${cap}. Comem ração (cevada ou nabo) todo dia.</p><div class="row">`+
@@ -116,6 +116,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'locked':{const i=String(v).indexOf(':');BLOQ={tipo:String(v).slice(0,i)==='build'?'build':'item',k:String(v).slice(i+1)};openSheet('bloqueado');break}
   case'templo':{if(sel&&sel.k==='p'){const r=sendCmd({t:'temploEsc',id:sel.id,c:v});if(!r.ok&&r.msg)toast(r.msg,'bad');else closeSheet()}break}
   case'bandeiraSet':{const i=String(v).indexOf(':');const r=sendCmd({t:'bandeiraSet',k:String(v).slice(0,i),v:String(v).slice(i+1)});if(!r.ok&&r.msg)toast(r.msg,'bad');break}
+  case'cozqtd':{if(b)sendCmd({t:'cozinhaQtd',b:b.id,d:+v});break}
   case'proc':{if(b){const r=sendCmd({t:'proc',b:b.id,r:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'reparaF':{if(b){const r=sendCmd({t:'reparaF',b:b.id,k:v});if(!r.ok){if(r.msg)toast(r.msg,'bad')}}break}
   case'eraAvanca':{const r=sendCmd({t:'eraAvanca'});if(!r.ok){if(r.msg)toast(r.msg,'bad')}else closeSheet();break}
