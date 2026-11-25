@@ -14,7 +14,7 @@ function prefixoArvore(k,id){const s=id||estacao().e.id;if(k==='oak'&&(s==='prim
 // 1º dia da estação: fração do dia (0..1) e a estação anterior. Fora disso, null. No começo do jogo não mistura.
 function transicao(){if(G.t<DIA())return null;const s=estacao();if(s.dia!==1)return null;const n=CAMPO.estacoes.length;return{p:(G.t/DIA())%1,anterior:CAMPO.estacoes[(s.i+n-1)%n].id}}
 // clima visual: no outono as folhas caem em todos os biomas (exceto neve)
-function clima(){return!BIO.snowy&&ehOutono()?'leaves':BIO.weather}
+function clima(){return G&&!BIO.snowy&&ehOutono()?'leaves':BIO.weather}
 let ULT_EST=null;
 function updSeason(){const el=document.getElementById('season');const s=estacao();if(ULT_EST!==s.e.id){ULT_EST=s.e.id;if(typeof initWeather==='function')initWeather()}if(!el)return;const txt=`${s.e.emoji} ${s.dia}`;if(el.textContent!==txt){el.textContent=txt;el.title=`${s.e.n}, dia ${s.dia} de ${CAMPO.dias_por_estacao}`}}
 // save v11 -> v12: antes cada estação tinha 4 dias. Mantém a estação e o dia atuais e começa a contar os novos a partir daí.
