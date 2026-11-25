@@ -23,7 +23,7 @@ function passoFeito(id){const C=G.colheita,F=camposProntos(),tem=st=>F.some(b=>b
     case'pao':return !!C.pao}
   return false}
 function colheitaTick(){if(G.demo)return;
-  if(!G.colheita){if(sementesTotal()<=0)return;G.colheita={p:0}}
+  if(!G.colheita){if(sementesTotal()<=0)return;G.colheita={p:0};toast(CAMPO.textos.saga.nova,'good')}
   const C=G.colheita;if(C.fim)return;const S=CAMPO.textos.saga;
   const i=S.passos.findIndex(s=>!passoFeito(s.id));
   if(i<0){C.fim=true;for(const k in S.premio)ganhaEstoque(k,S.premio[k]);toast(S.concluida,'good');return}

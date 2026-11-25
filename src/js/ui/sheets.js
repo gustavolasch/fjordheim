@@ -47,7 +47,7 @@ function sheetHTML(){
     return head('Carrinho de mão',`Mochila do carrinho: ${cartW(c)}/${BAG}.`)+(it.length?`<p class="hint">${it.join(' · ')}</p>`:'<p class="hint">Vazio.</p>')+`<div class="row">${btn}</div>`}
   case'tomb':{const t=sel&&sel.k==='t'?G.tombs.find(x=>x.id===sel.id):null;if(!t)return null;
     return head('Túmulo','Aqui ficou a sua mochila. Resgate para pegar tudo de volta.')+`<div class="row"><button class="gbtn" data-a="loot">${icon('interface','mochila')} Resgatar mochila</button></div>`}
-  case'saga':return sagaHTML();
+  case'missoes':return missoesHTML();
   case'assento':return assentoHTML();
   case'bandeira':return bandeiraHTML();
   case'era':return eraHTML();
@@ -135,6 +135,7 @@ function act(a,v){const b=sel&&sel.k==='b'?BMAP.get(sel.id):null;
   case'small':if(mode.sel)sendCmd({t:'decorOp',id:mode.sel.id,op:'small'});break;
   case'dup':if(mode.sel){const r=sendCmd({t:'decorOp',id:mode.sel.id,op:'dup'});if(!r.ok){toast(r.msg,'bad');break}if(r.d)mode.sel=r.d;sfx('place')}break;
   case'del':if(mode.sel){sendCmd({t:'decorOp',id:mode.sel.id,op:'del'});mode.sel=null}break;
+  case'seta':setaOff=!setaOff;if(!setaOff){closeSheet();return}break;
   case'done':mode={t:'none'};closeSheet();break}
   sheetSig='';renderSheet();markTabs()}
 const TABS={build:['build','Construir'],craft:['craft','Criar'],bag:['bag','Mochila'],edit:['edit','Editar']};

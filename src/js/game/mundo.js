@@ -122,7 +122,7 @@ function poiHTML(id){const p=lugarPorId(id);if(!p)return null;const L=MUNDO.luga
 function merchantHTML(m){return head('Mercador','Trocas de barco. Só você decide.')+`<div class="row" style="flex-wrap:wrap">`+
   MUNDO.mercador.ofertas.map((o,i)=>`<button class="sbtn" data-a="trade" data-v="${i}" ${afford(o.dar)?'':'disabled'}>${costHTML(o.dar)} → ${Object.keys(o.receber).map(k=>`${icon('recursos',k)}${o.receber[k]}`).join(' ')}</button>`).join('')+`</div>`}
 function sagaHTML(){const done=G.sagas||{};
-  return head('Sagas','Missões da vila. A recompensa vai para o depósito.')+colheitaSagaHTML()+MUNDO.sagas.map(s=>{const R=Object.keys(s.recompensa.res||{}).map(k=>`${icon('recursos',k)}${s.recompensa.res[k]}`).join(' ');
+  return MUNDO.sagas.map(s=>{const R=Object.keys(s.recompensa.res||{}).map(k=>`${icon('recursos',k)}${s.recompensa.res[k]}`).join(' ');
     return `<div class="item"><div class="top"><b>${done[s.id]?'✅':'⬜'} ${s.n}</b></div><div class="small">${s.desc}</div><div class="small">Recompensa: ${R||'nada'}</div></div>`}).join('')}
 // migração v11: saves antigos ganham um templo (com guardas e chefe)
 function migraV11(){if(!G.lugares)return;if(G.lugares.some(p=>p.k==='templo'))return;

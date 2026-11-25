@@ -20,7 +20,7 @@ body.tilt-on .tilt{display:block}
 .chip.bag{background:rgba(243,201,105,.14);cursor:pointer}
 .chip.full{color:#ff9a8a;background:rgba(160,40,30,.35)}
 .rbtn{flex:none;width:40px;border:none;color:#f6ead2;font:900 14px 'Nunito',system-ui,sans-serif;cursor:pointer;padding:0;border-radius:14px;display:flex;align-items:center;justify-content:center}
-#hint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 180px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(92vw,430px);display:flex;gap:8px;align-items:center;padding:7px 6px 7px 11px;border-radius:14px;font:700 12.5px/1.3 'Nunito',system-ui,sans-serif;z-index:6;transition:opacity .3s,transform .3s;border-color:rgba(243,201,105,.38)}
+#hint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 184px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(92vw,430px);display:flex;gap:8px;align-items:center;padding:7px 6px 7px 11px;border-radius:14px;font:700 12.5px/1.3 'Nunito',system-ui,sans-serif;z-index:6;transition:opacity .3s,transform .3s;border-color:rgba(243,201,105,.38)}
 #hint.off{opacity:0;transform:translate(-50%,-8px);pointer-events:none}
 #hint .ic{color:#f3c969;font-size:15px}
 #hint button{background:none;border:none;color:rgba(246,234,210,.6);font-size:15px;padding:2px 6px;cursor:pointer}
@@ -130,11 +130,13 @@ h3{font-family:'Cinzel',serif;color:#f3c969;font-size:15px;margin:18px 0 10px;le
 .transfer p{margin:8px 0 0;text-align:center}
 .transfer .sbtn:disabled{opacity:.4}
 .transfer textarea{width:100%;box-sizing:border-box;margin-top:8px;padding:8px;font-size:16px;border-radius:10px;border:1px solid #6a5a3a;background:#1b1712;color:#f3e7c9;resize:none;-webkit-user-select:text;user-select:text;touch-action:auto}
-#saga{position:fixed;top:calc(env(safe-area-inset-top,0px) + 180px);left:50%;transform:translateX(-50%);width:max-content;max-width:min(92vw,430px);display:none;gap:8px;align-items:center;padding:7px 6px 7px 12px;border-radius:14px;font:700 12.5px/1.3 'Nunito',system-ui,sans-serif;z-index:6;border-color:rgba(243,201,105,.5)}
-body.saga-on #saga{display:flex}
-body.saga-on #hint{display:none}
-#saga b{display:block;color:#f3c969}
-#saga button{flex:none;background:none;border:none;color:#f6ead2;opacity:.6;font-size:14px;padding:8px}
+#bQuest{position:fixed;top:calc(env(safe-area-inset-top,0px) + 128px);right:calc(env(safe-area-inset-right,0px) + 8px);z-index:5;width:40px;height:48px;padding:0;border-radius:14px;font-size:20px;color:#f6ead2;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(26,18,10,.9)}
+#bQuest.novo::after{content:'!';position:absolute;top:-5px;right:-4px;width:18px;height:18px;border-radius:50%;background:#f3c969;color:#1a1208;font:900 12px/18px 'Nunito',system-ui,sans-serif;animation:novoPulse 1.2s ease-in-out infinite}
+.passos{list-style:none;margin:8px 0;padding:0;font-size:13px}
+.passos li{padding:3px 0}
+.passos .ok,.passos .depois{opacity:.55}
+.passos .atual{font-weight:800;color:#f3c969}
+.passos .atual span{display:block;color:#f6ead2;font-weight:700;padding:2px 0 0 20px}
 #seta{position:fixed;z-index:8;pointer-events:none;width:0;height:0;display:none}
 #seta i{position:absolute;left:-18px;bottom:0;width:36px;text-align:center;font-style:normal;font-size:30px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));animation:setaPisca .7s ease-in-out infinite alternate}
 @keyframes setaPisca{from{transform:translateY(-10px);opacity:1}to{transform:translateY(0);opacity:.35}}

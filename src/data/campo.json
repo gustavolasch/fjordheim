@@ -145,29 +145,36 @@
       "passos": [
         {
           "id": "semente",
-          "dica": "Sementes vêm do capim alto. Toque no capim até ter {meta} sementes ({tem}/{meta})."
+          "dica": "Sementes vêm do capim alto. Toque no capim até ter {meta} sementes ({tem}/{meta}).",
+          "n": "Juntar sementes"
         },
         {
           "id": "campo",
-          "dica": "Abra Construir e faça um Campo. Depois toque na obra até terminar."
+          "dica": "Abra Construir e faça um Campo. Depois toque na obra até terminar.",
+          "n": "Construir um Campo"
         },
         {
           "id": "plantar",
-          "dica": "Toque no Campo e depois em Plantar."
+          "dica": "Toque no Campo e depois em Plantar.",
+          "n": "Plantar"
         },
         {
           "id": "esperar",
-          "dica": "Espere crescer. Toque no Campo para ver os dias que faltam."
+          "dica": "Espere crescer. Toque no Campo para ver os dias que faltam.",
+          "n": "Esperar crescer"
         },
         {
           "id": "colher",
-          "dica": "Está maduro! Toque no Campo e depois em Colher."
+          "dica": "Está maduro! Toque no Campo e depois em Colher.",
+          "n": "Colher"
         },
         {
           "id": "pao",
-          "dica": "Construa uma Cozinha, toque nela e faça Pão de cevada."
+          "dica": "Construa uma Cozinha, toque nela e faça Pão de cevada.",
+          "n": "Fazer pão"
         }
-      ]
+      ],
+      "nova": "📖 Nova missão no Livro de Missões: A Primeira Colheita."
     },
     "guia": {
       "titulo": "Guia do Campo",

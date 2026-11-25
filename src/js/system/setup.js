@@ -12,7 +12,7 @@ function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$(
   const guest=NET.role==='guest';let h='';
   if(guest)h='<div class="netinfo">👥 Ilha do amigo · sala '+NET.code+'</div><button class="gbtn" id="mResume">▶ Voltar ao jogo</button><button class="sbtn red" id="mNetLeave">Sair da ilha</button>';
   else{
-    if(inGame)h+='<button class="gbtn" id="mResume">▶ Voltar ao jogo</button><button class="sbtn" id="mSave">💾 Salvar</button><button class="sbtn" id="mSagas">📜 Sagas</button>';
+    if(inGame)h+='<button class="gbtn" id="mResume">▶ Voltar ao jogo</button><button class="sbtn" id="mSave">💾 Salvar</button>';
     if(NET.role==='host')h+='<div class="netinfo">👥 Sala <b>'+NET.code+'</b> · '+netStatus()+'</div><button class="sbtn red" id="mNetEnd">Encerrar sala</button>';
     else h+='<button class="gbtn" id="mHost">👥 Jogar com amigo</button><button class="sbtn" id="mJoin">🔗 Entrar com código</button>';
     if(hasSave())h+='<button class="'+(inGame?'sbtn':'gbtn')+'" id="mLoad">📂 '+(inGame?'Carregar salvo':'Continuar jogo salvo')+'</button>';
@@ -24,7 +24,7 @@ function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$(
   const on=(id,f)=>{const el=$('#'+id);if(el)el.onclick=f};
   if(!guest)ligaTransfer(inGame);else $('#transfer').classList.add('hidden');
   ligaGuia();
-  on('mResume',closeMenu);on('mSave',()=>{save();openMenu(true)});on('mSagas',()=>{closeMenu();openSheet('saga')});on('mLoad',()=>{if(load())closeMenu()});
+  on('mResume',closeMenu);on('mSave',()=>{save();openMenu(true)});on('mLoad',()=>{if(load())closeMenu()});
   on('mNetLeave',netGuestQuit);on('mNetEnd',()=>{netLeave(false);openMenu(inGame)});
   on('mHost',()=>{if(inGame){if(netHost()){toast('Sala '+NET.code+': diga o código ao seu amigo','good');openMenu(true)}}else{NET.pendingHost=true;toast('Escolha o cenário. A sala abre com ele.','')}});
   on('mJoin',()=>$('#joinBox').classList.toggle('hidden'));
