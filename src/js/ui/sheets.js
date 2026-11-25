@@ -84,16 +84,11 @@ function infoHTML(){if(!sel)return null;
   else{
     if(d.store){const cap=storeCap();h+=`<table class="tbl">${Object.keys(RES).map(k=>`<tr><td>${icon('recursos',k)} ${RES[k][0]}</td><td>${G.res[k]} / ${cap}</td></tr>`).join('')}</table><p class="hint">Toque aqui para guardar o que estiver na mochila.</p>`}
     h+=estacaoHTML(b);
-    if(b.type==='farm'){const r=farmoResumo(b),per=estacao().e,cult=Object.keys(CAMPO.culturas);
-      h+=`<p class="hint">Vazios ${r.v} · Preparados ${r.pr} · Plantados ${r.pl} · Prontos ${r.pt}</p><div class="row">`+
-        `<button class="sbtn" data-a="farmop" data-v="prep" ${r.v?'':'disabled'}>⛏️ Preparar terra</button>`+
-        cult.map(k=>{const K=CAMPO.culturas[k],ok=r.pr&&per.plantar&&have(K.semente)>0;return`<button class="sbtn" data-a="farmop" data-v="plant:${k}" ${ok?'':'disabled'}>${K.emoji} Plantar ${K.n} (${have(K.semente)})</button>`}).join('')+
-        `<button class="sbtn" data-a="farmop" data-v="harvest" ${r.pt?'':'disabled'}>🌾 Colher prontos (${r.pt})</button></div>`+
-        `<p class="small">${per.emoji} ${per.n}: ${per.plantar?'as plantas crescem':'nada cresce ao ar livre'}. Sementes vêm de frutinhas e da colheita.</p>`}
+    if(b.type==='farm')h+=campoHTML(b);
     if(b.type==='pen'){const n=penCount(b),cap=CAMPO.cercado.capacidade;
       h+=`<p class="hint">Animais: ${n} de ${cap}. Comem ração (cevada ou nabo) todo dia.</p><div class="row">`+
         Object.keys(CAMPO.animais).map(k=>{const A=CAMPO.animais[k],ok=n<cap&&afford(A.custo);return`<button class="sbtn" data-a="buyAnimal" data-v="${k}" ${ok?'':'disabled'}>${A.emoji} ${A.n} ${costHTML(A.custo)}</button>`}).join('')+`</div>`}
-    if(d.jobs)h+=`<p class="hint">👥 Posto para ${d.jobs} trabalhador(es). Moradores poderão ser encontrados no futuro.</p>`;
+    if(d.jobs&&b.type!=='farm')h+=`<p class="hint">👥 Posto para ${d.jobs} trabalhador(es). Moradores poderão ser encontrados no futuro.</p>`;
     if(b.type==='quarry')h+=`<div class="row"><b>Extrair:</b><button class="sbtn ${b.mode==='stone'?'on':''}" data-a="qmode" data-v="stone">${icon('recursos','stone')} Pedra</button><button class="sbtn ${b.mode==='iron'?'on':''}" data-a="qmode" data-v="iron">${icon('recursos','iron')} Ferro</button></div>`;
     if(b.type==='smithy')h+=`<p class="hint">Abra Criar para forjar armas. Você caminha até a ferraria para trabalhar.</p>`;
     if(b.type==='tower')h+=`<p class="hint">${icon('interface','alvo_arco')} Alcance de 6 casas. Funciona sozinha.</p>`}

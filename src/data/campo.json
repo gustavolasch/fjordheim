@@ -47,7 +47,10 @@
       "colheita": {
         "cevada": 3,
         "semente_cevada": 1
-      }
+      },
+      "cor_broto": "#8cc44a",
+      "cor_planta": "#6b9a3a",
+      "cor_madura": "#f0c850"
     },
     "nabo": {
       "n": "Nabo",
@@ -57,7 +60,10 @@
       "colheita": {
         "nabo": 3,
         "semente_nabo": 1
-      }
+      },
+      "cor_broto": "#8cc44a",
+      "cor_planta": "#4f8a3a",
+      "cor_madura": "#d58ad0"
     },
     "linho": {
       "n": "Linho",
@@ -67,7 +73,10 @@
       "colheita": {
         "linho": 2,
         "semente_linho": 1
-      }
+      },
+      "cor_broto": "#9ccc6a",
+      "cor_planta": "#5f9a5a",
+      "cor_madura": "#7fa8ff"
     }
   },
   "cercado": {
@@ -113,5 +122,74 @@
     "inverno_fator": 0
   },
   "capim_semente_chance": 0.15,
-  "capim_volta_seg": 120
+  "capim_volta_seg": 120,
+  "aviso_inverno_dias": 3,
+  "textos": {
+    "sem_semente": "Você precisa de sementes. Colha capim alto.",
+    "inverno_sem_plantio": "No inverno nada é plantado.",
+    "campo_cheio": "O campo está todo plantado.",
+    "campo_vazio": "Campo vazio. Plante uma semente.",
+    "faltam": "{planta}: faltam {dias}.",
+    "falta": "{planta}: falta {dias}.",
+    "nao_cresce": "{planta}: não cresce no inverno.",
+    "maduro": "Colheita pronta: {n} canteiro(s).",
+    "aviso_inverno": "O inverno chega em {dias}, colha tudo.",
+    "saga": {
+      "nome": "A Primeira Colheita",
+      "desc": "Aprenda a plantar, colher e fazer pão.",
+      "sementes_meta": 2,
+      "premio": {
+        "semente_cevada": 5
+      },
+      "concluida": "🌾 A Primeira Colheita concluída! +5 sementes de cevada.",
+      "passos": [
+        {
+          "id": "semente",
+          "dica": "Sementes vêm do capim alto. Toque no capim até ter {meta} sementes ({tem}/{meta})."
+        },
+        {
+          "id": "campo",
+          "dica": "Abra Construir e faça um Campo. Depois toque na obra até terminar."
+        },
+        {
+          "id": "plantar",
+          "dica": "Toque no Campo e depois em Plantar."
+        },
+        {
+          "id": "esperar",
+          "dica": "Espere crescer. Toque no Campo para ver os dias que faltam."
+        },
+        {
+          "id": "colher",
+          "dica": "Está maduro! Toque no Campo e depois em Colher."
+        },
+        {
+          "id": "pao",
+          "dica": "Construa uma Cozinha, toque nela e faça Pão de cevada."
+        }
+      ]
+    },
+    "guia": {
+      "titulo": "Guia do Campo",
+      "semente": "Semente",
+      "crescer": "Para crescer",
+      "estacoes": "Cresce em",
+      "uso": "Uso",
+      "nota": "Dias no ritmo normal. No verão cresce mais rápido ({verao}). No inverno nada cresce.",
+      "plantas": {
+        "cevada": {
+          "semente": "Capim alto, frutinhas e a própria colheita.",
+          "uso": "Pão de cevada (Cozinha), ração dos animais e compra de galinhas e ovelhas."
+        },
+        "nabo": {
+          "semente": "Troca com o mercador (3 de comida) e a própria colheita.",
+          "uso": "Ração dos animais e compra de ovelhas."
+        },
+        "linho": {
+          "semente": "Saque dos acampamentos de saqueadores e a própria colheita.",
+          "uso": "Ainda sem uso. Guarde para o futuro."
+        }
+      }
+    }
+  }
 }

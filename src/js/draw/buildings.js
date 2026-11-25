@@ -39,13 +39,22 @@ function dQuarry(b){const x=b.x,y=b.y,st=BIO.snowy?'#a9aaa8':C.stone;
   ln(ap,P(x+.6,y+1.05,30),C.woodD,2);ln(P(x+.6,y+1.05,30),P(x+.6,y+1.05,14),'#3a2a1a',1);box(x+.5,y+.95,.2,.2,10,4,shade(st,.2),shade(st,-.3),st)}
 function dFarmFlat(b,p){const x=b.x+.08,y=b.y+.08,w=b.w-.16,h=b.h-.16,soil=BIO.snowy?'#8a7562':'#7b5a35';const hh=h*Math.min(1,p);
   pp([P(x,y),P(x+w,y),P(x+w,y+hh),P(x,y+hh)],soil);for(let t=.25;t<hh;t+=.28)ln(P(x+.05,y+t),P(x+w-.05,y+t),shade(soil,-.25),1.3)}
+// 4 estágios visíveis: terra (sementes), broto, planta, madura (com brilho)
+function estagio(g){return g>=1?3:g>=.55?2:g>=.15?1:0}
+function dPlanta(pl,x,y,q){const K=CAMPO.culturas[pl.c],e=estagio(pl.g);
+  if(e===3){const c=P(x+.5,y+.5,0),a=.28+.16*Math.sin(perfT*3+q);ell(c[0],c[1]-3,17,9,`rgba(255,228,110,${a})`)}
+  for(let k=0;k<5;k++){const q0=P(x+.2+k*.15,y+.3+(k%2)*.4,0),X=q0[0],Y=q0[1],j=hash2(q,k)*1.5;
+    if(e===0)ell(X,Y,1.5,.9,'#e6d3a0');
+    else if(e===1){ln(q0,[X,Y-3-j],K.cor_broto,1.2);ell(X-1.8,Y-3.5-j,2,1.1,K.cor_broto);ell(X+1.8,Y-3.5-j,2,1.1,K.cor_broto)}
+    else{const h=(e===3?10:8)+j,col=e===3&&pl.c==='cevada'?K.cor_madura:K.cor_planta;ln(q0,[X,Y-h],col,1.5);ln([X,Y-h*.4],[X-3,Y-h*.65],col,1.2);ln([X,Y-h*.55],[X+3,Y-h*.8],col,1.2);
+      if(e===3){if(pl.c==='cevada')ell(X,Y-h-1.5,1.6,3,K.cor_madura);else if(pl.c==='nabo'){ell(X,Y-1,3,2.4,K.cor_madura);ell(X,Y+.3,1.8,1.2,'#f4eef4')}else ell(X,Y-h-1,2.4,2,K.cor_madura)}}}
+  if(e===3&&Math.sin(perfT*4+q*1.7)>.8){const c=P(x+.35+hash2(q,3)*.3,y+.4,0);ln([c[0]-3,c[1]-14],[c[0]+3,c[1]-14],'#fffbe0',1.1);ln([c[0],c[1]-17],[c[0],c[1]-11],'#fffbe0',1.1)}}
 function dFarm(b,p){if(p<1)return;
   for(let q=0;q<9;q++){const pl=b.canteiros&&b.canteiros[q];const x=b.x+q%3,y=b.y+((q/3)|0);
     const soil=!pl||pl.st===0?'#7b5a35':pl.st===1?'#5e4125':'#6a4a2b';
     pp([P(x+.06,y+.06),P(x+.94,y+.06),P(x+.94,y+.94),P(x+.06,y+.94)],soil);
     if(pl&&pl.st===1)for(let t=.2;t<1;t+=.27)ln(P(x+.1,y+t),P(x+.9,y+t),'rgba(30,18,8,.45)',1.2);
-    if(pl&&pl.st===2){const K=CAMPO.culturas[pl.c],pr=pl.g>=1,col=pr?'#e0b84a':shade(K.emoji==='🥕'?'#5f8f3a':'#6b9a3a',(pl.g-.5)*.3);
-      for(let k=0;k<5;k++){const sx=x+.2+k*.15,sy=y+.3+(k%2)*.4;const h=1+pl.g*7+hash2(q,k)*1.2;const q0=P(sx,sy,0);ln(q0,[q0[0],q0[1]-h],col,1.5);if(pr)ell(q0[0],q0[1]-h,1.1,1.6,shade(col,.2))}}}
+    if(pl&&pl.st===2)dPlanta(pl,x,y,q)}
   const s=P(b.x+1.5,b.y+1.5,0);ln(s,[s[0],s[1]-20],C.woodD,1.8);ln([s[0]-6,s[1]-15],[s[0]+6,s[1]-15],C.woodD,1.6);ctx.fillStyle='#8c6d3f';ctx.fillRect(s[0]-2.5,s[1]-17,5,7);ell(s[0],s[1]-19,2.4,2.4,'#d9b44a');pp([[s[0]-4,s[1]-20],[s[0]+4,s[1]-20],[s[0],s[1]-25]],'#5a3a22');
   for(const[cx,cy]of[[b.x,b.y],[b.x+3,b.y],[b.x,b.y+3],[b.x+3,b.y+3]])stake(P(cx,cy,0),8,C.woodL)}
 // cercado: chão, estacas em volta e um monte de feno
@@ -168,13 +177,13 @@ function drawSite(b){const p=b.prog/b.work,d=BD[b.type],x=b.x+.25,y=b.y+.25,w=b.
     if(p>.7){const rh=Hh+14*Math.min(1,(p-.7)/.3);const alongX=w>=h;for(const t of[0,.5,1]){if(alongX){const xx=x+w*t;ln(P(xx,y,Hh),P(xx,y+h/2,rh),C.woodL,1.8);ln(P(xx,y+h,Hh),P(xx,y+h/2,rh),C.woodL,1.8)}else{const yy=y+h*t;ln(P(x,yy,Hh),P(x+w/2,yy,rh),C.woodL,1.8);ln(P(x+w,yy,Hh),P(x+w/2,yy,rh),C.woodL,1.8)}}
       if(alongX)ln(P(x,y+h/2,rh),P(x+w,y+h/2,rh),C.woodD,2);else ln(P(x+w/2,y,rh),P(x+w/2,y+h,rh),C.woodD,2)}}
   const lg=P(b.x+b.w-.2,b.y+b.h-.1,0);for(let k=0;k<3;k++)ln([lg[0]-6,lg[1]-k*2.6],[lg[0]+4,lg[1]-k*2.6+2],k%2?C.woodL:C.wood,2.4)}
-function drawFlatB(b){const p=b.done?1:b.prog/b.work;switch(b.type){case'farm':return dFarmFlat(b,p);case'floor':return dFloorFlat(b,p);case'path':return dPathFlat(b,p);case'stockpile':return dStockFlat(b,p)}
+function drawFlatB(b){const p=b.done?1:b.prog/b.work;switch(b.type){case'farm':dFarmFlat(b,p);return dFarm(b,p);case'floor':return dFloorFlat(b,p);case'path':return dPathFlat(b,p);case'stockpile':return dStockFlat(b,p)}
   const d=BD[b.type];if(b.done&&!d.water&&!d.line&&!d.gate)pp([P(b.x+.15,b.y+.05),P(b.x+b.w+.35,b.y+.05),P(b.x+b.w+.35,b.y+b.h+.1),P(b.x+.15,b.y+b.h+.1)],'rgba(0,0,0,.13)')}
 function drawB(b){const p=b.done?1:b.prog/b.work;
   switch(b.type){case'wall':return dWall(b,p);case'stonewall':return dStoneWall(b,p);case'fence':return dFence(b,p);case'railfence':return dRailFence(b,p);case'gate':case'fgate':case'stonegate':case'railgate':return dGate(b,p);
-    case'bridge':return dBridge(b,p);case'farm':return dFarm(b,p);case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
+    case'bridge':return dBridge(b,p);case'farm':return;case'pen':return dPen(b,p);case'dock':return dDock(b,p);case'floor':case'path':return;case'stockpile':return dStockpile(b,p);case'cart':return drawCart({x:b.x+.5,y:b.y+.5,inv:{},items:{}})}
   if(!b.done)return drawSite(b);
-  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b);if(b.type==='longhouse'&&b.done)dBandeira(b)}
+  ({runa:drawRuna,bancada:dOficina,cavalete:dOficina,cozinha:dOficina,curtume:dOficina,fundicao:dOficina,salao:dLonghouse,longhouse:dLonghouse,house:dHouse,shelter:dShelter,lumber:dLumber,quarry:dQuarry,smithy:dSmithy,storage:dStorage,barracks:dBarracks,tower:dTower,trap:dTrap,bell:dBell})[b.type](b);if(b.type==='longhouse'&&b.done)dBandeira(b)}
 
 
 /* armadilha de estacas (no chão, estacas inclinadas) e sino de alarme (poste com sino) */

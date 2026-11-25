@@ -72,7 +72,7 @@ function procChegou(u,o){const b=BMAP.get(o.b);if(!b||!b.done){refund(o.paid,1);
 function oficioFim(u,a){const o=u.order;
   if(a.r==='reparo'){const w=piorFerr(a.k);if(w){w.d=maxFerr(a.k,w.q)};toast(`🔧 ${ITEMS[a.k].n} consertado`,'good')}
   else{const R=OFICIO.estacoes[(BMAP.get(a.b)||{}).type||'']?.[a.r];if(!R)return;
-    for(const k in R.saida)addInv(k,R.saida[k]);if(a.r==='lingote')G.flags.lingote=true;toast(`✅ ${R.n} pronto`,'good')}
+    for(const k in R.saida)addInv(k,R.saida[k]);if(a.r==='lingote')G.flags.lingote=true;if(a.r==='pao'&&G.colheita)G.colheita.pao=true;toast(`✅ ${R.n} pronto`,'good')}
   sfx('craft');if(o)o.done=true;u.order=null}
 // painel da estação (receitas e reparo)
 function estacaoHTML(b){let h='';const R=OFICIO.estacoes[b.type];

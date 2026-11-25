@@ -17,11 +17,13 @@ function openMenu(inGame){menuOpen=true;$('#menu').classList.remove('hidden');$(
     else h+='<button class="gbtn" id="mHost">👥 Jogar com amigo</button><button class="sbtn" id="mJoin">🔗 Entrar com código</button>';
     if(hasSave())h+='<button class="'+(inGame?'sbtn':'gbtn')+'" id="mLoad">📂 '+(inGame?'Carregar salvo':'Continuar jogo salvo')+'</button>';
   }
+  h+='<button class="sbtn" id="mGuia">📖 Guia do Campo</button>';
   if(!guest)h+='<button class="sbtn" id="mTransfer">🧳 Levar mundo</button>';
   $('#mTop').innerHTML=h;
   $('#newSec').style.display=guest?'none':'';
   const on=(id,f)=>{const el=$('#'+id);if(el)el.onclick=f};
   if(!guest)ligaTransfer(inGame);else $('#transfer').classList.add('hidden');
+  ligaGuia();
   on('mResume',closeMenu);on('mSave',()=>{save();openMenu(true)});on('mSagas',()=>{closeMenu();openSheet('saga')});on('mLoad',()=>{if(load())closeMenu()});
   on('mNetLeave',netGuestQuit);on('mNetEnd',()=>{netLeave(false);openMenu(inGame)});
   on('mHost',()=>{if(inGame){if(netHost()){toast('Sala '+NET.code+': diga o código ao seu amigo','good');openMenu(true)}}else{NET.pendingHost=true;toast('Escolha o cenário. A sala abre com ele.','')}});

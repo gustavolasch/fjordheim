@@ -46,6 +46,7 @@
     "tempo": 3
   },
   "estacoes": {
+    "cozinha": { "pao": { "n": "Pão de cevada", "entrada": { "cevada": 2 }, "saida": { "food": 3 }, "tempo": 3 } },
     "cavalete": {
       "tabua": {
         "n": "Tábua",

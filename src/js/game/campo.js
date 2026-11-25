@@ -25,7 +25,7 @@ function migraV12(){const dAntigo=Math.floor(G.t/DIA()),nAntigo=4,c=10*4;
 function farmoNext(b,op,c){const seed=c&&CAMPO.culturas[c]?CAMPO.culturas[c].semente:null;
   for(let q=0;q<9;q++){const p=b.canteiros[q];if(!p)continue;
     if(op==='prep'&&p.st===0)return q;
-    if(op==='plant'&&p.st===1&&estacao().e.plantar&&have(seed)>0)return q;
+    if(op==='plant'&&p.st<2&&estacao().e.plantar&&have(seed)>0)return q;
     if(op==='harvest'&&p.st===2&&p.g>=1)return q}
   return -1}
 // o que o lavrador faz agora: colhe o pronto, planta o que tem semente, prepara o vazio
@@ -37,19 +37,19 @@ function farmoMsg(b,op,c){
   if(op==='prep')return farmoNext(b,'prep')>=0?null:'Nenhum canteiro vazio';
   if(op==='harvest')return farmoNext(b,'harvest')>=0?null:'Nada pronto para colher';
   if(op==='plant'){if(!CAMPO.culturas[c])return'Cultura inválida';
-    if(!estacao().e.plantar)return'No inverno nada é plantado';
-    const seed=CAMPO.culturas[c].semente;if(have(seed)<=0)return`Falta ${RES[seed][0].toLowerCase()}. Sementes vêm de frutinhas e da colheita.`;
-    return farmoNext(b,'plant',c)>=0?null:'Nenhum canteiro preparado para plantar'}
+    if(!estacao().e.plantar)return CAMPO.textos.inverno_sem_plantio;
+    const seed=CAMPO.culturas[c].semente;if(have(seed)<=0)return CAMPO.textos.sem_semente;
+    return farmoNext(b,'plant',c)>=0?null:CAMPO.textos.campo_cheio}
   return'Ação inválida'}
 function farmoResumo(b){const r={v:0,pr:0,pl:0,pt:0};for(const p of b.canteiros){if(p.st===0)r.v++;else if(p.st===1)r.pr++;else if(p.g>=1)r.pt++;else r.pl++}return r}
 // aplica uma ação num canteiro (a simulação confere tudo)
 function applyPlot(b,q,op,c){const p=b.canteiros[q];if(!p)return false;
   if(op==='prep'){if(p.st!==0)return false;p.st=1;return true}
-  if(op==='plant'){const K=CAMPO.culturas[c];if(!K||p.st!==1||!estacao().e.plantar||!afford({[K.semente]:1}))return false;
+  if(op==='plant'){const K=CAMPO.culturas[c];if(!K||p.st>1||!estacao().e.plantar||!afford({[K.semente]:1}))return false;
     pay({[K.semente]:1});p.st=2;p.c=c;p.g=0;return true}
   if(op==='harvest'){if(p.st!==2||p.g<1)return false;const K=CAMPO.culturas[p.c];
     for(const k in K.colheita)addInv(k,K.colheita[k],b.x+1.5,b.y+1.5);
-    p.st=0;p.c=null;p.g=0;return true}
+    p.st=0;p.c=null;p.g=0;G.flags.colheita=true;if(G.colheita)G.colheita.colheu=true;return true}
   return false}
 function farmoCrescer(dt){const m=estacao().e.crescimento;if(m<=0)return;
   for(const b of G.bld){if(b.type!=='farm'||!b.done||!b.canteiros)continue;
@@ -94,7 +94,7 @@ function campoTick(dt){
   G.capimVolta=G.capimVolta||[];for(const e of G.capimVolta.slice())if(G.t>=e.t){TUFT[e.i]=e.tf;G.capimVolta.splice(G.capimVolta.indexOf(e),1)}
   const d=Math.floor(G.t/DIA());if(G.campoDia==null)G.campoDia=d;
   if(d>G.campoDia){const n=Math.min(d-G.campoDia,5);G.campoDia=d;for(let k=0;k<n;k++)alimentaAnimais()}
-  farmoCrescer(dt);estraga(dt);
+  farmoCrescer(dt);estraga(dt);colheitaTick();avisoInverno();
   for(const u of G.units.slice())if(u.kind==='domestic'&&!penDe(u)){removeUnit(u);toast(`${CAMPO.animais[u.sp]?.n||'Um animal'} fugiu: o cercado foi desmontado.`,'bad')}}
 
 // migração v7: fazendas antigas ganham canteiros; itens novos começam em zero

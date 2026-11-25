@@ -9,7 +9,7 @@ const HINTS={
  pick:'Rochas grandes e minério pedem uma [[ferramentas.pick]] Picareta. Crie uma em Criar.',
  night:'A noite chegou. Uma fogueira (Decoração) ilumina sua base.',
 
- semente:'Capim alto e frutinhas às vezes dão sementes de cevada. Plante na Fazenda.',
+ semente:'Capim alto e frutinhas às vezes dão sementes de cevada. Plante num Campo.',
  fence:'Cercas e muros se conectam sozinhos: em linha, na diagonal e nos cantos.'
 };
 

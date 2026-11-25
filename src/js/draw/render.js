@@ -38,7 +38,7 @@ function render(){
   const L=[];LIGHTS.length=0;
   for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(!vis(x+.5,y+.5))continue;if(G.tiles[i]===4)L.push([x+y+1,1,i]);else if(G.obj[i])L.push([x+y+1+(G.obj[i].ox||0)+(G.obj[i].oy||0),0,i])}
   for(const p of G.lugares||[])if(vis(p.x+.5,p.y+.5))L.push([p.x+p.y+1.5,7,p]);
-  for(const b of G.bld){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')continue;const cx=b.x+b.w/2,cy=b.y+b.h/2;if(vis(cx,cy))L.push([cx+cy,2,b])}
+  for(const b of G.bld){const d=BD[b.type];if(d.flat&&d.pass)continue;const cx=b.x+b.w/2,cy=b.y+b.h/2;if(vis(cx,cy))L.push([cx+cy,2,b])}
   for(const u of G.units)if(!u.hidden&&!u.dentro&&vis(u.x,u.y))L.push([u.x+u.ox+u.y+u.oy+.02,3,u]);
   for(const d of G.decor)if(vis(d.x,d.y))L.push([d.x+d.y,4,d]);
   for(const t of G.tombs)if(vis(t.x,t.y))L.push([t.x+t.y,5,t]);
@@ -81,6 +81,7 @@ function render(){
     else if(b.hp<b.max&&b.done){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(top[0]-14,top[1],28,4);ctx.fillStyle=b.hp<b.max*.4?'#e2533f':'#6fd35b';ctx.fillRect(top[0]-14,top[1],28*b.hp/b.max,4)}
     if(!b.done&&d.line){const q=P(cx,cy,2);ctx.strokeStyle='rgba(243,201,105,.6)';ctx.setLineDash([3,3]);ctx.lineWidth=1;pp([P(b.x+.1,b.y+.1),P(b.x+.9,b.y+.1),P(b.x+.9,b.y+.9),P(b.x+.1,b.y+.9)],null,'rgba(243,201,105,.55)',1);ctx.setLineDash([])}
     if(sel&&sel.k==='b'&&sel.id===b.id){ctx.setLineDash([5,4]);pp([P(b.x,b.y),P(b.x+b.w,b.y),P(b.x+b.w,b.y+b.h),P(b.x,b.y+b.h)],null,'#f3c969',2);ctx.setLineDash([])}}
+  desenhaMarcasCampo(vis);
   drawGhost();
   ctx.setTransform(DPR,0,0,DPR,0,0);
   drawWeather();

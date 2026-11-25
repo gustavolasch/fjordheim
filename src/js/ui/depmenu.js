@@ -30,7 +30,7 @@ function bTapInter(b){const d=BD[b.type];if(d.flat&&d.pass&&b.type!=='farm')retu
   return!b.done||!!d.store||b.type==='farm'||b.type==='dock'||!(d.grp&&!d.gate)}
 function tapCands(px,py,tx,ty){const out=[];
   let b=bAt(tx,ty);if(!b)for(const o of[1,2]){const c=bAt(tx+o,ty+o);if(c&&!BD[c.type].flat&&!BD[c.type].line){b=c;break}}
-  if(b&&!(BD[b.type].flat&&BD[b.type].pass)&&b.type!=='bridge')out.push({k:'b',ref:b,inter:bTapInter(b),pri:6,name:BD[b.type].n+(b.done?'':' (obra)')});
+  if(b&&!(BD[b.type].flat&&BD[b.type].pass&&b.type!=='farm')&&b.type!=='bridge')out.push({k:'b',ref:b,inter:bTapInter(b),pri:6,name:BD[b.type].n+(b.done?'':' (obra)')});
   for(const d of decorHits(px,py))out.push({k:'d',ref:d,inter:true,pri:5,name:DECOR[d.k].n});
   for(const i of objHits(px,py)){const o=G.obj[i];out.push({k:'o',ref:i,inter:true,pri:PICK_PRI[o.t]??3,name:OBJNAME[o.t]||o.t})}
   return out.sort((a,c)=>a.pri-c.pri)}
