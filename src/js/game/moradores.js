@@ -14,7 +14,9 @@ function isNoite(){return nightDark(G.t)>0}
 // ---- moradias: ajudantes dormem na Barraca (coletiva). Abrigo e Casa têm um só dono (house:1) e
 // são entregues por pedido de nível. O primeiro Abrigo fica reservado para o jogador. ----
 function ocupacao(b){let c=0;for(const u of G.units)if(u.kind==='villager'&&u.cama===b.id)c++;return c}
-function acharCama(){for(const b of G.bld){if(!b.done||!BD[b.type].coletiva)continue;if(ocupacao(b)<BD[b.type].house)return b}return null}
+// a construção mais perto de u entre as que passam no teste
+function maisPerto(u,teste){let best=null,bd=1e9;for(const b of G.bld){if(!b.done||!teste(b))continue;const d=u?Math.hypot(b.x+b.w/2-u.x,b.y+b.h/2-u.y):0;if(d<bd){bd=d;best=b}}return best}
+function acharCama(u){return maisPerto(u,b=>BD[b.type].coletiva&&ocupacao(b)<BD[b.type].house)}
 // vagas livres nas Barracas, descontando quem ainda espera uma
 function vagasBarraca(){let v=0;for(const b of G.bld)if(b.done&&BD[b.type].coletiva)v+=BD[b.type].house-ocupacao(b);
   return v-G.units.filter(u=>u.kind==='villager'&&u.cama==null).length}
@@ -22,9 +24,23 @@ function abrigoDoJogador(){let b=G.abrigoJogador!=null?BMAP.get(G.abrigoJogador)
   if(!b){b=G.bld.find(x=>x.done&&x.type==='shelter'&&!ocupacao(x))||null;G.abrigoJogador=b?b.id:null}
   return b}
 function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b:null}
-// tenta dar cama a quem não tem (ou perdeu a cama numa demolição)
-// dá cama a quem nunca teve uma (cama=null). Cama destruída fica com o id antigo e não é reatribuída.
-function acertaCamas(){for(const u of G.units){if(u.kind!=='villager')continue;if(u.cama==null){const b=acharCama();u.cama=b?b.id:null;if(b)u.carenciaAte=0}}}
+// moradia destruída ou desmontada: o morador fica sem cama
+function limpaCamas(){for(const u of G.units)if(u.kind==='villager'&&u.cama!=null&&!camaDo(u)){u.cama=null;u.perdeuCasa=true}}
+// quem está sem cama vai para a vaga mais próxima; sem vaga, começa o prazo para ir embora
+function acertaCamas(){limpaCamas();for(const u of G.units){if(u.kind!=='villager'||u.cama!=null)continue;
+  const b=acharCama(u),S=PESSOAS.sem_teto;
+  if(b){u.cama=b.id;u.carenciaAte=0;
+    if(u.semTeto||u.perdeuCasa)toast(`⛺ ${u.name} foi para a vaga mais próxima: ${BD[b.type].n}.`,'good');
+    u.semTeto=null;u.perdeuCasa=false}
+  else if(!u.semTeto){u.semTeto={desde:G.t,dias:null};u.carenciaAte=G.t+S.prazo_dias*DIA();u.perdeuCasa=false;
+    toast(`🗣️ ${u.name}: não há vaga para mim. Vou embora em ${S.prazo_dias} dias se não tiver onde morar.`,'bad')}}}
+function diasSemTeto(u){return u.semTeto?Math.max(0,PESSOAS.sem_teto.prazo_dias-(G.t-u.semTeto.desde)/DIA()):0}
+// retorna false se o morador foi embora
+function semTetoTick(u){if(u.cama!=null||!u.semTeto)return true;const S=PESSOAS.sem_teto,falta=diasSemTeto(u),d=Math.ceil(falta);
+  if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: não tinha onde morar.`,'bad');return false}
+  if(d<S.prazo_dias&&u.semTeto.dias!==d){u.semTeto.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} se não tiver onde morar.`,'bad')}
+  if(!u.dormindo&&G.t>=(u.tetoT||0)){u.tetoT=G.t+S.balao_intervalo;u.fala={txt:S.fala,t:S.balao_seg}}
+  return true}
 
 // ---- pedidos de moradia: u.pedido = {tipo:'abrigo'|'casa', desde:G.t} ----
 // o que o morador precisa e ainda não tem (ou null)
@@ -32,16 +48,16 @@ function moradiaDevida(u){const P=PESSOAS.pedidos,n=maiorNivel(u),b=camaDo(u),t=
   if(n>=P.casa.nivel&&t===P.abrigo.predio)return'casa';
   if(n>=P.abrigo.nivel&&t!==P.abrigo.predio&&t!==P.casa.predio)return'abrigo';
   return null}
-function moradiaLivre(tipo){const meu=abrigoDoJogador();return G.bld.find(b=>b.done&&b.type===tipo&&b!==meu&&!ocupacao(b))||null}
+function moradiaLivre(tipo,u){const meu=abrigoDoJogador();return maisPerto(u,b=>b.type===tipo&&b!==meu&&!ocupacao(b))}
 function diasDoPedido(u){return u.pedido?Math.max(0,PESSOAS.pedidos.prazo_dias-(G.t-u.pedido.desde)/DIA()):0}
-function mudaPara(u,b){u.cama=b.id;u.carenciaAte=0;u.pedido=null;u.moral=clamp(u.moral+PESSOAS.pedidos.bonus_moral,0,100);
+function mudaPara(u,b){u.cama=b.id;u.carenciaAte=0;u.pedido=null;u.semTeto=null;u.perdeuCasa=false;u.moral=clamp(u.moral+PESSOAS.pedidos.bonus_moral,0,100);
   toast(`🏠 ${u.name} se mudou: ${BD[b.type].n}. A moral subiu.`,'good')}
 // entrega moradia livre a quem pediu; sem ela, abre o pedido. Retorna false se o morador foi embora.
 function pedidoTick(u){const P=PESSOAS.pedidos;
   const tipo=moradiaDevida(u);
   if(!tipo){u.pedido=null;return true}
   // quem já está no nível da Casa e ainda mora na Barraca pode ir direto para uma Casa livre
-  const livre=(maiorNivel(u)>=P.casa.nivel&&moradiaLivre(P.casa.predio))||moradiaLivre(P[tipo].predio);
+  const livre=(maiorNivel(u)>=P.casa.nivel&&moradiaLivre(P.casa.predio,u))||moradiaLivre(P[tipo].predio,u);
   if(livre){mudaPara(u,livre);return true}
   if(!u.pedido||u.pedido.tipo!==tipo){u.pedido={tipo,desde:G.t,dias:null};
     toast(`🗣️ ${u.name} ${P[tipo].pede}. Prazo: ${P.prazo_dias} dias.`,'bad')}
@@ -49,7 +65,7 @@ function pedidoTick(u){const P=PESSOAS.pedidos;
   if(tipo==='abrigo'){
     if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
     if(d<P.prazo_dias&&u.pedido.dias!==d){u.pedido.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} sem um Abrigo.`,'bad')}}
-  if(!u.fala&&!u.dormindo&&G.t>=(u.balaoT||0)){u.balaoT=G.t+P.balao_intervalo;u.fala={txt:P[tipo].fala,t:P.balao_seg}}
+  if(!u.semTeto&&!u.fala&&!u.dormindo&&G.t>=(u.balaoT||0)){u.balaoT=G.t+P.balao_intervalo;u.fala={txt:P[tipo].fala,t:P.balao_seg}}
   return true}
 
 // ---- traços: 1 bom e 1 ruim, sorteados da lista do JSON ----
@@ -103,8 +119,10 @@ function moralTick(u,dt){const R=PESSOAS.moral.por_dia,k=dt/DIA();let d=0;
 // moradores: moral, aviso, saída e camas (roda a cada quadro, barato)
 function moradoresTick(dt){
   diaTick();
-  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;abrigoDoJogador();acertaCamas();
-    for(const u of G.units.slice())if(u.kind==='villager')pedidoTick(u)}
+  G.bedT=(G.bedT||0)-dt;if(G.bedT<=0){G.bedT=2;limpaCamas();abrigoDoJogador();
+    for(const u of G.units.slice())if(u.kind==='villager')pedidoTick(u); // moradia própria primeiro
+    acertaCamas();
+    for(const u of G.units.slice())if(u.kind==='villager')semTetoTick(u)}
   for(const u of G.units)if(u.kind==='villager'&&u.fala){u.fala.t-=dt;if(u.fala.t<=0)u.fala=null}
   const M=PESSOAS.moral;
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
@@ -145,13 +163,13 @@ function migraV6(){
   acertaCamas()}
 
 // save antes da v14: só Barraca abriga ajudantes. Ninguém é removido; quem dormia em outro lugar
-// ganha PESSOAS.carencia_moradia_dias sem perder moral por falta de cama.
+// vale a regra de sem teto (prazo de PESSOAS.sem_teto, sem perder moral por falta de cama até lá).
 function migraV14(){let n=0;
   for(const u of G.units){if(u.kind!=='villager')continue;
     const b=camaDo(u);if(b&&BD[b.type].coletiva)continue;
-    u.cama=null;u.carenciaAte=G.t+PESSOAS.carencia_moradia_dias*DIA();n++}
+    u.cama=null;n++}
   abrigoDoJogador();acertaCamas();
-  if(n)toast(`⛺ Agora os ajudantes dormem na Barraca (4 vagas). Construa em até ${PESSOAS.carencia_moradia_dias} dias.`,'bad')}
+  if(n)toast(`⛺ Agora os ajudantes dormem na Barraca (4 vagas). Construa em até ${PESSOAS.sem_teto.prazo_dias} dias ou eles vão embora.`,'bad')}
 
 // vida na vila (morador sem trabalho): passeia pela vila, senta perto de fogo e conversa com outro sem trabalho
 function fogosDaVila(){const f=G.decor.filter(d=>d.k==='campfire').map(d=>[d.x,d.y]);

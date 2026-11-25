@@ -33,7 +33,7 @@ function updWanderer(u,dt){
 }
 // convite: o andarilho vira morador e ocupa uma cama
 function recruitUnit(a){
-  const cama=acharCama();
+  const cama=acharCama(a);
   if(!cama)return cmdFail('Sem vaga na Barraca');
   const custo={food:PESSOAS.andarilho.custo_comida};
   if(!afford(custo))return cmdFail('Falta comida');
