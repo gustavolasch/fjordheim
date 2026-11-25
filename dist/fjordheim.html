@@ -210,7 +210,7 @@ img.ico{width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain;disp
     <div class="bgrid" id="biomes"></div></div>
     <h3>Opções</h3>
     <div class="opts" id="opts"></div>
-    <p class="ver">v0.2.0 · 5a75a9b</p>
+    <p class="ver">v0.2.0 · d69707f</p>
     <p class="help">Toque no chão para andar e nos objetos para coletar · arraste para mover a câmera · pinça ou roda do mouse para zoom</p>
   </div>
 </div>
@@ -1301,6 +1301,8 @@ function abrigoDoJogador(){let b=G.abrigoJogador!=null?BMAP.get(G.abrigoJogador)
   if(!b){b=G.bld.find(x=>x.done&&x.type==='shelter'&&!ocupacao(x))||null;G.abrigoJogador=b?b.id:null}
   return b}
 function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b:null}
+// morador que deixa a vila (moral, sem Abrigo no prazo ou sem teto); mortes não contam
+function vaiEmbora(u){unassign(u);removeUnit(u);G.foramEmbora=(G.foramEmbora||0)+1}
 // moradia destruída ou desmontada: o morador fica sem cama
 function limpaCamas(){for(const u of G.units)if(u.kind==='villager'&&u.cama!=null&&!camaDo(u)){u.cama=null;u.perdeuCasa=true}}
 // quem está sem cama vai para a vaga mais próxima; sem vaga, começa o prazo para ir embora
@@ -1314,7 +1316,7 @@ function acertaCamas(){limpaCamas();for(const u of G.units){if(u.kind!=='village
 function diasSemTeto(u){return u.semTeto?Math.max(0,PESSOAS.sem_teto.prazo_dias-(G.t-u.semTeto.desde)/DIA()):0}
 // retorna false se o morador foi embora
 function semTetoTick(u){if(u.cama!=null||!u.semTeto)return true;const S=PESSOAS.sem_teto,falta=diasSemTeto(u),d=Math.ceil(falta);
-  if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: não tinha onde morar.`,'bad');return false}
+  if(falta<=0){vaiEmbora(u);toast(`🚶 ${u.name} foi embora: não tinha onde morar.`,'bad');return false}
   if(d<S.prazo_dias&&u.semTeto.dias!==d){u.semTeto.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} se não tiver onde morar.`,'bad')}
   if(!u.dormindo&&G.t>=(u.tetoT||0)){u.tetoT=G.t+S.balao_intervalo;u.fala={txt:S.fala,t:S.balao_seg}}
   return true}
@@ -1340,7 +1342,7 @@ function pedidoTick(u){const P=PESSOAS.pedidos;
     toast(`🗣️ ${u.name} ${P[tipo].pede}. Prazo: ${P.prazo_dias} dias.`,'bad')}
   const falta=diasDoPedido(u),d=Math.ceil(falta);
   if(tipo==='abrigo'){
-    if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
+    if(falta<=0){vaiEmbora(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
     if(d<P.prazo_dias&&u.pedido.dias!==d){u.pedido.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} sem um Abrigo.`,'bad')}}
   if(!u.semTeto&&!u.fala&&!u.dormindo&&G.t>=(u.balaoT||0)){u.balaoT=G.t+P.balao_intervalo;u.fala={txt:P[tipo].fala,t:P.balao_seg}}
   return true}
@@ -1405,7 +1407,7 @@ function moradoresTick(dt){
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
     moralTick(u,dt);
     if(u.moral<=M.sair_abaixo){
-      unassign(u);removeUnit(u);toast(`😠 ${u.name} foi embora: a moral estava muito baixa.`,'bad');continue}
+      vaiEmbora(u);toast(`😠 ${u.name} foi embora: a moral estava muito baixa.`,'bad');continue}
     if(u.moral<=M.aviso_abaixo){
       if(!u.warnT)u.warnT={};
       if(u.warnT.moral==null||G.t-u.warnT.moral>M.aviso_intervalo){u.warnT.moral=G.t;toast(`😟 ${u.name} está quase indo embora. Dê cama e comida.`,'bad')}}}}
@@ -2870,12 +2872,13 @@ function colheitaHTML(){const C=G.colheita,S=CAMPO.textos.saga,fim=!!(C&&C.fim);
   if(C&&!fim)h+=`<ol class="passos">${S.passos.map((s,i)=>i<C.p?`<li class="ok">✅ ${s.n}</li>`:i===C.p?`<li class="atual">▶ ${s.n}<span>${preenche(s.dica,{meta:S.sementes_meta,tem:Math.min(have('semente_cevada'),S.sementes_meta)})}</span></li>`:`<li class="depois">⬜ ${s.n}</li>`).join('')}</ol><div class="row"><button class="sbtn" data-a="seta">👇 ${setaOff?'Mostrar seta':'Esconder seta'}</button></div>`;
   return h+`<div class="small">Recompensa: ${premio}</div></div>`}
 function eraMissoesHTML(){return`<h4>Metas da era ${G.era}: ${ERAS.nomes[G.era-1]}</h4><div class="item">${metasDaEra().map(c=>`<div class="small">${metaOk(c)?'✅':'⬜'} ${META_TXT[c.tipo](c)}</div>`).join('')}${G.era<5?'<div class="small">Com tudo pronto, toque na pedra rúnica para avançar.</div>':''}</div>`}
+function povoHTML(){return`<table class="tbl"><tr><td>👥 Moradores na vila</td><td>${popCount()}</td></tr><tr><td>🚶 Foram embora</td><td>${G.foramEmbora||0}</td></tr></table>`}
 function pedidosHTML(){const P=PESSOAS.pedidos,V=G.units.filter(u=>u.kind==='villager'),L=V.filter(u=>u.pedido),R=V.filter(u=>u.semTeto);if(!L.length&&!R.length)return'';
   return`<h4>Pedidos de moradia</h4>`+R.map(u=>{const d=Math.ceil(diasSemTeto(u));
     return`<div class="item"><div class="top"><b>⬜ ⛺ ${u.name} não tem onde morar</b></div><div class="small">Libere ou construa uma vaga na Barraca. Vai embora em ${d} dia${d>1?'s':''}.</div></div>`}).join('')+L.map(u=>{const T=P[u.pedido.tipo],d=Math.ceil(diasDoPedido(u));
     const fim=u.pedido.tipo==='abrigo'?`Vai embora em ${d} dia${d>1?'s':''}.`:d>0?`A moral começa a cair em ${d} dia${d>1?'s':''}.`:'A moral está caindo.';
     return`<div class="item"><div class="top"><b>⬜ 🏠 ${u.name} ${T.pede}</b></div><div class="small">Construa: ${BD[T.predio].n}. ${fim}</div><div class="small">Ao se mudar: +${P.bonus_moral} de moral.</div></div>`}).join('')}
-function missoesHTML(){return head('📖 Livro de Missões','Todas as missões da vila.')+`<div class="livro">${pedidosHTML()}<h4>Aprendizado</h4>${colheitaHTML()}<h4>Sagas</h4><p class="small">A recompensa vai para o depósito.</p>${sagaHTML()}${eraMissoesHTML()}</div>`}
+function missoesHTML(){return head('📖 Livro de Missões','Todas as missões da vila.')+`<div class="livro">${povoHTML()}${pedidosHTML()}<h4>Aprendizado</h4>${colheitaHTML()}<h4>Sagas</h4><p class="small">A recompensa vai para o depósito.</p>${sagaHTML()}${eraMissoesHTML()}</div>`}
 $('#bQuest').addEventListener('click',()=>{sfx('tick');if(sheetKind==='missoes'){closeSheet();return}if(mode.t!=='none')cancelMode();sel=null;openSheet('missoes');livroHUD()});
 const noElemento=s=>{const e=document.querySelector(s);if(!e||e.disabled)return null;const r=e.getBoundingClientRect();return r.width&&r.right>0&&r.left<innerWidth?[r.left+r.width/2,r.top]:null};
 const noMapa=(x,y,z)=>w2s(x,y,z||0);
@@ -2963,7 +2966,7 @@ function audioTick(dt){if(!SND.ctx||!SND.wind)return;const w=windStrength(),on=s
 // e ao multijogador (o anfitrião manda ao amigo). Não leva a câmera nem nada que seja só deste aparelho.
 // applyState() é o caminho inverso: reconstrói G a partir dele.
 const SAVE_VER=14; // v14: moradias (Barraca para os ajudantes; G.abrigoJogador = abrigo reservado do jogador)
-function snapState(){return{v:SAVE_VER,abrigoJogador:G.abrigoJogador??null,estOff:G.estOff||0,colheita:G.colheita||null,bandeira:G.bandeira,capimVolta:G.capimVolta,era:G.era,ferr:G.ferr,dia:G.dia,campoDia:G.campoDia,estAcc:G.estAcc,lugares:G.lugares,receitas:G.receitas,sagas:G.sagas,perdas:G.perdas,invasoesRepelidas:G.invasoesRepelidas,evT:G.evT,saqueT:G.saqueT,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
+function snapState(){return{v:SAVE_VER,abrigoJogador:G.abrigoJogador??null,foramEmbora:G.foramEmbora||0,estOff:G.estOff||0,colheita:G.colheita||null,bandeira:G.bandeira,capimVolta:G.capimVolta,era:G.era,ferr:G.ferr,dia:G.dia,campoDia:G.campoDia,estAcc:G.estAcc,lugares:G.lugares,receitas:G.receitas,sagas:G.sagas,perdas:G.perdas,invasoesRepelidas:G.invasoesRepelidas,evT:G.evT,saqueT:G.saqueT,carts:G.carts.map(c=>({...c,rider:null})),biome:G.biome,seed:G.seed,tiles:Array.from(G.tiles),wear:Array.from(G.wear,v=>Math.round(v*10)/10),h:Array.from(G.h,v=>Math.round(v)),obj:G.obj,bld:G.bld.map(b=>({...b,pop:0})),units:G.units.map(u=>({...u,path:null,act:null,order:null,flee:false,ride:null})),decor:G.decor,tombs:G.tombs,res:G.res,inv:G.inv,items:G.items,t:G.t,speed:G.speed,idc:G.idc,nextRaid:isFinite(G.nextRaid)?G.nextRaid:1e12,raidN:G.raidN,raidOn:G.raidOn,regrow:G.regrow,fall:G.fall,hints:G.hints,flags:G.flags,pid:G.pid,start:G.start,equip:G.equip,rs:G.rs,animT:G.animT}}
 function applyState(s){
   BIO=BIOMES[s.biome];G={biome:s.biome,seed:s.seed,tiles:Uint8Array.from(s.tiles),wear:Float32Array.from(s.wear),h:Float32Array.from(s.h),obj:s.obj,occ:new Int32Array(N*N),bld:s.bld,units:s.units,decor:s.decor||[],tombs:s.tombs||[],carts:s.carts||[],res:s.res,inv:s.inv,items:s.items,t:s.t,speed:s.speed||1,idc:s.idc,nextRaid:s.nextRaid,raidN:s.raidN||0,raidOn:s.raidOn,regrow:s.regrow||[],fall:s.fall||[],hints:s.hints||{},flags:s.flags||{},pid:s.pid,start:s.start,demo:false,equip:s.equip||emptyEquip(),rs:s.rs??((s.seed|0)^0x9e3779b9),animT:s.animT||0,bandeira:s.bandeira||null,era:s.era||1,ferr:s.ferr||{},lugares:s.lugares||null,receitas:s.receitas||[],sagas:s.sagas||{},perdas:s.perdas||0,invasoesRepelidas:s.invasoesRepelidas||0,evT:s.evT,saqueT:s.saqueT};
   BMAP=new Map();UMAP=new Map();for(const b of G.bld){BMAP.set(b.id,b);for(let dy=0;dy<b.h;dy++)for(let dx=0;dx<b.w;dx++)G.occ[idx(b.x+dx,b.y+dy)]=b.id}
@@ -2977,7 +2980,7 @@ function applyState(s){
   if((s.v||3)<9)migraV9(); // save antigo: eras, ferramentas com durabilidade e pedra rúnica
   if((s.v||3)<8)migraV8(); // save antigo: mundo vivo (névoa, lugares, receitas, sagas)
   if((s.v||3)<7)migraV7(); // save antigo: lavoura ganha canteiros e itens novos
-  G.abrigoJogador=s.abrigoJogador??null;
+  G.abrigoJogador=s.abrigoJogador??null;G.foramEmbora=s.foramEmbora||0;
   if((s.v||3)<14)migraV14(); // save antigo: só a Barraca abriga ajudantes
   PT=[];AR=[];initTiles();for(const e of G.capimVolta||[])TUFT[e.i]=null;bgGrad=null;initWeather();makeThumbs()}
 function save(silent){if(!G||G.demo||NET.role==='guest')return;try{const s=snapState();s.cam=cam;localStorage.setItem(SAVE_KEY,JSON.stringify(s));if(!silent)toast('💾 Jogo salvo neste navegador','good')}catch(e){if(!silent)toast('Não foi possível salvar neste navegador','bad')}}

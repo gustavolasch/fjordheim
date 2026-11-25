@@ -24,6 +24,8 @@ function abrigoDoJogador(){let b=G.abrigoJogador!=null?BMAP.get(G.abrigoJogador)
   if(!b){b=G.bld.find(x=>x.done&&x.type==='shelter'&&!ocupacao(x))||null;G.abrigoJogador=b?b.id:null}
   return b}
 function camaDo(u){const b=u.cama!=null?BMAP.get(u.cama):null;return b&&b.done?b:null}
+// morador que deixa a vila (moral, sem Abrigo no prazo ou sem teto); mortes não contam
+function vaiEmbora(u){unassign(u);removeUnit(u);G.foramEmbora=(G.foramEmbora||0)+1}
 // moradia destruída ou desmontada: o morador fica sem cama
 function limpaCamas(){for(const u of G.units)if(u.kind==='villager'&&u.cama!=null&&!camaDo(u)){u.cama=null;u.perdeuCasa=true}}
 // quem está sem cama vai para a vaga mais próxima; sem vaga, começa o prazo para ir embora
@@ -37,7 +39,7 @@ function acertaCamas(){limpaCamas();for(const u of G.units){if(u.kind!=='village
 function diasSemTeto(u){return u.semTeto?Math.max(0,PESSOAS.sem_teto.prazo_dias-(G.t-u.semTeto.desde)/DIA()):0}
 // retorna false se o morador foi embora
 function semTetoTick(u){if(u.cama!=null||!u.semTeto)return true;const S=PESSOAS.sem_teto,falta=diasSemTeto(u),d=Math.ceil(falta);
-  if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: não tinha onde morar.`,'bad');return false}
+  if(falta<=0){vaiEmbora(u);toast(`🚶 ${u.name} foi embora: não tinha onde morar.`,'bad');return false}
   if(d<S.prazo_dias&&u.semTeto.dias!==d){u.semTeto.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} se não tiver onde morar.`,'bad')}
   if(!u.dormindo&&G.t>=(u.tetoT||0)){u.tetoT=G.t+S.balao_intervalo;u.fala={txt:S.fala,t:S.balao_seg}}
   return true}
@@ -63,7 +65,7 @@ function pedidoTick(u){const P=PESSOAS.pedidos;
     toast(`🗣️ ${u.name} ${P[tipo].pede}. Prazo: ${P.prazo_dias} dias.`,'bad')}
   const falta=diasDoPedido(u),d=Math.ceil(falta);
   if(tipo==='abrigo'){
-    if(falta<=0){unassign(u);removeUnit(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
+    if(falta<=0){vaiEmbora(u);toast(`🚶 ${u.name} foi embora: ficou sem um Abrigo.`,'bad');return false}
     if(d<P.prazo_dias&&u.pedido.dias!==d){u.pedido.dias=d;toast(`⏳ ${u.name} vai embora em ${d} dia${d>1?'s':''} sem um Abrigo.`,'bad')}}
   if(!u.semTeto&&!u.fala&&!u.dormindo&&G.t>=(u.balaoT||0)){u.balaoT=G.t+P.balao_intervalo;u.fala={txt:P[tipo].fala,t:P.balao_seg}}
   return true}
@@ -128,7 +130,7 @@ function moradoresTick(dt){
   for(const u of G.units.slice()){if(u.kind!=='villager')continue;
     moralTick(u,dt);
     if(u.moral<=M.sair_abaixo){
-      unassign(u);removeUnit(u);toast(`😠 ${u.name} foi embora: a moral estava muito baixa.`,'bad');continue}
+      vaiEmbora(u);toast(`😠 ${u.name} foi embora: a moral estava muito baixa.`,'bad');continue}
     if(u.moral<=M.aviso_abaixo){
       if(!u.warnT)u.warnT={};
       if(u.warnT.moral==null||G.t-u.warnT.moral>M.aviso_intervalo){u.warnT.moral=G.t;toast(`😟 ${u.name} está quase indo embora. Dê cama e comida.`,'bad')}}}}
