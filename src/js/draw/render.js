@@ -27,6 +27,7 @@ function render(){
   if(!LOD)for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||!vis(x+.5,y+.5))continue;const al=.35+.25*Math.sin(t*2+x+y);const fc=`rgba(235,248,255,${al})`;
     if(y>0&&G.tiles[idx(x,y-1)]>=2)ln(P(x,y),P(x+1,y),fc,2);if(x<N-1&&G.tiles[idx(x+1,y)]>=2)ln(P(x+1,y),P(x+1,y+1),fc,2);if(y<N-1&&G.tiles[idx(x,y+1)]>=2)ln(P(x,y+1),P(x+1,y+1),fc,2);if(x>0&&G.tiles[idx(x-1,y)]>=2)ln(P(x,y),P(x,y+1),fc,2);
     const sp=Math.sin(t*1.7+hash2(x,y)*30);if(sp>.93){const q=P(x+.5,y+.5);ln([q[0]-4,q[1]],[q[0]+4,q[1]],'rgba(255,255,255,.55)',1.2)}}
+  if(!LOD&&!BIO.snowy&&ehInverno())for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y);if(G.tiles[i]>1||G.obj[i]||G.occ[i]||!vis(x+.5,y+.5)||hash2(x,y)<.62)continue;const q=P(x+.5,y+.5);ell(q[0],q[1],5+hash2(y,x)*6,2.4+hash2(x,y+3)*1.6,'rgba(240,248,255,.8)')}
   if(z>.65){const wsw=windStrength();for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=idx(x,y),tf=TUFT[i];if(!tf||G.wear[i]>10||G.obj[i]||G.occ[i]||!vis(x+.5,y+.5))continue;const q=P(x+.5+tf[0],y+.5+tf[1]);
     if(BIO.snowy){ell(q[0],q[1],2,1,'rgba(160,180,200,.35)');continue}
     const c=shade(BIO.grass[(tf[2]+1)%BIO.grass.length],-.28),bend=Math.sin(t*2.2+x*.6+y*.3)*1.3*wsw;ctx.strokeStyle=c;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(q[0]-2+bend,q[1]-3);ctx.lineTo(q[0],q[1]);ctx.lineTo(q[0]+.5+bend,q[1]-4);ctx.moveTo(q[0],q[1]);ctx.lineTo(q[0]+2.5+bend,q[1]-2.5);ctx.stroke();
@@ -89,14 +90,14 @@ function render(){
     for(const[x,y,r]of LIGHTS){const q=P(x,y,8),sx=(q[0]*z+cam.x)/2,sy=(q[1]*z+cam.y)/2,R=r*z/2*(1+Math.sin(perfT*8+x)*.03);const g=lctx.createRadialGradient(sx,sy,0,sx,sy,R);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');lctx.fillStyle=g;lctx.fillRect(sx-R,sy-R,R*2,R*2)}
     lctx.globalCompositeOperation='source-over';ctx.drawImage(lc,0,0,W,H);
     ctx.globalCompositeOperation='lighter';for(const[x,y,r]of LIGHTS){const q=P(x,y,8),sx=q[0]*z+cam.x,sy=q[1]*z+cam.y,R=r*z*.55;const g=ctx.createRadialGradient(sx,sy,0,sx,sy,R);g.addColorStop(0,`rgba(255,150,60,${dk2*.45})`);g.addColorStop(1,'rgba(255,150,60,0)');ctx.fillStyle=g;ctx.fillRect(sx-R,sy-R,R*2,R*2)}ctx.globalCompositeOperation='source-over'}}
-function drawWeather(){const w=BIO.weather;
+function drawWeather(){const w=clima();
   if(w==='leaves'){for(const p of SP){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.beginPath();ctx.ellipse(0,0,p.s,p.s*.5,0,0,6.283);ctx.fill();ctx.restore()}}
   else if(w==='snow'){ctx.fillStyle='rgba(255,255,255,.85)';for(const p of SP){ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,6.283);ctx.fill()}}
   else if(w==='motes'){for(const p of SP){ctx.fillStyle=darkness()>.2?`rgba(230,255,140,${.5+.4*Math.sin(perfT*3+p.r)})`:'rgba(255,255,230,.35)';ctx.beginPath();ctx.arc(p.x,p.y,p.s*.6,0,6.283);ctx.fill()}}
   else if(w==='clouds'){for(const p of SP){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.s);g.addColorStop(0,'rgba(255,255,255,.22)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(p.x-p.s,p.y-p.s,p.s*2,p.s*2)}}}
-function initWeather(){SP=[];const w=BIO.weather,n=w==='snow'?80:w==='leaves'?18:w==='motes'?22:5;for(let i=0;i<n;i++)SP.push(newSP(true))}
-function newSP(any){const w=BIO.weather,r=Math.random;const p={x:r()*W,y:any?r()*H:-10,r:r()*6,vr:(r()-.5)*2,c:pick(BIO.leaves),s:w==='snow'?.8+r()*1.8:w==='clouds'?120+r()*160:2.5+r()*2,vx:0,vy:0};
+function initWeather(){SP=[];const w=clima(),n=w==='snow'?80:w==='leaves'?18:w==='motes'?22:5;for(let i=0;i<n;i++)SP.push(newSP(true))}
+function newSP(any){const w=clima(),r=Math.random;const p={x:r()*W,y:any?r()*H:-10,r:r()*6,vr:(r()-.5)*2,c:pick(BIO.leaves),s:w==='snow'?.8+r()*1.8:w==='clouds'?120+r()*160:2.5+r()*2,vx:0,vy:0};
   if(w==='snow'){p.vy=20+r()*35;p.vx=-6+r()*4}else if(w==='leaves'){p.vy=18+r()*20;p.vx=10+r()*10}else if(w==='motes'){p.vy=-4+r()*8;p.vx=-5+r()*10}else{p.vx=6+r()*6;p.y=r()*H*.6;if(!any)p.x=-p.s}return p}
-function updWeather(dt){const w=BIO.weather,ws=.6+windStrength()*.8;for(let i=0;i<SP.length;i++){const p=SP[i];p.x+=(p.vx*ws+(w==='leaves'?Math.sin(perfT*1.5+p.r)*14:0))*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+function updWeather(dt){const w=clima(),ws=.6+windStrength()*.8;for(let i=0;i<SP.length;i++){const p=SP[i];p.x+=(p.vx*ws+(w==='leaves'?Math.sin(perfT*1.5+p.r)*14:0))*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
   if(p.y>H+10||p.x>W+(p.s||10)+20||p.x<-260||p.y<-20)SP[i]=newSP(false);if(w==='motes'&&(p.y<0||p.y>H)){SP[i]=newSP(true)}}}
 

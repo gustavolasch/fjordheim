@@ -2,7 +2,9 @@
 function windStrength(){return clamp(.5+.3*Math.sin(perfT*.13)+.2*Math.sin(perfT*.41+1),0,1)}
 function treeShape(cx,cy,k,s,c,shadow,shake){
   if(shadow!==false)ell(cx+5*s,cy+1,11*s,4.2*s,'rgba(0,0,0,.2)');
-  const sp=treeSpr(k,c);if(sp){const w0=(.35+windStrength()*.9)+(shake>0?shake*8:0),p0=shake>0?perfT*40:perfT*1.4;drawSpr(sp,cx,cy,s,Math.sin(p0*.9+cx*.05)*.012*w0);return}
+  const sps=treeSpr(k,c);if(sps){const w0=(.35+windStrength()*.9)+(shake>0?shake*8:0),p0=shake>0?perfT*40:perfT*1.4,sk=Math.sin(p0*.9+cx*.05)*.012*w0;for(const[sp,al]of sps)drawSpr(sp,cx,cy,s,sk,al);
+    if(k==='oak'&&c%3===0&&estacao().e.id==='primavera'){const fl=sprFor('flower_0');if(fl){drawSpr(fl,cx-6*s,cy-30*s,.7*s,0);drawSpr(fl,cx+5*s,cy-34*s,.6*s,0);drawSpr(fl,cx,cy-22*s,.55*s,0)}}
+    return}
   const wnd=(.35+windStrength()*.9)+(shake>0?shake*8:0),ph=shake>0?perfT*40:perfT*1.4;
   if(LOD){if(k==='oak'){ctx.fillStyle='#5a3a22';ctx.fillRect(cx-1.7*s,cy-15*s,3.4*s,15*s);const col=BIO.leaves[c%BIO.leaves.length];ell(cx,cy-22*s,11*s,10*s,col);ell(cx-3*s,cy-27*s,5*s,4*s,shade(col,.2))}else{const col=BIO.pines[c%BIO.pines.length];pp([[cx,cy-38*s],[cx-10*s,cy-4*s],[cx+10*s,cy-4*s]],col);pp([[cx,cy-38*s],[cx-10*s,cy-4*s],[cx,cy-2*s]],shade(col,-.22));if(BIO.snowy)pp([[cx,cy-38*s],[cx-4*s,cy-26*s],[cx+4*s,cy-26*s]],'#eef3f7')}return}
   if(k==='oak'){ctx.fillStyle='#5a3a22';ctx.fillRect(cx-1.7*s,cy-15*s,3.4*s,15*s);const col=BIO.leaves[c%BIO.leaves.length];const sw=Math.sin(ph+cx*.05)*.8*wnd;

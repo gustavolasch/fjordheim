@@ -17,6 +17,17 @@ for (const [biome, p] of Object.entries(PAL)) {
   }
   jobs.push({ name: 'Bush_Common', targetH: 18, out: `${biome}_bush`, tint: { hue: p.bush, lift: 1.2 } });
 }
+// Árvores por estação (todos os biomas, exceto neve, que segue procedural). Verão = sprites do bioma acima.
+// Primavera: verde claro (as flores são desenhadas por cima no jogo). Outono: laranja/vermelho/amarelo.
+// Inverno: árvores comuns sem folhas (DeadTree, só galhos) e pinheiros com neve (tom branco-azulado).
+const SEASON_LEAVES = { primavera: ['#9ed86a', '#b3e27d', '#8fcc5c'], outono: PAL.autumn.leaves };
+for (const [season, leaves] of Object.entries(SEASON_LEAVES)) {
+  for (let c = 0; c < 6; c++) jobs.push({ name: `CommonTree_${(c % 5) + 1}`, targetH: 44, out: `${season}_oak_${c}`, tint: { hue: leaves[c % leaves.length], lift: 1.35 } });
+}
+for (let c = 0; c < 6; c++) {
+  jobs.push({ name: `DeadTree_${(c % 5) + 1}`, targetH: 44, out: `inverno_oak_${c}` });
+  jobs.push({ name: `Pine_${(c % 5) + 1}`, targetH: 44, out: `inverno_pine_${c}`, tint: { hue: '#2f6836', lift: 1.1 } });
+}
 for (let i = 0; i < 3; i++) jobs.push({ name: `Rock_Medium_${i + 1}`, targetH: 14, out: `rock_${i}` });
 for (let i = 0; i < 5; i++) jobs.push({ name: `Pebble_Round_${i + 1}`, targetH: 5, out: `pebble_${i}` });
 jobs.push({ name: 'Flower_3_Group', targetH: 16, out: 'flower_0' });

@@ -351,6 +351,198 @@
   }
  },
  {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "primavera_oak_0",
+  "tint": {
+   "hue": "#9ed86a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_2",
+  "targetH": 44,
+  "out": "primavera_oak_1",
+  "tint": {
+   "hue": "#b3e27d",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_3",
+  "targetH": 44,
+  "out": "primavera_oak_2",
+  "tint": {
+   "hue": "#8fcc5c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_4",
+  "targetH": 44,
+  "out": "primavera_oak_3",
+  "tint": {
+   "hue": "#9ed86a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_5",
+  "targetH": 44,
+  "out": "primavera_oak_4",
+  "tint": {
+   "hue": "#b3e27d",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "primavera_oak_5",
+  "tint": {
+   "hue": "#8fcc5c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "outono_oak_0",
+  "tint": {
+   "hue": "#e0631f",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_2",
+  "targetH": 44,
+  "out": "outono_oak_1",
+  "tint": {
+   "hue": "#f0a020",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_3",
+  "targetH": 44,
+  "out": "outono_oak_2",
+  "tint": {
+   "hue": "#c8401c",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_4",
+  "targetH": 44,
+  "out": "outono_oak_3",
+  "tint": {
+   "hue": "#e8c33a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_5",
+  "targetH": 44,
+  "out": "outono_oak_4",
+  "tint": {
+   "hue": "#d9541a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "CommonTree_1",
+  "targetH": 44,
+  "out": "outono_oak_5",
+  "tint": {
+   "hue": "#b8321a",
+   "lift": 1.35
+  }
+ },
+ {
+  "name": "DeadTree_1",
+  "targetH": 44,
+  "out": "inverno_oak_0"
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "inverno_pine_0",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
+  "name": "DeadTree_2",
+  "targetH": 44,
+  "out": "inverno_oak_1"
+ },
+ {
+  "name": "Pine_2",
+  "targetH": 44,
+  "out": "inverno_pine_1",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
+  "name": "DeadTree_3",
+  "targetH": 44,
+  "out": "inverno_oak_2"
+ },
+ {
+  "name": "Pine_3",
+  "targetH": 44,
+  "out": "inverno_pine_2",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
+  "name": "DeadTree_4",
+  "targetH": 44,
+  "out": "inverno_oak_3"
+ },
+ {
+  "name": "Pine_4",
+  "targetH": 44,
+  "out": "inverno_pine_3",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
+  "name": "DeadTree_5",
+  "targetH": 44,
+  "out": "inverno_oak_4"
+ },
+ {
+  "name": "Pine_5",
+  "targetH": 44,
+  "out": "inverno_pine_4",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
+  "name": "DeadTree_1",
+  "targetH": 44,
+  "out": "inverno_oak_5"
+ },
+ {
+  "name": "Pine_1",
+  "targetH": 44,
+  "out": "inverno_pine_5",
+  "tint": {
+   "hue": "#2f6836",
+   "lift": 1.1
+  }
+ },
+ {
   "name": "Rock_Medium_1",
   "targetH": 14,
   "out": "rock_0"

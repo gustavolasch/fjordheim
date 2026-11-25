@@ -8,7 +8,15 @@ function novosCanteiros(){return Array.from({length:9},()=>({st:0,c:null,g:0}))}
 // ---- estações: dias_por_estacao cada (campo.json), começa na primavera. G.estOff = deslocamento em dias (save v12 mantém a estação de quem já joga) ----
 function estacao(){const n=CAMPO.dias_por_estacao,c=n*CAMPO.estacoes.length;const dd=(Math.floor(G.t/DIA())+(G.estOff||0))%c;const i=Math.floor(dd/n);return{i,e:CAMPO.estacoes[i],dia:dd%n+1}}
 function ehInverno(){return estacao().e.id==='inverno'}
-function updSeason(){const el=document.getElementById('season');if(!el)return;const s=estacao(),txt=`${s.e.emoji} ${s.dia}`;if(el.textContent!==txt){el.textContent=txt;el.title=`${s.e.n}, dia ${s.dia} de ${CAMPO.dias_por_estacao}`}}
+function ehOutono(){return estacao().e.id==='outono'}
+// nome-base dos sprites de árvore: <estacao>_oak_ / inverno_pine_ / <bioma>_pine_ (c é somado depois)
+function prefixoArvore(k,id){const s=id||estacao().e.id;if(k==='oak'&&(s==='primavera'||s==='outono'||s==='inverno'))return s+'_oak_';if(k!=='oak'&&s==='inverno')return 'inverno_pine_';return G.biome+'_'+(k==='oak'?'oak':'pine')+'_'}
+// 1º dia da estação: fração do dia (0..1) e a estação anterior. Fora disso, null. No começo do jogo não mistura.
+function transicao(){if(G.t<DIA())return null;const s=estacao();if(s.dia!==1)return null;const n=CAMPO.estacoes.length;return{p:(G.t/DIA())%1,anterior:CAMPO.estacoes[(s.i+n-1)%n].id}}
+// clima visual: no outono as folhas caem em todos os biomas (exceto neve)
+function clima(){return!BIO.snowy&&ehOutono()?'leaves':BIO.weather}
+let ULT_EST=null;
+function updSeason(){const el=document.getElementById('season');const s=estacao();if(ULT_EST!==s.e.id){ULT_EST=s.e.id;if(typeof initWeather==='function')initWeather()}if(!el)return;const txt=`${s.e.emoji} ${s.dia}`;if(el.textContent!==txt){el.textContent=txt;el.title=`${s.e.n}, dia ${s.dia} de ${CAMPO.dias_por_estacao}`}}
 // save v11 -> v12: antes cada estação tinha 4 dias. Mantém a estação e o dia atuais e começa a contar os novos a partir daí.
 function migraV12(){const dAntigo=Math.floor(G.t/DIA()),nAntigo=4,c=10*4;
   const i=Math.floor(dAntigo/nAntigo)%4,dia=dAntigo%nAntigo;const alvo=i*10+dia;G.estOff=((alvo-dAntigo)%c+c)%c}
