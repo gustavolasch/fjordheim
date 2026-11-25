@@ -5,7 +5,8 @@
    Todos os números vêm de data/pessoas.json (PESSOAS). */
 const DIA=()=>PESSOAS.dia_segundos;
 const TRAIT_KEYS=Object.keys(PESSOAS.tracos);
-const HAB_ACOES=['chop','takelog','mine','pick'];
+const HAB_ACOES=['chop','takelog','mine','pick','plot','fish','forge'];
+const HAB_TRABALHOS=['lumber','miner','collector','farmer','fisher','smith'];
 
 // noite: mesmo ciclo do dia e noite (independe da opção "dia e noite" estar ligada)
 function isNoite(){return nightDark(G.t)>0}
@@ -31,8 +32,11 @@ function sorteiaTracos(){
   return[bons[(Math.random()*bons.length)|0],ruins[(Math.random()*ruins.length)|0]]}
 function somaTraco(u,chave){let s=0;for(const t of u.tracos||[])s+=PESSOAS.tracos[t]?.efeito[chave]||0;return s}
 
-// ---- habilidades: XP sobe ao agir no posto (lenhador, minerador, coletor) ----
-function nivelHab(u,job){const H=PESSOAS.habilidade;const xp=(u.hab&&u.hab[job])||0;return Math.min(H.nivel_max,1+Math.floor(xp/H.xp_para_nivel))}
+// ---- habilidades: um nível por trabalho; cada nível custa um pouco mais que o anterior ----
+// XP acumulado para chegar ao nível n: soma de (xp_base + k) para k de 1 a n-1
+function xpDoNivel(n){return PESSOAS.habilidade.xp_base*(n-1)+n*(n-1)/2}
+function nivelHab(u,job){const H=PESSOAS.habilidade;const xp=(u.hab&&u.hab[job])||0;let n=1;while(n<H.nivel_max&&xp>=xpDoNivel(n+1))n++;return n}
+function maiorNivel(u){return Math.max(...HAB_TRABALHOS.map(j=>nivelHab(u,j)))}
 function ganhaHab(u,job){const H=PESSOAS.habilidade;const antes=nivelHab(u,job);
   u.hab[job]=(u.hab[job]||0)+H.xp_por_acao*(1+somaTraco(u,'xp'));
   const depois=nivelHab(u,job);
@@ -41,7 +45,7 @@ function ganhaHab(u,job){const H=PESSOAS.habilidade;const antes=nivelHab(u,job);
 // ---- moral: fatores de velocidade (alta trabalha mais rápido, baixa mais devagar) ----
 function moralVel(u){const M=PESSOAS.moral;if(u.moral>=M.alta_acima)return 1+M.bonus_alta;if(u.moral<M.baixa_abaixo)return 1-M.penalidade_baixa;return 1}
 // velocidade de trabalho do morador: habilidade do posto x moral x traços (divide a duração da ação)
-function velocidadeMorador(u){const nv=u.job&&DEPOT_JOBS.includes(u.job)?nivelHab(u,u.job):1;
+function velocidadeMorador(u){const nv=HAB_TRABALHOS.includes(u.job)?nivelHab(u,u.job):1;
   const hab=1+(nv-1)*PESSOAS.habilidade.bonus_por_nivel;return Math.max(.3,hab*moralVel(u)*(1+somaTraco(u,'velocidade')))}
 
 // ---- comida: no amanhecer cada morador come do estoque (depósito primeiro) ----
